@@ -1,0 +1,15 @@
+services:
+  controller:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      SOUL_API_KEY: ${SOUL_API_KEY:?Set SOUL_API_KEY}
+      SOUL_ADMIN_KEY: ${SOUL_ADMIN_KEY:?Set SOUL_ADMIN_KEY}
+      SOUL_NODE_TOKEN: ${SOUL_NODE_TOKEN:?Set SOUL_NODE_TOKEN}
+      HF_TOKEN: ${HF_TOKEN:-}
+    volumes:
+      - controller-data:/data
+    restart: unless-stopped
+volumes:
+  controller-data:
