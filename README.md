@@ -21,18 +21,18 @@ One model, many machines. Soul splits an LLM into contiguous decoder stages on a
 
 ## Quick start
 
-Use Python 3.11 or 3.12. From this checkout:
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) 0.9 or newer. From this checkout:
 
 ```sh
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e '.[node,dev]'
-soul demo
+uv sync --locked --extra node
+uv run --locked --extra node soul demo
 ```
 
 Open **http://127.0.0.1:8000** and enter `soul-dev` as the admin key. The demo launches **three separate processes**: one controller and two CPU nodes. It builds a tiny four-layer Llama locally, distributes two layers to each node, and executes a request to populate the dashboard. No model download is required. The demo model has random weights, so its output is deliberately meaningless. Computation, communication, placement, and counters are real. `Ctrl+C` stops all three processes.
 
-If port 8000 is occupied, use `soul demo --port 8766`. Logs and reusable weights go in `.soul/demo/`.
+uv manages Python 3.12 (pinned in `.python-version`), the local `.venv`, and dependencies from `uv.lock`; no manual environment activation is needed. The `node` extra installs CPU PyTorch on Linux and the Metal-capable wheel on macOS. The demo always uses CPU.
+
+If port 8000 is occupied, use `uv run --locked --extra node soul demo --port 8766`. Logs and reusable weights go in `.soul/demo/`. See [environment setup](docs/environment.md) for CUDA profiles, migration from an existing environment, and dependency updates.
 
 ## Run your own network
 
@@ -41,14 +41,12 @@ If port 8000 is occupied, use `soul demo --port 8766`. Logs and reusable weights
 The controller needs only the base package, not the node extra:
 
 ```sh
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
+uv sync --locked
 
 export SOUL_API_KEY='your-inference-key'
 export SOUL_ADMIN_KEY='your-admin-key'
 export SOUL_NODE_TOKEN='your-node-enrollment-token'
-soul controller --host 0.0.0.0 --port 8000 --max-context 2048
+uv run --locked soul controller --host 0.0.0.0 --port 8000 --max-context 2048
 ```
 
 Use independent, strong values for these three credentials. The API key can run inference; the admin key can inspect logs and load/unload models; the node token admits trusted compute nodes. `--dev` instead uses the public `soul-dev` credential and is restricted to loopback.
@@ -62,35 +60,39 @@ For a remote network, use HTTPS/WSS through a reverse proxy or a private encrypt
 On each machine, copy or clone this project and run:
 
 ```sh
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e '.[node]'
+uv sync --locked --extra node
 export SOUL_NODE_TOKEN='your-node-enrollment-token'
-soul node --controller https://controller.example.com --name mac-studio
+uv run --locked --extra node soul node --controller https://controller.example.com --name mac-studio
 ```
 
 The node uses CUDA if available, otherwise Metal, otherwise CPU. Metal uses the Mac's unified memory. `--device mps` requires a Metal-capable PyTorch installation; use `--device cpu` for a portable smoke test. No inbound node ports are required.
 
 ### NVIDIA node
 
-Install the **PyTorch 2.8 CUDA wheel matching your operating system and driver** from the [official PyTorch version instructions](https://pytorch.org/get-started/previous-versions/#v280), then install the node extra in the same environment:
+On Linux, check the NVIDIA driver with `nvidia-smi`, then select **one** CUDA profile: `node-cu126`, `node-cu128`, or `node-cu129` for CUDA 12.6, 12.8, or 12.9. uv installs the corresponding official PyTorch **2.8.0** wheel and its runtime dependencies. For example, with a GPU and driver compatible with CUDA 12.8:
 
 ```sh
-pip install -e '.[node]'
+nvidia-smi
+uv sync --locked --extra node-cu128
+uv run --locked --extra node-cu128 python -c "import torch; print(torch.__version__, torch.version.cuda); assert torch.cuda.is_available(), 'CUDA is unavailable'; print(torch.cuda.get_device_name(0))"
 export SOUL_NODE_TOKEN='your-node-enrollment-token'
-soul node --controller https://controller.example.com --device cuda:0 --name gpu-01
+uv run --locked --extra node-cu128 soul node --controller https://controller.example.com --device cuda:0 --name gpu-01
 ```
+
+Use the same extra in every sync/run command; CUDA extras already include all node dependencies and must not be combined with `node` or each other. See [Linux CUDA setup](docs/environment.md#linux-with-nvidia-cuda) for driver checks and troubleshooting, and the [official PyTorch 2.8 builds](https://pytorch.org/get-started/previous-versions/#v280).
 
 One process uses one device. For multiple GPUs on one host, run a node per GPU with a different `--cache-dir` and `--device cuda:N`; set explicit memory caps if resources are shared. Do not run Metal nodes inside Docker: use native macOS Python.
 
 ### Memory and disk controls
 
+These examples use the CPU/Metal profile; replace `node` with your selected CUDA extra on NVIDIA hosts.
+
 ```sh
-soul node --controller https://controller.example.com \
+uv run --locked --extra node soul node --controller https://controller.example.com \
   --memory-gb 10 --weight-mode resident --cache-dir /fast-ssd/soul
 
 # Keep only the executing decoder layer's weights on the GPU:
-soul node --controller https://controller.example.com \
+uv run --locked --extra node soul node --controller https://controller.example.com \
   --memory-gb 6 --weight-mode stream --cache-dir /fast-ssd/soul
 ```
 
@@ -102,7 +104,7 @@ Nodes persist identity in `<cache-dir>/identity.json`; reuse that directory afte
 
 ## Load a model and generate text
 
-A request automatically inspects and places its requested model. You can also choose **Load a model** in the admin UI. For gated/private models, authenticate **both controller and nodes** with `HF_TOKEN` or `hf auth login`; tokens are not sent through the node protocol. Have sufficient local disk space and permission to use the model.
+A request automatically inspects and places its requested model. You can also choose **Load a model** in the admin UI. For gated/private models, authenticate **both controller and nodes** with `HF_TOKEN` or, after syncing the appropriate environment, `uv run --no-sync hf auth login`; tokens are not sent through the node protocol. Have sufficient local disk space and permission to use the model.
 
 ```sh
 curl http://localhost:8000/v1/chat/completions \
@@ -164,21 +166,25 @@ Controller restarts preserve counters and history but mark loaded placement reco
 ## Development and verification
 
 ```sh
-pip install -e '.[node,dev]'
-pytest -q
-ruff check src tests examples
-ruff format --check src tests examples
+uv sync --locked --extra node --group dev
+uv run --no-sync pytest -q
+uv run --no-sync ruff check src tests examples
+uv run --no-sync ruff format --check src tests examples
 
 # Optional live download test: a small public checkpoint, no full-shard download
-python examples/verify_hub.py
+uv run --no-sync python examples/verify_hub.py
 # Run the same exercise on an available accelerator
-python examples/verify_hub.py --device mps
-python examples/verify_hub.py --device cuda
+uv run --no-sync python examples/verify_hub.py --device mps
+# On an NVIDIA host, select the matching CUDA profile first
+uv sync --locked --extra node-cu128 --group dev
+uv run --no-sync python examples/verify_hub.py --device cuda
 ```
+
+Development tools and the two API SDKs are in the `dev` dependency group. `--no-sync` reuses the environment prepared by the preceding sync, including its selected PyTorch build. After changing dependencies or pulling an updated lockfile, sync again with the same profile. Do not use `--all-extras`: the node profiles are mutually exclusive.
 
 Tests instantiate small random models locally. They compare sharded vs. unsplit logits for four architectures, chunked prefill, cached decode, sliding attention and disk streaming; run actual HTTP/WebSocket nodes with both official SDKs; and cover placement, auth, validation, reconnect fencing, cancellation cleanup and queueing. The Hub smoke test separately exercises actual remote tensor ranges and tokenizer loading.
 
-The optional node runtime is intentionally pinned to Transformers **4.56.0** and PyTorch **2.8.x**, because model/cache internals are part of the stage adapter contract. Upgrade only together with equivalence tests. See [architecture](docs/architecture.md), [wire protocol](docs/protocol.md), and [phase 2](docs/phase-2.md).
+The optional node runtime is intentionally pinned to Transformers **4.56.0** and PyTorch **2.8.0**, because model/cache internals are part of the stage adapter contract. Upgrade only together with equivalence tests. See [architecture](docs/architecture.md), [wire protocol](docs/protocol.md), and [phase 2](docs/phase-2.md).
 
 ## Repository
 
@@ -192,4 +198,7 @@ src/soul/protocol.py   MessagePack framing and protocol version
 src/soul/demo.py       three-process, zero-download demo
 examples/             optional real Hugging Face smoke test
 tests/               numerical, protocol, and network integration tests
+pyproject.toml       uv project, node profiles, development dependency group
+uv.lock              reproducible dependency versions and package sources
+.python-version      Python 3.12 for local environments and CI
 ```

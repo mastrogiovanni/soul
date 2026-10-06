@@ -7,7 +7,7 @@ name = "soul-serving"
 version = "0.1.0"
 description = "A lightweight controller and distributed, layer-sharded LLM inference nodes"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 dependencies = [
   "fastapi>=0.116,<0.117", "uvicorn[standard]>=0.35,<0.36",
   "httpx>=0.28,<0.29", "huggingface-hub>=0.34,<0.35",
@@ -17,11 +17,56 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-node = ["torch>=2.8,<2.9", "transformers==4.56.0", "safetensors>=0.6,<0.7", "numpy>=1.26,<3", "sentencepiece>=0.2,<0.3"]
+node = ["torch==2.8.0", "transformers==4.56.0", "safetensors>=0.6,<0.7", "numpy>=1.26,<3", "sentencepiece>=0.2,<0.3"]
+node-cu126 = ["torch==2.8.0", "transformers==4.56.0", "safetensors>=0.6,<0.7", "numpy>=1.26,<3", "sentencepiece>=0.2,<0.3"]
+node-cu128 = ["torch==2.8.0", "transformers==4.56.0", "safetensors>=0.6,<0.7", "numpy>=1.26,<3", "sentencepiece>=0.2,<0.3"]
+node-cu129 = ["torch==2.8.0", "transformers==4.56.0", "safetensors>=0.6,<0.7", "numpy>=1.26,<3", "sentencepiece>=0.2,<0.3"]
+
+[dependency-groups]
 dev = ["pytest>=8,<9", "pytest-asyncio>=1,<2", "ruff>=0.12,<1", "openai>=1.100,<3", "anthropic>=0.64,<1"]
 
 [project.scripts]
 soul = "soul.cli:main"
+
+[tool.uv]
+required-version = ">=0.9.0"
+default-groups = []
+# Select one PyTorch build per environment. Development tools can accompany any build.
+conflicts = [[
+  { extra = "node" },
+  { extra = "node-cu126" },
+  { extra = "node-cu128" },
+  { extra = "node-cu129" },
+]]
+
+[tool.uv.sources]
+torch = [
+  # macOS uses the PyPI wheel, which includes Metal support.
+  { index = "pytorch-cpu", extra = "node", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+  { index = "pytorch-cu126", extra = "node-cu126" },
+  { index = "pytorch-cu128", extra = "node-cu128" },
+  { index = "pytorch-cu129", extra = "node-cu129" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/soul"]

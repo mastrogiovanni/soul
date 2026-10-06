@@ -32,7 +32,13 @@ $("load-form").onsubmit = async (event) => {
   catch (error) { notice(error.message); } finally { $("load-submit").disabled = false; }
 };
 $("pipeline-model").onchange = () => { selected = $("pipeline-model").value; renderTopology(); };
-$("join-button").onclick = () => { $("join-command").textContent = `python3 -m venv .venv\nsource .venv/bin/activate\npip install '.[node]'\n\nexport SOUL_NODE_TOKEN='<node-token>'\nsoul node --controller ${location.origin}`; $("join-dialog").showModal(); };
+function renderJoinCommand() {
+  const profile = $("join-profile").value;
+  const device = profile === "node" ? "" : " --device cuda:0";
+  $("join-command").textContent = `uv sync --locked --extra ${profile}\n\nexport SOUL_NODE_TOKEN='<node-token>'\nuv run --locked --extra ${profile} soul node --controller ${location.origin}${device}`;
+}
+$("join-profile").onchange = renderJoinCommand;
+$("join-button").onclick = () => { renderJoinCommand(); $("join-dialog").showModal(); };
 $("logs-dialog").addEventListener("close", () => logsNode = null);
 async function refreshLogs() {
   if (!logsNode) return;

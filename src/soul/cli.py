@@ -105,7 +105,8 @@ def main():
             from soul.node.client import NodeClient
         except ImportError:
             parser.error(
-                "Install node dependencies: pip install 'soul-serving[node]' (or pip install '.[node]')"
+                "Run from the project with: uv run --locked --extra node soul node ... "
+                "(for NVIDIA, use node-cu126, node-cu128 or node-cu129 instead of node)"
             )
         client = NodeClient(
             args.controller,
