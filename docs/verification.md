@@ -1,5 +1,20 @@
 # Verification record
 
+## Kubernetes and `/soul` context — 2026-10-07
+
+- **Application tests:** all **48 tests** passed, including mounted-path routing, relative redirects/assets, Swagger/OpenAPI paths, role-specific authentication, and real node WebSockets plus OpenAI streaming/Anthropic requests through a simulated Basic Auth ingress. Three additional deployment-workflow tests passed, covering preflight before build, private/idempotent credential creation, and data-preserving removal.
+- **Manifests and tooling:** Kustomize rendered the default resources and namespace/image overrides successfully. Bash syntax, JavaScript syntax, Ruff lint/format, and whitespace checks passed.
+- **Container:** `make build` produced the controller-only Linux arm64 image. A disposable container ran as UID 1000 with a read-only root filesystem, dropped capabilities, no privilege escalation, writable temporary storage and a data volume. Health, `/soul` redirects, assets, docs, authorization and API paths worked. SQLite request history survived restart; PyTorch and Transformers were absent.
+- **Browser:** the container's `/soul/` panel connected successfully after restart, displayed persisted history, generated a node command ending in `/soul`, and linked to `/soul/docs`. No console warnings/errors appeared. The temporary container, volume and browser tab were removed afterward.
+- **Deployment limitation:** `make up` stopped in preflight because `kind-k8s` is not configured on this machine. No shared cluster resources or ingress settings were changed. Live Contour routing, public HTTPS/certificate validation and the hostPath mount have not been exercised here; the shared platform must exist before deployment.
+
+## Model inventories and proactive preloading — 2026-10-07
+
+- **Automated suite:** all **40 tests** passed using `uv run --no-sync pytest -q`. New integration coverage exercises disk-only preloading, cache inventories on reconnect, inference without tensor downloads, model listing across GPU rotation/unload, offline-only removal, automatic shard recovery, persisted catalog discovery, and corrupt-cache exclusion.
+- **Admin UI:** an isolated uv demo on port 8787 ran a controller and two CPU nodes. Browser checks verified cached layer ranges, GPU unload retaining availability, the disk-only preload form, and removal of a third disposable node after disconnection. Connected nodes had no removal button. No browser console warnings or errors appeared.
+- **Static checks:** Ruff lint/format checks, JavaScript syntax checking, and `git diff --check` passed. The existing WebSocket deprecation warnings remain.
+- **Scope:** the existing controller on port 8000 and the user's real nodes were not restarted. This change uses protocol version 2; upgrade/restart both controller and nodes together. Validation used CPU processes, not physical mixed Mac/NVIDIA machines or large checkpoints.
+
 ## uv migration — 2026-10-06
 
 - **Locked environment:** `uv lock` and `uv sync --locked --extra node --group dev` succeeded with uv 0.9.0 and Python 3.12 on macOS. The lock covers the controller, CPU/Metal, three CUDA profiles, and the development group.

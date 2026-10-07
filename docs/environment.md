@@ -101,4 +101,6 @@ The Dockerfile installs only locked controller dependencies into `/app/.venv` us
 docker compose up --build -d
 ```
 
+Open `http://127.0.0.1:8000/soul/`. The image defaults to `CONTEXT_ROOT=/soul`, including admin/API/docs/static/WebSocket routes; `/healthz` remains available for direct container probes. Its numeric UID/GID is 1000, and `HF_HOME=/data/huggingface` keeps metadata on the writable volume. For the shared HTTPS Kubernetes deployment, use [`make up`](kubernetes.md).
+
 This container does not install PyTorch or run GPU nodes. Launch Mac nodes natively and configure Linux nodes with the selected CUDA environment.

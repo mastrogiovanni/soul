@@ -19,6 +19,7 @@ class Store:
                 output_tokens INTEGER DEFAULT 0, error TEXT);
             CREATE TABLE IF NOT EXISTS deployments (model TEXT PRIMARY KEY, data TEXT);
             CREATE TABLE IF NOT EXISTS nodes (id TEXT PRIMARY KEY, data TEXT);
+            CREATE TABLE IF NOT EXISTS models (model TEXT PRIMARY KEY, data TEXT);
         """)
         self.db.execute(
             "UPDATE requests SET status='failed', error='Controller restarted' WHERE status IN ('queued','running')"
@@ -43,13 +44,17 @@ class Store:
         self.db.commit()
 
     def save(self, table, key, data):
-        assert table in ("nodes", "deployments")
+        assert table in ("nodes", "deployments", "models")
         self.db.execute(f"INSERT OR REPLACE INTO {table} VALUES(?,?)", (key, json.dumps(data)))
         self.db.commit()
 
     def load(self, table):
-        assert table in ("nodes", "deployments")
+        assert table in ("nodes", "deployments", "models")
         return [json.loads(row[0]) for row in self.db.execute(f"SELECT data FROM {table}")]
+
+    def delete_node(self, node_id):
+        self.db.execute("DELETE FROM nodes WHERE id=?", (node_id,))
+        self.db.commit()
 
     def stats(self):
         counts = {r[0]: r[1] for r in self.db.execute("SELECT status,count(*) FROM requests GROUP BY status")}

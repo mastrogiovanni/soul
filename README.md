@@ -14,8 +14,10 @@ One model, many machines. Soul splits an LLM into contiguous decoder stages on a
 - Pinned Hugging Face revisions; HTTP range downloads of **only assigned tensors**, atomic local safetensors files, checksum validation, and reuse after restarts.
 - Resident weights, or optional per-layer streaming from local disk to the GPU.
 - Node-local rotary-position calculations, causal/sliding-window attention, and per-request KV caches. Chunked prefill bounds activation size.
-- Bounded FIFO inference admission, demand-driven model loading and replacement, generation fencing after reconnects, timeouts, and explicit failures.
-- An admin UI for model placement, connected/offline nodes, download progress, logs, queue state, request outcomes, and cumulative counters persisted in SQLite.
+- Explicit model preloading, persistent node cache inventories, and automatic repair of missing shards when nodes join, disconnect, or are removed.
+- Bounded FIFO inference admission, GPU loading from prepared disk caches, generation fencing after reconnects, timeouts, and explicit failures.
+- An admin UI for model placement, cached layers, offline-node removal, download progress, logs, queue state, request outcomes, and cumulative counters persisted in SQLite.
+- `make up` deployment to the shared spesa-style Kind/Contour cluster, with HTTPS at `/soul`, persistent controller data and generated credentials.
 
 **Model support is explicit:** unquantized safetensors checkpoints with Transformers `model_type` **`llama`, `mistral`, `qwen2`, or `qwen3`**, using their standard tensor layout. Examples include Llama-family models, SmolLM2, Qwen2.5, and Qwen3 dense models. A repository's `model_type` is authoritative, not its marketing name. MoE variants, Gemma, GPT-2, multimodal models, Mamba/hybrid models, custom remote code, GGUF, and prequantized checkpoints require additional adapters. Unsupported models fail clearly; Soul does **not** claim arbitrary Hugging Face compatibility.
 
@@ -51,9 +53,19 @@ uv run --locked soul controller --host 0.0.0.0 --port 8000 --max-context 2048
 
 Use independent, strong values for these three credentials. The API key can run inference; the admin key can inspect logs and load/unload models; the node token admits trusted compute nodes. `--dev` instead uses the public `soul-dev` credential and is restricted to loopback.
 
-The dashboard is at `/`, API documentation at `/docs`, and basic health at `/healthz`. Deployment state and counters live in `.soul/controller/controller.sqlite3`. Run **one controller process / one Uvicorn worker** against this state. Multi-controller consensus and shared scheduling are outside this release.
+Native execution defaults to the dashboard at `/`, API documentation at `/docs`, and basic health at `/healthz`. Use `--context-root /soul` (or `CONTEXT_ROOT=/soul`) to serve the entire application beneath `/soul`; the container uses this prefix by default. Deployment state and counters live in `.soul/controller/controller.sqlite3`. Run **one controller process / one Uvicorn worker** against this state. Multi-controller consensus and shared scheduling are outside this release.
 
-For a remote network, use HTTPS/WSS through a reverse proxy or a private encrypted network. Nodes see prompts, activations, and portions of the model; enroll trusted machines only. Use `--allow-model owner/repository` repeatedly to restrict which models inference callers can load. Without an allowlist, authenticated callers may initiate downloads of any supported model.
+For a remote network, use HTTPS/WSS through a reverse proxy or a private encrypted network. Nodes see prompts, activations, and portions of the model; enroll trusted machines only. Use `--allow-model owner/repository` repeatedly to restrict the model catalog. Administrators preload models; inference callers can use prepared models but cannot trigger downloads of arbitrary repositories.
+
+### Kubernetes / shared HTTPS domain
+
+With spesa's shared Kind/Contour platform and TLS already configured:
+
+```sh
+make up
+```
+
+The admin panel is exposed at **`https://<existing-domain>/soul/`**, sharing `ingress-root` and its certificate. First-run keys are saved in `.soul/kubernetes/credentials.env`; use its `SOUL_ADMIN_KEY` in the panel. Nodes connect to `https://<existing-domain>/soul`, and OpenAI clients use `https://<existing-domain>/soul/v1` as their base URL. `make down` removes only the application, retaining its data and credentials. See [Kubernetes deployment](docs/kubernetes.md) for platform paths, storage, Basic Auth, and commands.
 
 ### Mac node
 
@@ -104,7 +116,19 @@ Nodes persist identity in `<cache-dir>/identity.json`; reuse that directory afte
 
 ## Load a model and generate text
 
-A request automatically inspects and places its requested model. You can also choose **Load a model** in the admin UI. For gated/private models, authenticate **both controller and nodes** with `HF_TOKEN` or, after syncing the appropriate environment, `uv run --no-sync hf auth login`; tokens are not sent through the node protocol. Have sufficient local disk space and permission to use the model.
+Choose **Preload a model** in the admin UI, or call the preload endpoint before sending inference. Preloading downloads assigned tensors and the first stage's tokenizer to node disks, without taking GPU memory away from another model. Select **Preload and load GPU** if you also want to materialize the model before the first request. For gated/private models, authenticate **both controller and nodes** with `HF_TOKEN` or, after syncing the appropriate environment, `uv run --no-sync hf auth login`; tokens are not sent through the node protocol. Have sufficient local disk space and permission to use the model.
+
+```sh
+curl --fail-with-body http://localhost:8000/admin/models/preload \
+  -H "Authorization: Bearer $SOUL_ADMIN_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"model": "Qwen/Qwen2.5-0.5B-Instruct"}'
+
+# Lists every executable cached model, including models not currently on a GPU
+curl http://localhost:8000/v1/models -H "Authorization: Bearer $SOUL_API_KEY"
+```
+
+The preload call waits for its downloads; the dashboard displays progress concurrently. If capacity is insufficient, it returns `503` and retains the model as `partial` for later recovery. An unregistered inference model returns `404 model_not_preloaded`; an incomplete pipeline returns `503 model_not_ready`. Inference never downloads missing weights. It can still spend time loading prepared files into GPU memory.
 
 ```sh
 curl http://localhost:8000/v1/chat/completions \
@@ -157,11 +181,15 @@ These are protocol-compatible **local model** endpoints. They do not call OpenAI
 
 Phase 1 runs **one active generation across the cluster**, with up to 32 queued inference requests by default. This is deliberately conservative: it makes model replacement and exact KV cleanup tractable before adding continuous batching, replicas, and concurrent pipelines. It aggregates memory capacity; it does not promise lower single-request latency than one GPU.
 
-The controller prefers fewer stages, using larger-memory nodes first. It accounts for the larger first/last stage weights and allocates contiguous ranges. `--max-layers-per-node N` can force a smaller shard for experiments. Node compute-speed calibration and network-aware load balancing are future work.
+The controller prefers reusing cached tensors, then fewer stages. It checks node memory and download disk-space estimates, accounts for the larger first/last stage weights, and allocates contiguous ranges. `--max-layers-per-node N` can force a smaller shard for experiments. Node compute-speed calibration and network-aware load balancing are future work.
 
 Node reconnects invalidate every affected deployment and all old KV state. Later requests can rebuild the pipeline from disk-cached weights. In-flight requests fail; there is no transparent replay after output has been streamed. Before stream headers, failures use ordinary 4xx/5xx responses. During streaming, errors appear as protocol error events. A request must fit `prompt_tokens + max_tokens <= max_context`; the default is 2048, capped by the model's configured context.
 
-Controller restarts preserve counters and history but mark loaded placement records stale; queued/running requests become failed. The request queue itself is in memory and is not replayed after restart. No prompt or generated text is saved in the controller's ledger.
+Controller restarts preserve the model catalog, pinned metadata, counters and history but mark GPU placements stale; queued/running requests become failed. Nodes verify cached tensors and report their inventory when connecting, before any inference. The controller proactively prepares missing shards on connected nodes when a complete placement fits. It retains incomplete models in the admin inventory and omits them from `/v1/models` (also available as `/models`). Several models can remain executable on disk while only one occupies a node's GPU.
+
+In **Nodes**, **Remove node** appears only for disconnected nodes. Removal forgets the controller's node record and schedules model repair on the remaining nodes; it does not erase the offline machine's files or revoke its enrollment token. The same identity can rejoin and report its cache again. Recovery respects memory, free disk, and `--max-layers-per-node`; use **Retry preload** after changing resources. Preload and repair share the inference scheduling lock, so large downloads can delay queued requests.
+
+**Upgrade:** this cache-inventory protocol is version **2**. Restart the controller and all nodes with the updated code; version-1 nodes are rejected. Existing deployment records are migrated into the catalog and old tensor files are reused after inspection. Cache verification reads local files and can delay node registration for large caches. No prompt or generated text is saved in the controller's ledger.
 
 ## Development and verification
 

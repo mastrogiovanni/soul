@@ -21,6 +21,17 @@ class Peer:
         self.logs = deque(maxlen=300)
         self.connected = True
         self.send_lock = asyncio.Lock()
+        self.inventory = {}
+        self.update_inventory(hello.get("inventory", []))
+
+    def update_inventory(self, entries):
+        from soul.catalog import ModelSpec
+
+        inventory = {}
+        for entry in entries:
+            spec = ModelSpec(**entry["spec"])
+            inventory[spec.key] = entry
+        self.inventory = inventory
 
     async def call(self, method, args=None, timeout=120):
         if not self.connected:
@@ -51,6 +62,9 @@ class Peer:
         self.last_seen = time.time()
         kind = message["type"]
         if kind == "result":
+            result = message.get("result", {})
+            if "inventory" in result:
+                self.update_inventory(result["inventory"])
             future = self.pending.get(message.get("id"))
             if future and not future.done():
                 if "error" in message:
@@ -67,6 +81,8 @@ class Peer:
                     "message": str(message.get("message", ""))[:2000],
                 }
             )
+        elif kind == "inventory":
+            self.update_inventory(message["inventory"])
         else:
             raise ValueError("Unknown node event")
 
@@ -78,6 +94,28 @@ class Peer:
                 future.set_exception(SoulError(f"Node {self.name}: {reason}"))
 
     def snapshot(self):
+        from soul.catalog import ModelSpec
+
+        cached_models = []
+        for entry in self.inventory.values():
+            spec = ModelSpec(**entry["spec"])
+            names = set(entry["tensors"])
+            if not names and not entry.get("tokenizer"):
+                continue
+            layers = [
+                i
+                for i in range(spec.layers)
+                if all(n in names for n in spec.tensors if n.startswith(f"model.layers.{i}."))
+            ]
+            cached_models.append(
+                {
+                    "model": spec.model_id,
+                    "revision": spec.revision,
+                    "layers": layers,
+                    "tensor_count": len(names),
+                    "tokenizer": entry.get("tokenizer", False),
+                }
+            )
         return {
             "node_id": self.id,
             "name": self.name,
@@ -85,5 +123,6 @@ class Peer:
             "connected": self.connected,
             "generation": self.generation,
             "last_seen": self.last_seen,
+            "cached_models": cached_models,
             **self.status,
         }

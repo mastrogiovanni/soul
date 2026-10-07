@@ -1,5 +1,7 @@
 # Architecture and engineering decisions
 
+For the single-controller Kind/Contour deployment, see [Kubernetes](kubernetes.md). The complete HTTP/WebSocket application can be mounted at `/soul`; its admin panel uses relative asset links and prefixes API requests and generated node commands. Kubernetes keeps one controller replica with a retained volume and `Recreate` updates, while Mac/NVIDIA nodes continue to run externally.
+
 ## Scope
 
 The described workload is autoregressive serving. There is no backward pass, gradient exchange, optimizer sharding, checkpoint writing, or distributed training in phase 1. Adding training would require a separate execution protocol and considerably different memory and failure semantics.
@@ -37,7 +39,7 @@ The controller relays **hidden activations**, not KV tensors. KV is neither the 
 
 ## Model inspection and precise downloads
 
-1. Resolve the repository revision to a commit SHA. Read config, generation config, and safetensors index.
+1. On an explicit admin preload, resolve the repository revision to a commit SHA. Read config, generation config, and safetensors index; persist these in the model catalog.
 2. Read only each shard's 8-byte header length and JSON tensor header using HTTP Range.
 3. Record exact dtype, shape, shard filename, absolute offset, and byte length for each tensor.
 4. Ask eligible nodes for their cost matrices, choose contiguous ranges, then send immutable assignment metadata.
@@ -45,6 +47,10 @@ The controller relays **hidden activations**, not KV tensors. KV is neither the 
 6. Write each tensor as an atomic, valid safetensors file. Check local SHA-256 on cache reuse and repair incomplete/corrupt files. This checksum detects local cache corruption; upstream identity comes from the pinned commit, validated ranges and HTTPS, not an independently verified per-tensor Hub checksum.
 
 Range requests must return an exact `206 Content-Range`; the reader refuses a server that ignores ranges. Checkpoint downloads do not execute pickle or remote model code. The controller's regular Hugging Face cache contains only small metadata files; the first node additionally downloads tokenizer resources.
+
+Each node writes a model manifest beside the per-tensor cache before the first download. On connection it scans these manifests, checks tensor checksums and the local tokenizer, and reports its verified inventory plus per-model memory/missing-byte offers. Interrupted downloads preserve completed tensors. Preload stores tokenizer resources inside the model cache; inference loads them with `local_files_only=True`. The node's `load` RPC refuses missing or corrupt tensors instead of downloading them.
+
+The persistent catalog is independent of transient GPU deployments. A background reconciler refreshes offers and prepares missing shards after connection changes and offline-node removal. Preload and reconciliation acquire the generation lock, keeping placement changes outside active requests. Models can coexist on disk; runtime rotation still keeps one model stage per node in device memory. `/v1/models` calculates executable cached coverage on connected nodes, including endpoint tensors and tokenizer availability, and does not advertise incomplete deployments.
 
 ## Stage adapter
 
@@ -70,7 +76,7 @@ For each candidate contiguous range, a node estimates:
 
 `resident_weight_bytes` is the sum of that range's layer weights in resident mode, or the largest layer in stream mode, plus embeddings/head/norm as applicable. Workspace accounts for chunked attention, MLP temporaries, and a minimum 256 MiB reserve. Sliding-window KV is conservatively charged as a full context.
 
-The planner sorts nodes by budget and uses dynamic programming across contiguous intervals, permitting skipped nodes and minimizing stage count within that fixed order. It does not optimize all node permutations: an unusual asymmetry in first/last-stage costs may require adjusting node budgets/order or a future permutation-aware planner. Raw byte estimates cannot perfectly predict allocator fragmentation, concurrent external workloads or backend kernels. OOM is an explicit failed request, never silently approximated computation.
+The planner uses dynamic programming across contiguous intervals, permitting skipped nodes and minimizing download bytes before stage count. The controller considers budget order and cached-layer order and checks free disk against missing tensor bytes. It does not optimize all node permutations: unusual asymmetries may require adjusting node budgets/order or a future permutation-aware planner. Disk estimates exclude filesystem overhead and external concurrent writes; failures remain explicit. Raw byte estimates cannot perfectly predict allocator fragmentation, concurrent external workloads or backend kernels. OOM is an explicit failed request, never silently approximated computation.
 
 Disk streaming transfers one decoder layer per stage forward pass; it does not stream the edge head or embeddings. There is no asynchronous prefetch or overlap yet. GPU-resident KV can therefore still be the limiting factor. Weight streaming is a capacity feature, often significantly slower than resident inference.
 
@@ -78,7 +84,7 @@ Disk streaming transfers one decoder layer per stage forward pass; it does not s
 
 A connection has a new generation UUID; a placement has its own epoch. Replacing a node connection invalidates earlier assignments. Nodes clear GPU state on reconnect before consuming new RPCs. The controller only uses deployments whose recorded connection generations still match. It never assumes an old cache survived a crash.
 
-SQLite stores node records, deployment history and request outcomes, but all recovered deployments start stale. Work queued/running at a controller crash becomes failed. After startup, nodes reconnect and the next inference can replan/reload using their disk caches. The system does not resume partial generations. Streaming failures are sent as error events; pre-stream failures return 5xx. Node heartbeat expiry is 30 seconds and heartbeats run every 5 seconds.
+SQLite stores node records, model metadata/preload intentions, deployment history and request outcomes. Recovered GPU deployments start stale; cached availability is rebuilt from verified node inventories. Work queued/running at a controller crash becomes failed. Joining or lost nodes trigger proactive preparation, independently of inference. Offline-node deletion removes its durable node record and triggers repair without deleting files on that node; a returning identity can enroll again. The system does not resume partial generations. Streaming failures are sent as error events; pre-stream failures return 5xx. Node heartbeat expiry is 30 seconds and heartbeats run every 5 seconds.
 
 ## Controller sizing and performance
 

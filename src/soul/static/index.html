@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#142b2b"><title>Soul · Control room</title>
-  <link rel="stylesheet" href="/static/style.css"><script src="/static/app.js" defer></script>
+  <link rel="stylesheet" href="static/style.css?v=3"><script src="static/app.js?v=3" defer></script>
 </head>
 <body>
   <aside class="sidebar">
-    <a class="brand" href="/" aria-label="Soul home"><span class="brand-symbol">✳</span> soul<span class="version">0.1</span></a>
+    <a class="brand" href="./" aria-label="Soul home"><span class="brand-symbol">✳</span> soul<span class="version">0.1</span></a>
     <div class="workspace"><span class="workspace-icon">S</span><div>Distributed serving<small>Control plane</small></div><span class="workspace-dot"></span></div>
     <p class="nav-label">WORKSPACE</p>
     <nav aria-label="Main navigation">
@@ -16,23 +16,23 @@
       <button class="nav-item" data-tab="nodes"><span>⌘</span> Nodes <b id="node-count">0</b></button>
       <button class="nav-item" data-tab="requests"><span>↗</span> Requests</button>
     </nav>
-    <div class="sidebar-bottom"><div class="network-mark"><span></span> One model. Many machines.</div><p>Computation at the edges.<br>Coordination at the center.</p><a href="/docs" target="_blank" rel="noopener">API reference <span>↗</span></a><button id="disconnect" class="sidebar-button">Disconnect console</button></div>
+    <div class="sidebar-bottom"><div class="network-mark"><span></span> One model. Many machines.</div><p>Computation at the edges.<br>Coordination at the center.</p><a href="docs" target="_blank" rel="noopener">API reference <span>↗</span></a><button id="disconnect" class="sidebar-button">Disconnect console</button></div>
   </aside>
   <main>
     <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span><span id="crumb">Overview</span></div><div class="live-indicator"><span id="live-dot"></span><span id="live-label">Not connected</span></div></header>
     <div class="content">
-      <section class="page-heading"><div><div class="eyebrow">SOUL / CONTROL ROOM</div><h1 id="page-title">Your network, in sync.</h1><p id="page-description">A single view of the machines bringing your models to life.</p></div><button class="button primary" id="open-load"><span>＋</span> Load a model</button></section>
+      <section class="page-heading"><div><div class="eyebrow">SOUL / CONTROL ROOM</div><h1 id="page-title">Your network, in sync.</h1><p id="page-description">A single view of the machines bringing your models to life.</p></div><button class="button primary" id="open-load"><span>＋</span> Preload a model</button></section>
       <div id="notice" class="notice" role="status" hidden></div>
       <section id="auth-panel" class="auth-panel"><div><h2>Connect to your controller</h2><p>Enter the admin key to view this network. Local development uses <code>soul-dev</code>.</p></div><form id="auth-form"><label class="sr-only" for="admin-key">Admin key</label><input id="admin-key" type="password" placeholder="Admin key" autocomplete="current-password" required><button class="button primary">Connect →</button></form></section>
       <section class="stats" aria-label="Network metrics">
         <article class="stat"><span class="stat-label">Connected nodes <span>⌘</span></span><div class="stat-value" id="stat-nodes">—</div><span class="stat-detail" id="node-detail">Waiting for connection</span></article>
-        <article class="stat"><span class="stat-label">Loaded models <span>▧</span></span><div class="stat-value" id="stat-models">—</div><span class="stat-detail">Ready for inference</span></article>
+        <article class="stat"><span class="stat-label">Available models <span>▧</span></span><div class="stat-value" id="stat-models">—</div><span class="stat-detail">Cached across connected nodes</span></article>
         <article class="stat"><span class="stat-label">Completed requests <span>↗</span></span><div class="stat-value" id="stat-requests">—</div><span class="stat-detail" id="request-detail">All time · persisted locally</span></article>
         <article class="stat"><span class="stat-label">Generated tokens <span>≋</span></span><div class="stat-value" id="stat-tokens">—</div><span class="stat-detail" id="queue-detail">Queue is empty</span></article>
       </section>
       <div id="overview-view" class="view">
         <section class="panel topology-panel"><div class="panel-heading"><div><h2>Model distribution <span class="subtle-tag">STAR TOPOLOGY</span></h2><p>Each node owns a stage. The controller connects the sequence.</p></div><label class="sr-only" for="pipeline-model">Model to inspect</label><select id="pipeline-model"><option value="">No models loaded</option></select></div>
-          <div id="topology" class="topology empty-topology"><div class="controller-orb">✳</div><h3>Build your first pipeline</h3><p>Connect a node, then load a Hugging Face model.<br>Soul will find a place for every layer.</p><div class="empty-steps"><span>01 Connect</span><i>→</i><span>02 Distribute</span><i>→</i><span>03 Generate</span></div></div>
+          <div id="topology" class="topology empty-topology"><div class="controller-orb">✳</div><h3>Build your first pipeline</h3><p>Connect a node, then preload a Hugging Face model.<br>Soul will find a place for every layer.</p><div class="empty-steps"><span>01 Connect</span><i>→</i><span>02 Distribute</span><i>→</i><span>03 Generate</span></div></div>
           <div class="panel-footer"><span><i class="tiny-dot green"></i> Node-local KV cache</span><span><i class="tiny-dot blue"></i> Controller-relayed activations</span><span id="context-label">2,048 token context</span></div>
         </section>
         <div class="lower-grid"><section class="panel"><div class="panel-heading"><div><h2>Connected machines</h2><p>The compute behind your network.</p></div><button class="text-button" data-go="nodes">View all ↗</button></div><div id="node-preview" class="node-preview"><div class="empty-small">Your nodes will appear here when they connect.</div></div></section>
@@ -45,8 +45,8 @@
       <footer class="page-footer"><span><b>✳</b> Soul distributed serving</span><span id="updated">Waiting for controller</span></footer>
     </div>
   </main>
-  <dialog id="load-dialog"><form id="load-form"><div class="dialog-heading"><h2>Load a model</h2><button type="button" class="close" data-close="load-dialog" aria-label="Close">×</button></div><p>The controller will inspect the model and distribute contiguous layers across your connected nodes.</p><label for="model-id">Hugging Face model ID</label><input id="model-id" placeholder="Qwen/Qwen2.5-0.5B-Instruct" required><div class="form-hint">Supports unquantized Llama, Mistral, Qwen2 and Qwen3 safetensors checkpoints. Gated models require HF_TOKEN on the controller and nodes.</div><button class="button primary full" id="load-submit">Distribute model →</button></form></dialog>
+  <dialog id="load-dialog"><form id="load-form"><div class="dialog-heading"><h2>Prepare a model</h2><button type="button" class="close" data-close="load-dialog" aria-label="Close">×</button></div><p>Download model shards to your nodes before sending inference requests. Cached models remain available when another model uses the GPU.</p><label for="model-id">Hugging Face model ID</label><input id="model-id" placeholder="Qwen/Qwen2.5-0.5B-Instruct" required><label for="model-action">Preparation</label><select id="model-action"><option value="preload">Preload to disk</option><option value="load">Preload and load GPU</option></select><div class="form-hint">Supports unquantized Llama, Mistral, Qwen2 and Qwen3 safetensors checkpoints. Gated models require HF_TOKEN on the controller and nodes.</div><button class="button primary full" id="load-submit">Prepare model →</button></form></dialog>
   <dialog id="logs-dialog"><div class="dialog-heading"><h2 id="logs-title">Node logs</h2><button class="close" data-close="logs-dialog" aria-label="Close">×</button></div><p>Latest 300 events received in this controller session. Full rolling logs remain on the node.</p><pre id="logs-output">Loading…</pre></dialog>
-  <dialog id="join-dialog"><div class="dialog-heading"><h2>Connect a node</h2><button class="close" data-close="join-dialog" aria-label="Close">×</button></div><p>Install <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener">uv 0.9 or newer</a>, then run these commands in a copy of this project.</p><label for="join-profile">Node hardware</label><select id="join-profile"><option value="node">Mac (Metal) or CPU</option><option value="node-cu126">NVIDIA · CUDA 12.6</option><option value="node-cu128">NVIDIA · CUDA 12.8</option><option value="node-cu129">NVIDIA · CUDA 12.9</option></select><pre id="join-command"></pre><div class="form-hint">For NVIDIA, choose a CUDA version supported by your GPU and driver; check nvidia-smi on the node. Use your node token, not the admin key. Each node needs its own cache directory.</div><a href="/docs" target="_blank" rel="noopener" class="text-button">Explore the API ↗</a></dialog>
+  <dialog id="join-dialog"><div class="dialog-heading"><h2>Connect a node</h2><button class="close" data-close="join-dialog" aria-label="Close">×</button></div><p>Install <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener">uv 0.9 or newer</a>, then run these commands in a copy of this project.</p><label for="join-profile">Node hardware</label><select id="join-profile"><option value="node">Mac (Metal) or CPU</option><option value="node-cu126">NVIDIA · CUDA 12.6</option><option value="node-cu128">NVIDIA · CUDA 12.8</option><option value="node-cu129">NVIDIA · CUDA 12.9</option></select><pre id="join-command"></pre><div class="form-hint">For NVIDIA, choose a CUDA version supported by your GPU and driver; check nvidia-smi on the node. Use your node token, not the admin key. Each node needs its own cache directory.</div><a href="docs" target="_blank" rel="noopener" class="text-button">Explore the API ↗</a></dialog>
 </body>
 </html>

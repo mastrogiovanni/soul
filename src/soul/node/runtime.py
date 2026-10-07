@@ -80,6 +80,51 @@ class Runtime:
         self.sessions = {}
         self.start = self.end = 0
         self.epoch = None
+        self.cached = {}
+
+    def scan_cache(self):
+        self.cached = {}
+        for spec in WeightStore.manifests(self.cache_dir):
+            self.refresh_cache(spec)
+        return self.inventory()
+
+    def refresh_cache(self, spec):
+        store = WeightStore(self.cache_dir, spec)
+        tokenizer = False
+        if (store.root / "tokenizer").is_dir():
+            try:
+                AutoTokenizer.from_pretrained(store.root / "tokenizer", local_files_only=True)
+                tokenizer = True
+            except (OSError, ValueError):
+                pass
+        self.cached[spec.key] = {
+            "spec": spec.to_dict(),
+            "tensors": store.available(),
+            "tokenizer": tokenizer,
+        }
+
+    def inventory(self):
+        return [
+            {**entry, "offer": self.offer(ModelSpec(**entry["spec"]))} for entry in list(self.cached.values())
+        ]
+
+    def preload(self, spec, start, end, progress=lambda *_: None):
+        if not 0 <= start < end <= spec.layers:
+            raise ValueError("Invalid layer assignment")
+        store = WeightStore(self.cache_dir, spec)
+        try:
+            store.ensure(spec.names_for(start, end), progress)
+            if start == 0:
+                target = store.root / "tokenizer"
+                try:
+                    AutoTokenizer.from_pretrained(target, local_files_only=True)
+                except (OSError, ValueError):
+                    tokenizer = AutoTokenizer.from_pretrained(
+                        spec.model_id, revision=spec.revision, trust_remote_code=False
+                    )
+                    tokenizer.save_pretrained(target)
+        finally:
+            self.refresh_cache(spec)
 
     def capabilities(self):
         return {
@@ -93,6 +138,13 @@ class Runtime:
         }
 
     def offer(self, spec: ModelSpec):
+        if spec.key not in self.cached:
+            # Adopts tensor caches written by protocol-v1 clients as well.
+            WeightStore(self.cache_dir, spec).remember()
+            self.refresh_cache(spec)
+        entry = self.cached[spec.key]
+        entry["spec"] = spec.to_dict()
+        cached = set(entry["tensors"])
         element = torch.empty((), dtype=self.dtype).element_size()
         layer_bytes = [
             sum(
@@ -111,9 +163,9 @@ class Runtime:
             8 * chunk * spec.config.get("intermediate_size", 4 * spec.config["hidden_size"]) * element
             + spec.config["num_attention_heads"] * chunk * spec.max_context * 4,
         )
-        costs = []
+        costs, missing_bytes = [], []
         for start in range(spec.layers):
-            row = []
+            row, missing = [], []
             for end in range(start + 1, spec.layers + 1):
                 weights = (
                     sum(layer_bytes[start:end])
@@ -122,8 +174,20 @@ class Runtime:
                 )
                 weights += (first if start == 0 else 0) + (last if end == spec.layers else 0)
                 row.append(math.ceil(weights * 1.1 + (end - start) * spec.kv_per_layer(element) + workspace))
+                missing.append(
+                    sum(spec.tensors[n]["length"] for n in spec.names_for(start, end) if n not in cached)
+                    + (1 if start == 0 and not entry["tokenizer"] else 0)
+                )
             costs.append(row)
-        return {"budget_bytes": self.budget, "costs": costs, "weight_mode": self.weight_mode}
+            missing_bytes.append(missing)
+        return {
+            "budget_bytes": self.budget,
+            "costs": costs,
+            "weight_mode": self.weight_mode,
+            "missing_bytes": missing_bytes,
+            "disk_free_bytes": psutil.disk_usage(self.cache_dir).free,
+            "context": spec.max_context,
+        }
 
     def unload(self):
         self.sessions.clear()
@@ -135,7 +199,9 @@ class Runtime:
         elif self.device == "mps":
             torch.mps.empty_cache()
 
-    def load(self, spec: ModelSpec, start: int, end: int, epoch: str, progress=lambda *_: None):
+    def load(
+        self, spec: ModelSpec, start: int, end: int, epoch: str, progress=lambda *_: None, *, download=True
+    ):
         if spec.config["model_type"] not in ARCHITECTURES or not 0 <= start < end <= spec.layers:
             raise ValueError("Unsupported assignment")
         if self.offer(spec)["costs"][start][end - start - 1] > self.budget:
@@ -143,7 +209,10 @@ class Runtime:
         self.unload()
         self.spec, self.start, self.end = spec, start, end
         self.store = WeightStore(self.cache_dir, spec)
-        self.store.ensure(spec.names_for(start, end), progress)
+        if download:
+            self.preload(spec, start, end, progress)
+        else:
+            self.store.require(spec.names_for(start, end))
         data = dict(spec.config)
         model_type = data.pop("model_type")
         config = AutoConfig.for_model(model_type, **data)
@@ -186,7 +255,7 @@ class Runtime:
         model.eval()
         if start == 0:
             self.tokenizer = AutoTokenizer.from_pretrained(
-                spec.model_id, revision=spec.revision, trust_remote_code=False
+                self.store.root / "tokenizer", local_files_only=True, trust_remote_code=False
             )
         self.epoch = epoch
 

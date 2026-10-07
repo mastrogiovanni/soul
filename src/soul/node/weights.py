@@ -9,6 +9,7 @@ from pathlib import Path
 from safetensors import safe_open
 
 from soul.catalog import ModelSpec, RangeReader
+from soul.protocol import SoulError
 
 
 class WeightStore:
@@ -17,10 +18,40 @@ class WeightStore:
         self.root = root / "weights" / spec.key
         self.root.mkdir(parents=True, exist_ok=True)
 
+    def remember(self):
+        temporary = self.root / "manifest.partial"
+        temporary.write_text(json.dumps(self.spec.to_dict()))
+        temporary.replace(self.root / "manifest.json")
+
+    def available(self):
+        result = []
+        for name in self.spec.tensors:
+            path = self.path(name)
+            checksum = path.with_suffix(".sha256")
+            if path.exists() and checksum.exists() and self.digest(path) == checksum.read_text():
+                result.append(name)
+        return result
+
+    def require(self, names):
+        if not set(names).issubset(self.available()):
+            raise SoulError("Assigned tensors are missing or corrupt; preload the model first", 503)
+
+    @classmethod
+    def manifests(cls, root):
+        for path in sorted((root / "weights").glob("*/manifest.json")):
+            try:
+                spec = ModelSpec(**json.loads(path.read_text()))
+                if path.parent.name == spec.key:
+                    yield spec
+            except (OSError, ValueError, TypeError, KeyError):
+                continue
+
     def path(self, name):
         return self.root / (hashlib.sha256(name.encode()).hexdigest() + ".safetensors")
 
     def ensure(self, names: list[str], progress=lambda *_: None):
+        # Persist metadata before downloading so interrupted shards can be rediscovered.
+        self.remember()
         reader = RangeReader(self.spec.model_id, self.spec.revision)
         total = sum(self.spec.tensors[n]["length"] for n in names)
         completed = 0

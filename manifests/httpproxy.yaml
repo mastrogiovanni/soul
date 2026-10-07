@@ -1,0 +1,17 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: soul
+  labels:
+    app: soul-controller
+spec:
+  # Included at /soul on ingress-root; inherit its hostname, TLS and authorization.
+  # Preserve the prefix: the application serves HTTP and WebSockets under /soul.
+  routes:
+    - enableWebsockets: true
+      timeoutPolicy:
+        response: infinity
+        idle: infinity
+      services:
+        - name: soul-service
+          port: 80

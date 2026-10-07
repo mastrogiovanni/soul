@@ -1,4 +1,5 @@
 import asyncio
+import base64
 import contextlib
 import json
 import logging
@@ -19,6 +20,16 @@ from soul.protocol import MAX_FRAME, VERSION, SoulError, pack, unpack
 log = logging.getLogger("soul.node")
 
 
+async def in_thread(function, *args):
+    task = asyncio.create_task(asyncio.to_thread(function, *args))
+    try:
+        return await asyncio.shield(task)
+    except asyncio.CancelledError:
+        with contextlib.suppress(Exception):
+            await task
+        raise
+
+
 def identity(cache_dir: Path, node_id=None):
     cache_dir.mkdir(parents=True, exist_ok=True)
     path = cache_dir / "identity.json"
@@ -33,7 +44,17 @@ def identity(cache_dir: Path, node_id=None):
 
 
 class NodeClient:
-    def __init__(self, controller, token, cache_dir, node_id=None, name=None, **runtime_options):
+    def __init__(
+        self,
+        controller,
+        token,
+        cache_dir,
+        node_id=None,
+        name=None,
+        ingress_username=None,
+        ingress_password=None,
+        **runtime_options,
+    ):
         parsed = urlparse(controller)
         if parsed.scheme not in ("http", "https", "ws", "wss") or not parsed.netloc:
             raise ValueError("Controller must be an http(s) or ws(s) URL")
@@ -50,8 +71,17 @@ class NodeClient:
         self.node_id = identity(cache_dir, node_id)
         self.name = name or socket.gethostname()
         self.token = token
+        self.headers = {"Authorization": f"Bearer {token}", "X-Soul-Node-Token": token}
+        if ingress_username is not None or ingress_password is not None:
+            if not ingress_username or not ingress_password or ":" in ingress_username:
+                raise ValueError(
+                    "Set both SOUL_INGRESS_USERNAME and SOUL_INGRESS_PASSWORD; username cannot contain ':'"
+                )
+            credential = base64.b64encode(f"{ingress_username}:{ingress_password}".encode()).decode()
+            self.headers["Authorization"] = f"Basic {credential}"
         self.runtime = Runtime(cache_dir, **runtime_options)
         self.status = {"status": "idle"}
+        self.initial_inventory = []
         handler = RotatingFileHandler(cache_dir / "node.log", maxBytes=5 * 1024**2, backupCount=2)
         handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
         log.addHandler(handler)
@@ -70,6 +100,7 @@ class NodeClient:
                 "node_id": self.node_id,
                 "name": self.name,
                 "capabilities": self.runtime.capabilities(),
+                "inventory": self.initial_inventory,
             }
         )
         reply = unpack(await ws.recv())
@@ -82,6 +113,7 @@ class NodeClient:
 
         def progress(done, total, tensor):
             self.status = {
+                **self.status,
                 "status": "downloading",
                 "downloaded_bytes": done,
                 "total_bytes": total,
@@ -109,13 +141,23 @@ class NodeClient:
                     raise ValueError("Expected an RPC request")
                 method, args = request["method"], request.get("args", {})
                 try:
-                    result = await asyncio.to_thread(self.dispatch, method, args, progress)
-                    await send({"type": "result", "id": request["id"], "result": result})
-                    if method in ("load", "unload", "release"):
+                    work = asyncio.create_task(asyncio.to_thread(self.dispatch, method, args, progress))
+                    try:
+                        result = await asyncio.shield(work)
+                    except asyncio.CancelledError:
+                        # Do not let an old worker mutate the cache/GPU after a new handshake.
+                        with contextlib.suppress(Exception):
+                            await work
+                        raise
+                    if method in ("preload", "load", "unload", "release"):
                         await send({"type": "status", **self.status})
+                    await send({"type": "result", "id": request["id"], "result": result})
+                    if method in ("preload", "load", "unload", "release"):
                         await send({"type": "log", "level": "INFO", "message": f"{method} completed"})
                 except Exception as exc:
                     log.exception("RPC %s failed", method)
+                    if method in ("preload", "load"):
+                        await send({"type": "inventory", "inventory": self.runtime.inventory()})
                     if method in ("load", "forward"):
                         await asyncio.to_thread(self.runtime.unload)
                         self.status = {"status": "error", "error": str(exc)[:500]}
@@ -135,10 +177,26 @@ class NodeClient:
 
     def dispatch(self, method, args, progress):
         if method == "offer":
-            return self.runtime.offer(ModelSpec(**args["spec"]))
+            offer = self.runtime.offer(ModelSpec(**args["spec"]))
+            return {**offer, "inventory": self.runtime.inventory()}
+        if method == "preload":
+            previous = self.status
+            self.status = {
+                "status": "downloading",
+                "model": args["spec"]["model_id"],
+                "start": args["start"],
+                "end": args["end"],
+            }
+            try:
+                self.runtime.preload(ModelSpec(**args["spec"]), args["start"], args["end"], progress)
+            finally:
+                self.status = previous
+            return {"cached": True, "inventory": self.runtime.inventory()}
         if method == "load":
             self.status = {"status": "loading"}
-            self.runtime.load(ModelSpec(**args["spec"]), args["start"], args["end"], args["epoch"], progress)
+            self.runtime.load(
+                ModelSpec(**args["spec"]), args["start"], args["end"], args["epoch"], progress, download=False
+            )
             self.status = {
                 "status": "ready",
                 "model": args["spec"]["model_id"],
@@ -168,9 +226,11 @@ class NodeClient:
         delay = 1
         while True:
             try:
+                await in_thread(self.runtime.unload)
+                self.initial_inventory = await in_thread(self.runtime.scan_cache)
                 async with websockets.connect(
                     self.url,
-                    extra_headers={"Authorization": f"Bearer {self.token}"},
+                    extra_headers=self.headers,
                     max_size=MAX_FRAME,
                     compression=None,
                     ping_interval=20,

@@ -6,8 +6,7 @@ from dataclasses import asdict
 
 import anyio
 
-from soul.catalog import inspect_model
-from soul.planner import plan
+from soul.controller.models import Models
 from soul.protocol import SoulError
 
 
@@ -65,6 +64,23 @@ class Engine:
         self.rpc_timeout, self.load_timeout = rpc_timeout, load_timeout
         self.allow_local, self.max_layers_per_node = allow_local, max_layers_per_node
         self.allowed_models = set(allowed_models or [])
+        self.models = Models(self)
+
+    async def remove_node(self, node_id):
+        peer = self.nodes.get(node_id)
+        if peer and peer.connected:
+            raise SoulError("Connected nodes cannot be removed", 409, "node_connected")
+        if peer is None and node_id not in self.old_nodes:
+            raise SoulError("Unknown node", 404, "not_found")
+        self.invalidate(node_id)
+        self.nodes.pop(node_id, None)
+        self.old_nodes.pop(node_id, None)
+        self.store.delete_node(node_id)
+        for record in self.models.records.values():
+            record["assignments"] = [a for a in record.get("assignments", []) if a["node_id"] != node_id]
+            self.models.save(record)
+        self.models.wake()
+        return {"removed": node_id}
 
     def invalidate(self, node_id):
         for deployment in self.deployments.values():
@@ -76,7 +92,7 @@ class Engine:
         nodes = {**self.old_nodes, **{id: n.snapshot() for id, n in self.nodes.items()}}
         return {
             "nodes": list(nodes.values()),
-            "models": list(self.deployments.values()),
+            "models": self.models.views(),
             "metrics": self.store.stats(),
             "queue_depth": self.waiting,
             "active_request": self.active,
@@ -95,30 +111,15 @@ class Engine:
         existing = self.deployments.get(model_id)
         if existing and self.valid(existing):
             return existing
-        peers = [n for n in self.nodes.values() if n.connected]
-        if not peers:
-            raise SoulError("No inference nodes are connected")
         if model_id not in self.specs:
-            try:
-                self.specs[model_id] = await asyncio.to_thread(
-                    inspect_model, model_id, "main", self.max_context, self.allow_local
-                )
-            except SoulError:
-                raise
-            except Exception as exc:
-                raise SoulError(f"Cannot inspect model: {str(exc)[:300]}", 400, "invalid_model") from exc
+            raise SoulError(
+                "Preload this model through /admin/models/preload before inference",
+                404,
+                "model_not_preloaded",
+            )
         spec = self.specs[model_id]
-        peers = [p for p in peers if spec.config["model_type"] in p.capabilities.get("architectures", [])]
-        replies = await asyncio.gather(
-            *(p.call("offer", {"spec": spec.to_dict()}, timeout=self.rpc_timeout) for p in peers),
-            return_exceptions=True,
-        )
-        offers = [
-            {**r, "node_id": p.id}
-            for p, r in zip(peers, replies, strict=True)
-            if not isinstance(r, BaseException)
-        ]
-        assignments = plan(spec.layers, offers, self.max_layers_per_node)
+        await self.models.refresh_offers(spec)
+        assignments = self.models.placements(model_id, cached_only=True)
         selected_ids = {a.node_id for a in assignments}
         retired = [
             d
@@ -194,6 +195,7 @@ class Engine:
         return deployment
 
     async def load_model(self, model):
+        await self.models.preload(model)
         async with self.gate:
             return await self.ensure_model(model)
 

@@ -1,71 +1,10 @@
 import asyncio
 import contextlib
 import json
-import socket
 
-import httpx
-import pytest
-import uvicorn
 from anthropic import AsyncAnthropic
+from conftest import eventually
 from openai import AsyncOpenAI
-
-from soul.controller.app import Settings, create_app
-from soul.node.client import NodeClient
-
-
-async def eventually(predicate, timeout=15):
-    async with asyncio.timeout(timeout):
-        while not predicate():
-            await asyncio.sleep(0.03)
-
-
-@pytest.fixture
-async def cluster(tmp_path, tiny_model):
-    path, _ = tiny_model
-    settings = Settings(
-        api_key="api",
-        admin_key="admin",
-        node_token="node",
-        state_dir=tmp_path / "controller",
-        max_layers_per_node=2,
-        allow_local=True,
-        max_context=256,
-        rpc_timeout=5,
-        load_timeout=20,
-    )
-    app = create_app(settings)
-    sock = socket.socket()
-    sock.bind(("127.0.0.1", 0))
-    port = sock.getsockname()[1]
-    server = uvicorn.Server(
-        uvicorn.Config(app, host="127.0.0.1", port=port, log_level="error", ws_per_message_deflate=False)
-    )
-    server_task = asyncio.create_task(server.serve(sockets=[sock]))
-    await eventually(lambda: server.started)
-    url = f"http://127.0.0.1:{port}"
-    clients = [
-        NodeClient(
-            url,
-            "node",
-            tmp_path / f"node{i}",
-            node_id=f"node{i}",
-            name=f"Test node {i}",
-            device="cpu",
-            memory_gb=1,
-        )
-        for i in range(2)
-    ]
-    tasks = [asyncio.create_task(c.run()) for c in clients]
-    await eventually(lambda: len(app.state.engine.nodes) == 2)
-    async with httpx.AsyncClient(base_url=url, timeout=30) as http:
-        yield app.state.engine, http, str(path), url, clients, tasks
-    for task in tasks:
-        task.cancel()
-    for task in tasks:
-        with contextlib.suppress(asyncio.CancelledError):
-            await task
-    server.should_exit = True
-    await server_task
 
 
 async def test_real_nodes_openai_anthropic_and_admin(cluster):

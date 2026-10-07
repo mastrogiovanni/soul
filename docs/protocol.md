@@ -1,18 +1,20 @@
-# Node protocol v1
+# Node protocol v2
 
-All node traffic goes through an outward WebSocket connection to `/internal/nodes`. The handshake uses `Authorization: Bearer <SOUL_NODE_TOKEN>`. Browser-origin connections are rejected in v1; a browser/WebGPU node will need a scoped browser enrollment flow in phase 2. WebSocket compression is disabled and each binary MessagePack map is limited to 64 MiB.
+All node traffic goes through an outward WebSocket connection to `<controller-base>/internal/nodes`. Container/Kubernetes deployments use `wss://<host>/soul/internal/nodes`. The handshake accepts `Authorization: Bearer <SOUL_NODE_TOKEN>` or `X-Soul-Node-Token`. When the shared ingress requires Basic Auth, set `SOUL_INGRESS_USERNAME` and `SOUL_INGRESS_PASSWORD` on the node: the client sends those credentials in `Authorization` and its Soul token separately, preserving both authentication gates. Browser-origin connections are rejected; a browser/WebGPU node will need a scoped browser enrollment flow in phase 2. WebSocket compression is disabled and each binary MessagePack map is limited to 64 MiB. Version-1 handshakes are rejected: upgrade controller and nodes together.
 
 ## Handshake
 
 Node → controller:
 
 ```json
-{"type":"hello","version":1,"node_id":"persistent-uuid","name":"mac-studio","capabilities":{"device":"mps","device_name":"Apple Metal (unified memory)","budget_bytes":12884901888,"dtype":"float16","architectures":["llama","mistral","qwen2","qwen3"],"weight_mode":"resident","ram_bytes":34359738368}}
+{"type":"hello","version":2,"node_id":"persistent-uuid","name":"mac-studio","capabilities":{"device":"mps","device_name":"Apple Metal (unified memory)","budget_bytes":12884901888,"dtype":"float16","architectures":["llama","mistral","qwen2","qwen3"],"weight_mode":"resident","ram_bytes":34359738368},"inventory":[]}
 ```
 
-Controller → node: `{"type":"welcome","version":1,"generation":"connection-uuid"}`.
+Controller → node: `{"type":"welcome","version":2,"generation":"connection-uuid"}`.
 
 A new connection always discards GPU assignments and KV state. The disk tensor cache survives. Node IDs match `[A-Za-z0-9_.-]{1,128}`. A duplicate identity replaces the old connection and invalidates its placements.
+
+Before opening the connection, nodes scan cache manifests and verify tensor checksums. `inventory` is an array of `{spec: ModelSpec, tensors: [verified tensor names], tokenizer: boolean, offer: MemoryOffer}`. Empty nodes send an empty array. Offers describe the context in their accompanying spec; the controller refreshes offers when its configured context differs. Model metadata can be recovered from returning nodes even by a new controller. A pinned catalog revision takes precedence over a different revision in another node's cache.
 
 ## RPC
 
@@ -22,8 +24,9 @@ Node → controller: `{"type":"result","id":"uuid","result":{...}}` or `{"type":
 
 | Method | Arguments / response |
 | --- | --- |
-| `offer` | ModelSpec → budget and triangular `costs[start][end-start-1]` matrix |
-| `load` | ModelSpec, inclusive `start`, exclusive `end`, deployment `epoch` → ready |
+| `offer` | ModelSpec → memory offer and refreshed full inventory |
+| `preload` | ModelSpec, inclusive `start`, exclusive `end` → download assigned tensors/tokenizer to disk; return `cached: true` and full inventory |
+| `load` | ModelSpec, inclusive `start`, exclusive `end`, deployment `epoch` → ready; requires locally cached tensors/tokenizer, never downloads |
 | `unload` | No arguments → releases weights and all request caches |
 | `tokenize` | epoch and `messages` or `prompt` → `input_ids`, `eos_ids`; first stage only |
 | `forward` | epoch, session_id, position, IDs or hidden tensor, sample flag, temperature/top_p/seed → hidden tensor or token_id |
@@ -33,6 +36,8 @@ Node → controller: `{"type":"result","id":"uuid","result":{...}}` or `{"type":
 `ModelSpec` contains model_id, resolved revision SHA, raw Transformers config, generation_config, max_context, and a map of tensor name → shard filename, byte offset/length, dtype and shape. No Hugging Face access token crosses this protocol. Tensors use the standard checkpoint layout and are reindexed locally inside the runtime.
 
 Nodes send asynchronous events: `heartbeat` every 5 seconds, `status` for progress/state, and `log` with level/message. The controller disconnects a node after 30 seconds without events. Node RPCs run in order; heartbeat/status transport remains live while GPU/download work runs in a worker thread.
+
+A memory offer contains `budget_bytes`, triangular `costs[start][end-start-1]`, triangular `missing_bytes`, `disk_free_bytes`, `context`, and `weight_mode`. Missing bytes include a one-byte sentinel when first-stage tokenizer preparation is needed. Zero means the range is fully prepared. Offers account for the node's dtype, context, endpoints, KV cache, and workspace. Inventory updates accompany successful offer/preload results; an `inventory` event reports the remaining verified cache after a failed preload/load. These reports describe disk contents independently of GPU status. The controller does not send inference to a partial pipeline, and only preload/reconciliation downloads missing tensors.
 
 ## Tensor envelope
 

@@ -123,6 +123,7 @@ def run(port=8000, state_dir=Path(".soul/demo")):
                 time.sleep(0.2)
             else:
                 raise TimeoutError("Nodes did not connect within 60 seconds")
+            http.post(base + "/admin/models/load", json={"model": str(model)}).raise_for_status()
             response = http.post(
                 base + "/v1/chat/completions",
                 json={

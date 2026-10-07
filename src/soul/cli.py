@@ -20,6 +20,11 @@ def main():
     controller.add_argument("--port", type=positive, default=8000)
     controller.add_argument("--state-dir", type=Path, default=Path(".soul/controller"))
     controller.add_argument(
+        "--context-root",
+        default=os.environ.get("CONTEXT_ROOT", ""),
+        help="Public path prefix, e.g. /soul (default: CONTEXT_ROOT or /)",
+    )
+    controller.add_argument(
         "--dev", action="store_true", help="Loopback-only development with soul-dev credentials"
     )
     controller.add_argument("--max-context", type=positive, default=2048)
@@ -77,8 +82,9 @@ def main():
             allow_local=args.allow_local_models,
             max_layers_per_node=args.max_layers_per_node,
             allowed_models=args.allow_model,
+            context_root=args.context_root,
         )
-        logging.info("Admin UI: http://%s:%s", args.host, args.port)
+        logging.info("Admin UI: http://%s:%s%s/", args.host, args.port, args.context_root.rstrip("/"))
         uvicorn.run(
             create_app(settings),
             host=args.host,
@@ -118,6 +124,8 @@ def main():
             memory_gb=args.memory_gb,
             weight_mode=args.weight_mode,
             dtype=args.dtype,
+            ingress_username=os.environ.get("SOUL_INGRESS_USERNAME"),
+            ingress_password=os.environ.get("SOUL_INGRESS_PASSWORD"),
         )
         try:
             asyncio.run(client.run())
