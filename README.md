@@ -2,6 +2,10 @@
 
 One model, many machines. Soul splits an LLM into contiguous decoder stages on a star network: nodes connect outward to a small controller, which accepts API requests and routes activations through the stages.
 
+Soul’s aim is to give **communities and nonprofit organizations access to large language models with little setup effort**, using shared compute and accepting **higher, variable latency**. It is intended for batch systems and processes that can finish later: email processing, analysis of extracted invoice text, process improvement, grant opportunity summaries, meeting follow-ups, translation drafts, document tagging, feedback digests, and impact report drafts.
+
+These are workflows to build around Soul’s inference APIs. An external application or scheduler handles text extraction, individual requests, retries, progress, and result storage; Soul does not currently provide a durable batch job platform. Immediate, predictable real-time responses are not its primary goal.
+
 ## Join the community
 
 Explore **[the Soul community website](https://mastrogiovanni.github.io/soul-community/)** for the benefits of joining, a visual introduction to the network, installation instructions, and inference access. Website source and publishing instructions are in [docs/website.md](docs/website.md).

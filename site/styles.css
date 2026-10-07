@@ -898,6 +898,57 @@ kbd {
   align-self: stretch;
   font-size: 10px;
 }
+.use-cases-section {
+  padding-bottom: 0;
+}
+.use-cases-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+.use-case {
+  padding: 25px 0 5px;
+  border-top: 1px solid var(--line);
+}
+.case-number {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--muted);
+}
+.use-case h3 {
+  margin: 17px 0 12px;
+  font-size: 21px;
+}
+.use-case p {
+  font-size: 13px;
+  line-height: 1.85;
+}
+.workflow-note {
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  margin-top: 35px;
+  padding: 26px 30px;
+  background: #ebefe3;
+  border-radius: 4px;
+}
+.workflow-note > div {
+  flex: 1;
+}
+.workflow-note h3 {
+  font-size: 17px;
+  letter-spacing: -.025em;
+}
+.workflow-note p {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.85;
+}
+.workflow-note a {
+  flex: none;
+  font-size: 12px;
+}
 .inference-section {
   display: grid;
   grid-template-columns: 1fr 1.07fr;
@@ -1422,6 +1473,19 @@ dialog::backdrop {
   }
   .benefit-grid {
     grid-template-columns: 1fr;
+  }
+  .use-cases-section {
+    padding-bottom: 0;
+  }
+  .use-cases-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .workflow-note {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 22px;
   }
   .benefit {
     padding: 26px;

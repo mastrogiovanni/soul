@@ -28,6 +28,8 @@ Keep credentials, application sources, and private files out of `site/`: that en
 
 ## Content and assets
 
+The mission is to make large language models easier to access for communities and nonprofit organizations, accepting higher, variable latency in exchange for shared infrastructure and less setup effort. The use-case section describes nine potential background workflows, including email processing, invoice analysis, and process improvement. These are integration ideas rather than bundled applications: job scheduling, text extraction, retries, and result storage belong to the calling application. Keep this distinction when updating the copy; Soul does not currently implement a durable job service or Batch API.
+
 The join command points to the community controller's `/soul/install.sh`, which must be deployed alongside `/soul/install/agent.tar.gz`. Node enrollment is separate from an inference API key. Public copy describes recovery opportunities and capacity benefits without promising automatic failover or faster responses: this version has one controller and one active generation.
 
 On 7 October 2026, `/soul/healthz` returned 200 but `/soul/install.sh` returned 404. The join panel displays this deployment dependency explicitly. Remove the `.installer-status` notice after the installer and archive endpoints are deployed and verified. Publishing Pages does not update the separately hosted controller.
