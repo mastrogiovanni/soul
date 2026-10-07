@@ -38,7 +38,7 @@ def main():
     node = commands.add_parser("node", help="Join a controller as an inference node")
     node.add_argument("--controller", default="http://127.0.0.1:8000")
     node.add_argument("--node-id")
-    node.add_argument("--name")
+    node.add_argument("--name", help="Node display name (default: normalized hostname-username)")
     node.add_argument("--cache-dir", type=Path, default=Path.home() / ".cache/soul")
     node.add_argument("--device", default="auto", help="auto, cpu, mps, cuda or cuda:N")
     node.add_argument("--dtype", choices=("auto", "float32", "float16", "bfloat16"), default="auto")

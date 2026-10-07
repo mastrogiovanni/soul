@@ -27,6 +27,7 @@ Usage: bash install.sh [--profile auto|cpu|cu126|cu128|cu129] [--no-start] [-- N
 
 Installs Soul and joins https://mastrogiovanni.ddns.net/soul in the foreground.
 Linux x86_64/ARM64 and native Apple Silicon macOS are supported. No sudo needed.
+The default node name is the normalized hostname-username (for example mac-studio-michele).
 Node options (for example --name or --memory-gb) are saved in the restart command.
 SOUL_INSTALL_DIR: absolute install path (default: ~/.local/share/soul).
 HELP

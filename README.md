@@ -12,6 +12,8 @@ curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh | bash
 
 The installer detects **Apple Silicon macOS** or **Linux x86_64/ARM64**, selects CPU, Metal, or a compatible NVIDIA CUDA profile, and installs Python and the locked agent dependencies for your user. No Git checkout, existing Python installation, or `sudo` is needed. It immediately starts the agent and connects to **[the Soul community](https://mastrogiovanni.ddns.net/soul)** using the built-in enrollment token `your-node-enrollment-token`; there are no credentials to fill in.
 
+Your agent is named automatically using normalized **`hostname-username`**, for example `mac-studio-michele`.
+
 **Keep the terminal open to contribute.** Press `Ctrl+C` to stop. Restart the installed agent with:
 
 ```sh

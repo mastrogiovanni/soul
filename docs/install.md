@@ -10,7 +10,9 @@ The script installs the agent and starts it in the foreground. The controller is
 
 The controller serves both `/soul/install.sh` and `/soul/install/agent.tar.gz`. The archive contains the deployed package's source and lockfile, so agent installations follow the controller version and do not need access to the GitHub repository.
 
-Keep the terminal open while contributing. `Ctrl+C` stops the agent; this installer does not create a boot or login service. The node connects outward over HTTPS/WSS and needs no inbound ports. It reconnects automatically after temporary network failures. Its name defaults to your hostname, and its logs report connection errors if it cannot reach or enroll with the controller.
+Keep the terminal open while contributing. `Ctrl+C` stops the agent; this installer does not create a boot or login service. The node connects outward over HTTPS/WSS and needs no inbound ports. It reconnects automatically after temporary network failures. Its logs report connection errors if it cannot reach or enroll with the controller.
+
+The agent automatically combines the hostname and username as **`hostname-username`**. Each part is normalized to lowercase ASCII: accents are folded, runs of punctuation or spaces become one hyphen, and leading/trailing hyphens are removed. For example, hostname `Mac-Studio.local` and username `Michele.Mastrogiovanni` become `mac-studio-local-michele-mastrogiovanni`. This default applies on every start, including the restart launcher and manual `soul node` commands. An explicit `--name` overrides it.
 
 ## Supported systems and automatic selection
 
@@ -35,9 +37,9 @@ The initial dependency download can take several minutes and several GB for CUDA
 Pass installer options through `bash -s --`. Put node options after a second `--`; they are saved in the restart command:
 
 ```sh
-# Set a recognizable node name and cap its memory budget at 8 GiB.
+# Keep the automatic hostname-username name and cap memory at 8 GiB.
 curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh \
-  | bash -s -- -- --name my-community-node --memory-gb 8
+  | bash -s -- -- --memory-gb 8
 
 # Use CPU even if an NVIDIA GPU is present.
 curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh \

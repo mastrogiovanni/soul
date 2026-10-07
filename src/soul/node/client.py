@@ -1,11 +1,14 @@
 import asyncio
 import base64
 import contextlib
+import getpass
 import json
 import logging
 import random
+import re
 import socket
 import time
+import unicodedata
 import uuid
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -43,6 +46,15 @@ def identity(cache_dir: Path, node_id=None):
     return node_id
 
 
+def default_node_name():
+    """Combine the hostname and login username into a lowercase ASCII slug."""
+    parts = []
+    for value, fallback in ((socket.gethostname(), "host"), (getpass.getuser(), "user")):
+        value = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+        parts.append(re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-") or fallback)
+    return "-".join(parts)
+
+
 class NodeClient:
     def __init__(
         self,
@@ -69,7 +81,7 @@ class NodeClient:
             )
         )
         self.node_id = identity(cache_dir, node_id)
-        self.name = name or socket.gethostname()
+        self.name = name or default_node_name()
         self.token = token
         self.headers = {"Authorization": f"Bearer {token}", "X-Soul-Node-Token": token}
         if ingress_username is not None or ingress_password is not None:
