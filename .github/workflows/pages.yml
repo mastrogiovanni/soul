@@ -1,0 +1,49 @@
+name: Publish community website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "scripts/publish-site.sh"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: community-website
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v6
+      - name: Configure the website repository deploy key
+        id: credentials
+        env:
+          SOUL_PAGES_DEPLOY_KEY: ${{ secrets.SOUL_PAGES_DEPLOY_KEY }}
+        run: |
+          if [ -z "$SOUL_PAGES_DEPLOY_KEY" ]; then
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'Automatic publishing awaits an approved SOUL_PAGES_DEPLOY_KEY. Run scripts/publish-site.sh locally to publish using your existing GitHub access.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$SOUL_PAGES_DEPLOY_KEY" > "$HOME/.ssh/soul-pages"
+          chmod 600 "$HOME/.ssh/soul-pages"
+          curl --fail --silent --show-error https://api.github.com/meta \
+            | python3 -c 'import json, sys; print("\n".join("github.com " + key for key in json.load(sys.stdin)["ssh_keys"]))' \
+            > "$HOME/.ssh/known_hosts"
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+      - name: Publish only the website to the public repository
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          GIT_SSH_COMMAND: ssh -i ~/.ssh/soul-pages -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes
+        run: bash scripts/publish-site.sh
+      - name: Remove deployment key
+        if: always()
+        run: rm -f "$HOME/.ssh/soul-pages"

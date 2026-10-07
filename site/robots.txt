@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mastrogiovanni.github.io/soul-community/sitemap.xml

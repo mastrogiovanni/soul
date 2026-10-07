@@ -4,6 +4,8 @@ One model, many machines. Soul splits an LLM into contiguous decoder stages on a
 
 ## Join the community
 
+Explore **[the Soul community website](https://mastrogiovanni.github.io/soul-community/)** for the benefits of joining, a visual introduction to the network, installation instructions, and inference access. Website source and publishing instructions are in [docs/website.md](docs/website.md).
+
 Contribute your machine's compute by running this command in a terminal:
 
 ```sh
