@@ -28,8 +28,9 @@
     />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=20261007-use-cases" />
-    <script src="app.js" defer></script>
+    <link rel="stylesheet" href="styles.css?v=20261007-models" />
+    <script src="app.js?v=20261007-models" defer></script>
+    <script type="module" src="model-explorer.js?v=20261007-models"></script>
     <title>Soul — Great minds. Shared machines.</title>
   </head>
   <body>
@@ -42,7 +43,7 @@
       >
       <nav aria-label="Main navigation">
         <a href="#network">Why join</a><a href="#how-it-works">How it works</a
-        ><a href="#use-cases">Use cases</a><a href="#inference">Use Soul</a>
+        ><a href="#use-cases">Use cases</a><a href="#models">Models</a>
       </nav>
       <a class="button button-small" href="#join"
         >Join the network <span aria-hidden="true">↗</span></a
@@ -138,8 +139,8 @@
               hold different layers, helping the network serve models that may
               not fit on one contributor’s device.
             </p>
-            <a href="#how-it-works"
-              >Meet the network <span aria-hidden="true">↗</span></a
+            <a href="#models"
+              >Explore models that could fit <span aria-hidden="true">↗</span></a
             >
           </article>
           <article class="benefit">
@@ -373,6 +374,201 @@
         </aside>
       </section>
 
+      <section class="section models-section" id="models" aria-labelledby="models-title">
+        <div class="section-heading">
+          <p class="eyebrow">MODEL EXPLORER / PLAN WHAT’S POSSIBLE</p>
+          <div class="heading-row">
+            <h2 id="models-title">What could we run<br /><em>together?</em></h2>
+            <p>Explore models available to download, then estimate which could fit
+              the memory your network contributes. A few more machines can open
+              up more possibilities.</p>
+          </div>
+        </div>
+        <div class="model-planner">
+          <form id="network-estimate" class="network-estimate" aria-describedby="estimate-help">
+            <fieldset disabled>
+              <legend>Imagine your network</legend>
+              <p id="estimate-help">Use a rough average. Enter memory dedicated to Soul,
+                not the machine’s total RAM or GPU memory.</p>
+              <div class="network-inputs">
+                <label for="network-machines">Contributing machines
+                  <input id="network-machines" type="number" min="0" max="1000" step="1" value="4" required inputmode="numeric" />
+                </label>
+                <label for="network-memory">Memory per machine <span>(GiB)</span>
+                  <input id="network-memory" type="number" min="1" max="1024" step="0.25" value="8" required inputmode="decimal" />
+                </label>
+                <label for="network-precision">Hardware / weight precision
+                  <select id="network-precision">
+                    <option value="4">CPU or mixed · 32-bit</option>
+                    <option value="2">GPU / Apple Metal · 16-bit</option>
+                  </select>
+                </label>
+              </div>
+              <div class="network-presets" aria-label="Example networks">
+                <span>Try a network</span>
+                <button type="button" data-network-preset data-machines="4" data-memory="8" aria-pressed="true">4 × 8 GiB</button>
+                <button type="button" data-network-preset data-machines="8" data-memory="16" aria-pressed="false">8 × 16 GiB</button>
+                <button type="button" data-network-preset data-machines="32" data-memory="16" aria-pressed="false">32 × 16 GiB</button>
+              </div>
+              <p id="estimate-error" class="estimate-error" role="status" hidden>Enter 0–1,000 whole machines and 1–1,024 GiB per machine, in steps of 0.25 GiB.</p>
+            </fieldset>
+          </form>
+          <div class="network-total" aria-live="polite" aria-atomic="true">
+            <p class="eyebrow">YOUR ESTIMATED SHARED MEMORY</p>
+            <p class="capacity-number"><strong id="network-capacity">—</strong> <span>GiB</span></p>
+            <p id="capacity-description">Enable JavaScript to calculate an estimate.</p>
+            <p id="fit-summary">Compare one model at a time.</p>
+            <span class="scenario-label">Illustrative scenario · not live network data</span>
+          </div>
+        </div>
+        <noscript><p class="model-notice">The catalog below works without JavaScript. Enable JavaScript for the local memory calculator and filters.</p></noscript>
+        <div class="model-catalog-heading">
+          <div><h3>A model for your next idea.</h3><p>Curated candidates, not a list of models currently installed.</p></div>
+          <a class="text-link" href="#inference">See live availability with your API key <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="model-filters">
+          <label for="model-search">Find a model
+            <input id="model-search" type="search" placeholder="Search name or family…" disabled />
+          </label>
+          <label class="model-fit-toggle"><input type="checkbox" id="model-fit-only" disabled /> Only likely to fit</label>
+          <p id="model-result-count" role="status">9 models in the catalog</p>
+        </div>
+        <table class="model-table" role="table" aria-label="Downloadable model candidates and estimated memory fit" aria-describedby="model-estimate-note">
+          <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">MODEL / PARAMETERS</th><th role="columnheader" scope="col">MEMORY ESTIMATE</th><th role="columnheader" scope="col">YOUR NETWORK</th></tr></thead>
+          <tbody role="rowgroup">
+              <tr role="row" data-model="Qwen/Qwen2.5-0.5B-Instruct" data-parameters="494032768" data-architecture="qwen2" data-revision="7ae557604adf67be50417f59c2c2f167def9a775">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct">Qwen2.5-0.5B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>A small starting point for labels and short drafts.</p>
+                  <div class="model-meta"><span>0.49B parameters · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-0" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-0.5B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-0">Qwen/Qwen2.5-0.5B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="HuggingFaceTB/SmolLM2-1.7B-Instruct" data-parameters="1711376384" data-architecture="llama" data-revision="31b70e2e869a7173562077fd711b654946d38674">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct">SmolLM2-1.7B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>Try rewriting and summarizing short English text.</p>
+                  <div class="model-meta"><span>1.71B parameters · llama</span>
+                    <button class="model-copy" data-copy="model-id-1" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for SmolLM2-1.7B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-1">HuggingFaceTB/SmolLM2-1.7B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen2.5-3B-Instruct" data-parameters="3085938688" data-architecture="qwen2" data-revision="aa8e72537993ba99e69dfaafa59ed015b17504d1">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-3B-Instruct">Qwen2.5-3B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>Explore email triage and everyday summaries.</p>
+                  <div class="model-meta"><span>3.09B parameters · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-2" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-3B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-2">Qwen/Qwen2.5-3B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="mistralai/Mistral-7B-Instruct-v0.3" data-parameters="7248023552" data-architecture="mistral" data-revision="c170c708c41dac9275d15a8fff4eca08d52bab71">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3">Mistral-7B-Instruct-v0.3 <span aria-hidden="true">↗</span></a>
+                  <p>Explore document summaries and draft responses.</p>
+                  <div class="model-meta"><span>7.25B parameters · mistral</span>
+                    <button class="model-copy" data-copy="model-id-3" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Mistral-7B-Instruct-v0.3">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-3">mistralai/Mistral-7B-Instruct-v0.3</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen2.5-7B-Instruct" data-parameters="7615616512" data-architecture="qwen2" data-revision="a09a35458c702b33eeacc393d103063234e8bc28">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct">Qwen2.5-7B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>Try structured extraction and community report drafts.</p>
+                  <div class="model-meta"><span>7.62B parameters · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-4" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-7B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-4">Qwen/Qwen2.5-7B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen3-8B" data-parameters="8190735360" data-architecture="qwen3" data-revision="b968826d9c46dd6066d109eabc6255188de91218">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-8B">Qwen3-8B <span aria-hidden="true">↗</span></a>
+                  <p>Explore reasoning tasks and document workflows.</p>
+                  <div class="model-meta"><span>8.19B parameters · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-5" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-8B">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-5">Qwen/Qwen3-8B</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen3-14B" data-parameters="14768307200" data-architecture="qwen3" data-revision="40c069824f4251a91eefaf281ebe4c544efd3e18">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-14B">Qwen3-14B <span aria-hidden="true">↗</span></a>
+                  <p>Room to experiment with more involved analysis.</p>
+                  <div class="model-meta"><span>14.77B parameters · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-6" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-14B">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-6">Qwen/Qwen3-14B</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen3-32B" data-parameters="32762123264" data-architecture="qwen3" data-revision="9216db5781bf21249d130ec9da846c4624c16137">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-32B">Qwen3-32B <span aria-hidden="true">↗</span></a>
+                  <p>A larger candidate for multi-step reasoning workflows.</p>
+                  <div class="model-meta"><span>32.76B parameters · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-7" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-32B">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-7">Qwen/Qwen3-32B</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen2.5-72B-Instruct" data-parameters="72706203648" data-architecture="qwen2" data-revision="495f39366efef23836d0cfae4fbe635880d2be31">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct">Qwen2.5-72B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>An ambitious target for a much larger shared network.</p>
+                  <div class="model-meta"><span>72.71B parameters · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-8" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-72B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-8">Qwen/Qwen2.5-72B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+          </tbody>
+        </table>
+        <div class="model-empty-state">
+          <p id="model-empty" hidden>No models match these filters. Try a different search or a larger network estimate.</p>
+          <button type="button" id="model-filter-reset" class="text-link" hidden>Clear filters ↗</button>
+        </div>
+        <details class="model-method" id="model-estimate-note">
+          <summary>How we estimate fit <span aria-hidden="true">+</span></summary>
+          <div>
+            <p><strong>Simple sizing, no benchmarks.</strong> Shared capacity is machines × contributed memory.
+              Model memory is parameter count × 4 bytes for CPU/mixed or × 2 bytes for GPU/Metal,
+              converted to GiB, plus 25% and 2 GiB for rough overhead, rounded up.
+              “Likely to fit” means at least 10% spare capacity above that estimate; “Tight fit” means less.</p>
+            <p>We assume one model at a time and similarly sized machines. CPU/mixed uses a conservative
+              32-bit estimate; GPU/Metal assumes all participating nodes use 16-bit weights.
+              These are unquantized, dense text models using Soul’s Llama, Mistral, Qwen2, or Qwen3 adapters.
+              Quantized, mixture-of-experts, and multimodal variants are outside this catalog.</p>
+            <p>Total memory is only a first check. A model still needs to fit across individual machines,
+              with room for its layers, context cache, and runtime. Disk space, node availability, and
+              connections also matter. More memory does not predict response speed or guarantee installation.</p>
+            <p>Model names and parameter counts were checked against the publishers’ Hugging Face metadata
+              on 7 October 2026. Follow each model link for its model card and license. These examples
+              are a curated selection, not every supported model or a performance recommendation.</p>
+          </div>
+        </details>
+        <aside class="model-next-step">
+          <span class="little-star" aria-hidden="true">✳</span>
+          <div><h3>Found a model that fits your plans?</h3>
+            <p>Copy its model ID and ask the network operator to download and prepare it in the controller’s
+              Models panel. Once it is prepared and executable, discover it through the inference API.</p></div>
+          <a class="button button-small" href="https://mastrogiovanni.ddns.net/soul/">Open the controller <span aria-hidden="true">↗</span></a>
+        </aside>
+      </section>
+
       <section class="section gallery-section" aria-labelledby="gallery-title">
         <div class="section-heading">
           <p class="eyebrow">04 / A CLOSER LOOK</p>
@@ -482,10 +678,6 @@
             ><span aria-hidden="true">↗</span>
           </div>
           <div class="terminal-body">
-            <div class="installer-status">
-              <strong>Installer rollout pending</strong>
-              <p>Checked 7 October 2026: the controller is online, but its installer is not available yet. The command below will work after the operator deploys the installer update.</p>
-            </div>
             <p class="terminal-comment"># One command to join the community</p>
             <pre><code id="install-command">curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh | bash</code></pre>
             <button
@@ -751,6 +943,7 @@ curl --fail-with-body \
               depends on administrator preparation, model permissions, and
               network capacity. It does not provide proprietary OpenAI or
               Anthropic models; its APIs use compatible request formats.
+              <a href="#models">Browse model candidates and estimate their memory needs.</a>
             </p>
           </details>
           <details>
@@ -801,6 +994,7 @@ curl --fail-with-body \
       >
       <p>One model. Many machines.</p>
       <div>
+        <a href="#models">Model explorer ↗</a>
         <a href="https://mastrogiovanni.ddns.net/soul/">Controller ↗</a
         ><a href="https://mastrogiovanni.ddns.net/soul/docs">API reference ↗</a
         ><a href="https://github.com/mastrogiovanni">Community operator ↗</a>

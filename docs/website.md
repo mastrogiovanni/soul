@@ -2,7 +2,7 @@
 
 Public website: **https://mastrogiovanni.github.io/soul-community/**
 
-The source of truth is `site/` in this repository. It is a standalone static site with no build dependencies, tracking, forms, or embedded credentials. Preview it with:
+The source of truth is `site/` in this repository. It is a standalone static site with no build dependencies, tracking, data collection, or embedded credentials. Preview it with:
 
 ```sh
 python3 -m http.server 4173 --directory site
@@ -34,7 +34,7 @@ The mission is to make large language models easier to access for communities an
 
 The join command points to the community controller's `/soul/install.sh`, which must be deployed alongside `/soul/install/agent.tar.gz`. Node enrollment is separate from an inference API key. Public copy describes recovery opportunities and capacity benefits without promising automatic failover or faster responses: this version has one controller and one active generation.
 
-On 7 October 2026, `/soul/healthz` returned 200 but `/soul/install.sh` returned 404. The join panel displays this deployment dependency explicitly. Remove the `.installer-status` notice after the installer and archive endpoints are deployed and verified. Publishing Pages does not update the separately hosted controller.
+On 7 October 2026, both `/soul/install.sh` and `/soul/install/agent.tar.gz` returned 200, so the earlier rollout-pending notice was removed. Publishing Pages does not update the separately hosted controller.
 
 - `site/assets/network.jpg`: generated conceptual network artwork, used in the hero, gallery, and social preview.
 - `site/assets/workspace.jpg`: generated illustrative contributor workspace.
@@ -43,6 +43,23 @@ On 7 October 2026, `/soul/healthz` returned 200 but `/soul/install.sh` returned 
 
 Raster images were created with the built-in image generation tool and converted to JPEG for delivery. They are hosted locally with the site; no stock-photo service is required. See `docs/website-image-prompts.txt` for the full prompts.
 
+## Model explorer
+
+The `#models` section is a curated catalog of downloadable candidates, not live controller inventory. It includes nine dense, unquantized text models using supported Llama, Mistral, Qwen2, and Qwen3 adapters. Publisher model-card links, exact parameter counts, architecture, and the checked Hugging Face revision are stored with each HTML row. Metadata was checked on 7 October 2026 using `huggingface_hub.HfApi.model_info` and each pinned `config.json`, without downloading weights. Recheck metadata and compatibility when changing this list. Individual model/hardware combinations have not all been tested.
+
+The calculator runs entirely in the browser. Visitors enter an estimated machine count and average memory budget dedicated to Soul; defaults are an illustrative 4 machines × 8 GiB, not measurements of the community controller. CPU/mixed defaults to 4 bytes per parameter, matching CPU float32; GPU/Metal assumes all participating nodes use 2-byte float16 weights. Actual node dtype overrides may differ.
+
+`site/model-estimator.mjs` uses only this arithmetic:
+
+- Capacity in GiB = machine count × contributed GiB per machine.
+- Required GiB = `ceil(parameters × bytes_per_parameter / 1024^3 × 1.25 + 2)`.
+- Below the requirement: **More memory needed**. At/above it but with less than 10% spare capacity: **Tight fit**. At least 10% spare: **Likely to fit**.
+- Suggested additional machines = `max(0, ceil(required_GiB / GiB_per_machine) - machine_count)`.
+
+The overhead and thresholds are heuristics, not benchmarks or placement guarantees. Estimates are for one model at a time on similarly sized machines. They do not model layer placement, context/KV cache, heterogeneous nodes, quantization, disk, or latency. The UI documents these limits and links to the protected `GET /v1/models` example for actual prepared/executable models. Installing/preparing a catalog model remains an operator action in the controller. No credentials or backend authentication changes are needed.
+
+The catalog and model-card links remain readable without JavaScript; calculator/filter controls are disabled until the module loads. Search, the fit filter, presets, zero contributors, and invalid input states are supported. Run the arithmetic tests with `node --test tests/site/*.test.mjs`; this also runs in CI. Update the cache-version queries on changed JS/CSS assets, including module imports, when publishing changes.
+
 ## Verification
 
-Before publishing, inspect desktop and mobile layouts, follow the section links, open every gallery image, verify next/previous/Escape controls, copy the install and API commands, expand FAQ/installation details, and check for horizontal overflow and browser errors. Check the public installer and controller links independently; publishing this static site does not deploy the controller.
+Before publishing, inspect desktop and mobile layouts, follow the section links, open every gallery image, verify next/previous/Escape controls, copy the install and API commands, expand FAQ/installation details, and check for horizontal overflow and browser errors. For the model explorer, change both memory inputs and precision, try the presets and filters, check invalid/zero-capacity states, and verify the layout on narrow screens. Check the public installer and controller links independently; publishing this static site does not deploy the controller.

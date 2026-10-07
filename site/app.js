@@ -19,15 +19,15 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
     const source = document.getElementById(button.dataset.copy);
     try {
       await navigator.clipboard.writeText(source.textContent.trim());
-      announce("Copied. Paste into your terminal when you’re ready.");
+      announce(button.dataset.copyMessage || "Copied. Paste into your terminal when you’re ready.");
     } catch {
-      // Keep the command usable when clipboard permission is unavailable.
+      // Keep the text usable when clipboard permission is unavailable.
       const selection = window.getSelection();
       const range = document.createRange();
       range.selectNodeContents(source);
       selection.removeAllRanges();
       selection.addRange(range);
-      announce("Command selected. Use your device’s Copy action to copy it.");
+      announce("Text selected. Use your device’s Copy action to copy it.");
     }
   });
 });
