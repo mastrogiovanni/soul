@@ -20,9 +20,9 @@ def test_mounted_ui_docs_auth_and_health(prefix, tmp_path):
         assert client.get(base + "/healthz").status_code == 200
         page = client.get(base + "/")
         assert page.status_code == 200
-        assert 'href="static/style.css?v=3"' in page.text
+        assert 'href="static/style.css?v=4"' in page.text
         assert 'href="./"' in page.text and 'href="docs"' in page.text
-        assert client.get(base + "/static/app.js?v=3").status_code == 200
+        assert client.get(base + "/static/app.js?v=4").status_code == 200
         docs = client.get(base + "/docs")
         assert f"{base}/openapi.json" in docs.text
         schema = client.get(base + "/openapi.json").json()

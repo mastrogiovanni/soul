@@ -55,6 +55,8 @@ Use independent, strong values for these three credentials. The API key can run 
 
 Native execution defaults to the dashboard at `/`, API documentation at `/docs`, and basic health at `/healthz`. Use `--context-root /soul` (or `CONTEXT_ROOT=/soul`) to serve the entire application beneath `/soul`; the container uses this prefix by default. Deployment state and counters live in `.soul/controller/controller.sqlite3`. Run **one controller process / one Uvicorn worker** against this state. Multi-controller consensus and shared scheduling are outside this release.
 
+In the dashboard, open **Models → Use model** for a copyable curl request (streaming or JSON), the exact model ID and API base URL, and Open WebUI connection instructions. Enable **Site also requires HTTP Basic Auth** when using the shared ingress. Examples use your inference key (`SOUL_API_KEY`), never your admin key. The Ollama guide explains how to use Soul alongside Ollama in a compatible chat UI; Soul does not implement Ollama's native API.
+
 For a remote network, use HTTPS/WSS through a reverse proxy or a private encrypted network. Nodes see prompts, activations, and portions of the model; enroll trusted machines only. Use `--allow-model owner/repository` repeatedly to restrict the model catalog. Administrators preload models; inference callers can use prepared models but cannot trigger downloads of arbitrary repositories.
 
 ### Kubernetes / shared HTTPS domain

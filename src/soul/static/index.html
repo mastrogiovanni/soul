@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#142b2b"><title>Soul · Control room</title>
-  <link rel="stylesheet" href="static/style.css?v=3"><script src="static/app.js?v=3" defer></script>
+  <link rel="stylesheet" href="static/style.css?v=4"><script src="static/app.js?v=4" defer></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -48,5 +48,18 @@
   <dialog id="load-dialog"><form id="load-form"><div class="dialog-heading"><h2>Prepare a model</h2><button type="button" class="close" data-close="load-dialog" aria-label="Close">×</button></div><p>Download model shards to your nodes before sending inference requests. Cached models remain available when another model uses the GPU.</p><label for="model-id">Hugging Face model ID</label><input id="model-id" placeholder="Qwen/Qwen2.5-0.5B-Instruct" required><label for="model-action">Preparation</label><select id="model-action"><option value="preload">Preload to disk</option><option value="load">Preload and load GPU</option></select><div class="form-hint">Supports unquantized Llama, Mistral, Qwen2 and Qwen3 safetensors checkpoints. Gated models require HF_TOKEN on the controller and nodes.</div><button class="button primary full" id="load-submit">Prepare model →</button></form></dialog>
   <dialog id="logs-dialog"><div class="dialog-heading"><h2 id="logs-title">Node logs</h2><button class="close" data-close="logs-dialog" aria-label="Close">×</button></div><p>Latest 300 events received in this controller session. Full rolling logs remain on the node.</p><pre id="logs-output">Loading…</pre></dialog>
   <dialog id="join-dialog"><div class="dialog-heading"><h2>Connect a node</h2><button class="close" data-close="join-dialog" aria-label="Close">×</button></div><p>Install <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener">uv 0.9 or newer</a>, then run these commands in a copy of this project.</p><label for="join-profile">Node hardware</label><select id="join-profile"><option value="node">Mac (Metal) or CPU</option><option value="node-cu126">NVIDIA · CUDA 12.6</option><option value="node-cu128">NVIDIA · CUDA 12.8</option><option value="node-cu129">NVIDIA · CUDA 12.9</option></select><pre id="join-command"></pre><div class="form-hint">For NVIDIA, choose a CUDA version supported by your GPU and driver; check nvidia-smi on the node. Use your node token, not the admin key. Each node needs its own cache directory.</div><a href="docs" target="_blank" rel="noopener" class="text-button">Explore the API ↗</a></dialog>
+  <dialog id="use-dialog" aria-labelledby="use-title"><div class="dialog-heading"><h2 id="use-title">Use model</h2><button type="button" class="close" data-close="use-dialog" aria-label="Close">×</button></div>
+    <p id="use-status" role="status"></p>
+    <div class="usage-value"><div><strong>Model ID</strong><code id="use-model-id"></code></div><button type="button" class="button secondary" data-copy-use="use-model-id">Copy model ID</button></div>
+    <div class="usage-value"><div><strong>OpenAI-compatible base URL</strong><code id="use-base-url"></code></div><button type="button" class="button secondary" data-copy-use="use-base-url">Copy URL</button></div>
+    <p>Use your <code>SOUL_API_KEY</code> inference key. Examples contain placeholders; your admin key is never included.</p>
+    <label for="use-format">Connection guide</label><select id="use-format"><option value="curl">Example request · curl</option><option value="webui">Open WebUI</option><option value="ollama">Ollama compatibility</option></select>
+    <div id="use-request-options" class="usage-options"><label><input id="use-stream" type="checkbox" checked> Stream the response</label></div>
+    <div class="usage-options"><label><input id="use-basic" type="checkbox"> Site also requires HTTP Basic Auth</label></div>
+    <pre id="use-content" tabindex="0"></pre>
+    <div class="usage-actions"><button type="button" class="button secondary" data-copy-use="use-content">Copy instructions</button><span id="use-copy-status" role="status" aria-live="polite"></span></div>
+    <p class="form-hint">Use a URL reachable from the machine running your client. In a Docker container, localhost refers to that container; use the public HTTPS address or a reachable host address and retain the path prefix. Soul supports text chat and streaming; tools, images, embeddings and the Responses API are not supported.</p>
+    <a id="use-docs" href="docs" target="_blank" rel="noopener" class="text-button">API reference ↗</a>
+  </dialog>
 </body>
 </html>

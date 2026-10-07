@@ -58,7 +58,61 @@ async function refreshLogs() {
   try { const data = await api(`/admin/nodes/${encodeURIComponent(logsNode)}/logs`); $("logs-output").textContent = data.logs.map((log) => `${new Date(log.time * 1000).toLocaleTimeString()}  ${log.level.padEnd(5)}  ${log.message}`).join("\n") || "No events received yet."; }
   catch (error) { $("logs-output").textContent = error.message; }
 }
+
+let usageModel = null;
+const shellQuote = (value) => "'" + String(value).replace(/'/g, "'\"'\"'") + "'";
+function renderUsage() {
+  if (!usageModel) return;
+  const model = snapshot.models.find((m) => m.model === usageModel.model) || usageModel;
+  const base = new URL("v1", controllerURL).href;
+  const format = $("use-format").value, basic = $("use-basic").checked;
+  $("use-model-id").textContent = model.model;
+  $("use-base-url").textContent = base;
+  $("use-status").textContent = model.executable ? `Available for inference · ${number(model.context)} token context (prompt + output).` : "Not currently executable. Preload this model and restore missing nodes or capacity before sending requests.";
+  $("use-request-options").hidden = format !== "curl";
+  $("use-copy-status").textContent = "";
+  if (format === "curl") {
+    const stream = $("use-stream").checked;
+    const payload = {model:model.model, messages:[{role:"user", content:"Hello!"}], max_tokens:Math.max(1, Math.min(64, Math.floor(model.context / 4))), stream};
+    const auth = basic ? '  --user "$SOUL_INGRESS_USERNAME:$SOUL_INGRESS_PASSWORD" \\\n  -H "X-Soul-API-Key: $SOUL_API_KEY"' : '  -H "Authorization: Bearer $SOUL_API_KEY"';
+    $("use-content").textContent = `# Set SOUL_API_KEY to your inference key first.${basic ? "\n# Also set SOUL_INGRESS_USERNAME and SOUL_INGRESS_PASSWORD." : ""}\ncurl --fail-with-body${stream ? " --no-buffer" : ""} ${shellQuote(base + "/chat/completions")} \\\n${auth} \\\n  -H 'Content-Type: application/json' \\\n  --data-raw ${shellQuote(JSON.stringify(payload, null, 2))}`;
+    $("use-docs").href = new URL("docs", controllerURL).href;
+    $("use-docs").textContent = "API reference ↗";
+  } else if (format === "webui") {
+    $("use-content").textContent = `1. Open Settings → Admin → Connections in Open WebUI.\n2. Add an OpenAI API connection (Provider: Default).\n3. URL: ${base}\n4. API key: your SOUL_API_KEY inference key.\n5. Save, verify the connection, then refresh the model list.\n6. Select this model: ${model.model}\n\nOnly executable models appear in Soul's /models list.\nUse text chat; disable tools and unsupported request options.${basic ? "\n\nThis site also requires Basic Auth. The default Bearer-only connection is insufficient. Use a connection/gateway that sends both:\nAuthorization: Basic <base64(site-username:site-password)>\nX-Soul-API-Key: <your inference key>\n\nIf your Open WebUI version cannot set both headers, use an approved gateway or private controller endpoint that enforces Soul's API key. Keep the public ingress authentication enabled." : ""}`;
+    $("use-docs").href = "https://docs.openwebui.com/getting-started/quick-start/connect-a-provider/starting-with-openai-compatible/";
+    $("use-docs").textContent = "Open WebUI connection guide ↗";
+  } else {
+    $("use-content").textContent = `Soul does not implement Ollama's native /api/chat, /api/generate or /api/tags endpoints. Pointing ollama run or an Ollama-only connection at Soul will not work.\n\nTo use this distributed model in a chat application that also supports Ollama, add a separate OpenAI-compatible connection:\n\nBase URL: ${base}\nAPI key: your SOUL_API_KEY inference key\nModel ID: ${model.model}\n\nOpen WebUI can keep your Ollama connection alongside this Soul connection. Select the Open WebUI guide for setup.${basic ? "\n\nFor this site's Basic Auth, see the Open WebUI guide or the curl example with the Basic Auth option enabled." : ""}`;
+    $("use-docs").href = "https://docs.ollama.com/api/openai-compatibility";
+    $("use-docs").textContent = "Ollama API compatibility reference ↗";
+  }
+}
+function openUsage(id) {
+  usageModel = snapshot.models.find((m) => m.model === id);
+  if (!usageModel) return;
+  renderUsage();
+  $("use-dialog").showModal();
+}
+for (const id of ["use-format", "use-stream", "use-basic"]) $(id).onchange = renderUsage;
+$("use-dialog").addEventListener("close", () => usageModel = null);
+async function copyUsage(id) {
+  const element = $(id), value = element.textContent;
+  try {
+    await navigator.clipboard.writeText(value);
+    $("use-copy-status").textContent = "Copied.";
+  } catch {
+    const range = document.createRange(); range.selectNodeContents(element);
+    const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+    $("use-copy-status").textContent = "Clipboard unavailable. Text selected; press Ctrl+C or ⌘C to copy.";
+  }
+}
+
 document.addEventListener("click", async (event) => {
+  const use = event.target.closest("[data-use-model]");
+  if (use) openUsage(use.dataset.useModel);
+  const copy = event.target.closest("[data-copy-use]");
+  if (copy) await copyUsage(copy.dataset.copyUse);
   const remove = event.target.closest("[data-remove-node]");
   if (remove) {
     remove.disabled = true;
@@ -99,7 +153,7 @@ function render() {
   renderTopology();
   $("node-preview").innerHTML = nodes.length ? nodes.slice(0,4).map((n) => `<div class="node-row"><div class="machine-icon">▣</div><div class="node-info"><strong>${escapeHTML(n.name)}</strong><small>${escapeHTML(n.capabilities.device_name)} · ${gib(n.capabilities.budget_bytes)}</small></div>${badge(n.status)}<button class="text-button" data-logs="${escapeHTML(n.node_id)}">Logs ↗</button></div>`).join("") : '<div class="empty-small">Your nodes will appear here when they connect.</div>';
   $("activity").innerHTML = metrics.recent.length ? metrics.recent.slice(0,4).map((r) => `<div class="activity-row"><span class="activity-mark">${r.status === "completed" ? "✓" : "↗"}</span><div><strong>${escapeHTML(r.model.split('/').pop())}</strong><small>${escapeHTML(r.status)} · ${r.output_tokens} tokens · ${r.duration.toFixed(1)}s</small></div><time class="activity-time">${new Date(r.created*1000).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</time></div>`).join("") : '<div class="empty-small">No requests yet.<br><span>Ready when you are.</span></div>';
-  $("models-table").innerHTML = models.length ? `<table><thead><tr><th>MODEL</th><th>ARCHITECTURE</th><th>DISTRIBUTION</th><th>STATUS</th><th></th></tr></thead><tbody>${models.map((m)=>`<tr><td>${escapeHTML(m.model)}<small>Revision ${escapeHTML(m.revision.slice(0,12))}</small></td><td>${escapeHTML(m.architecture)}<small>${m.context} token context</small></td><td>${m.layers} layers · ${m.assignments.length} nodes</td><td>${badge(m.status)}${m.error && !m.executable ? `<small>${escapeHTML(m.error)}</small>` : ''}</td><td>${m.status === "ready" ? `<button data-unload="${escapeHTML(m.model)}">Unload GPU</button>` : `<button data-prepare-model="${escapeHTML(m.model)}" data-action="${m.executable ? 'load' : 'preload'}">${m.executable ? 'Load GPU' : 'Retry preload'}</button>`}</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">No models yet. Preload a model to get started.</div>';
+  $("models-table").innerHTML = models.length ? `<table><thead><tr><th>MODEL</th><th>ARCHITECTURE</th><th>DISTRIBUTION</th><th>STATUS</th><th></th></tr></thead><tbody>${models.map((m)=>`<tr><td>${escapeHTML(m.model)}<small>Revision ${escapeHTML(m.revision.slice(0,12))}</small></td><td>${escapeHTML(m.architecture)}<small>${m.context} token context</small></td><td>${m.layers} layers · ${m.assignments.length} nodes</td><td>${badge(m.status)}${m.error && !m.executable ? `<small>${escapeHTML(m.error)}</small>` : ''}</td><td><button data-use-model="${escapeHTML(m.model)}">Use model</button>${m.status === "ready" ? `<button data-unload="${escapeHTML(m.model)}">Unload GPU</button>` : `<button data-prepare-model="${escapeHTML(m.model)}" data-action="${m.executable ? 'load' : 'preload'}">${m.executable ? 'Load GPU' : 'Retry preload'}</button>`}</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">No models yet. Preload a model to get started.</div>';
   $("nodes-table").innerHTML = nodes.length ? `<table><thead><tr><th>NODE</th><th>HARDWARE</th><th>MEMORY BUDGET</th><th>CACHED LAYERS</th><th>STATE</th><th></th></tr></thead><tbody>${nodes.map((n)=>`<tr><td>${escapeHTML(n.name)}<small><code>${escapeHTML(n.node_id)}</code></small></td><td>${escapeHTML(n.capabilities.device_name)}<small>${escapeHTML(n.capabilities.dtype)} · ${escapeHTML(n.capabilities.weight_mode)} weights</small></td><td>${gib(n.capabilities.budget_bytes)}</td><td>${(n.cached_models || []).map((m)=>`${escapeHTML(modelLabel(m.model))}<small>${m.layers.length ? `Layers ${escapeHTML(layerRanges(m.layers))}` : "Partial cache"} · ${m.tensor_count} tensors</small>`).join('<br>') || '—'}</td><td>${badge(n.status)}${n.total_bytes ? `<small>${gib(n.downloaded_bytes)} / ${gib(n.total_bytes)}</small><progress value="${Number(n.downloaded_bytes)}" max="${Number(n.total_bytes)}"></progress>`:''}${n.tensor ? `<small>${escapeHTML(n.tensor)}</small>`:''}${n.error ? `<small>${escapeHTML(n.error)}</small>`:''}</td><td><button data-logs="${escapeHTML(n.node_id)}">View logs</button>${!n.connected ? `<button data-remove-node="${escapeHTML(n.node_id)}">Remove node</button>` : ''}</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">No nodes registered. Connect a node to contribute compute.</div>';
   $("requests-table").innerHTML = metrics.recent.length ? `<table><thead><tr><th>REQUEST</th><th>MODEL</th><th>STATUS</th><th>TOKENS IN / OUT</th><th>DURATION</th></tr></thead><tbody>${metrics.recent.map((r)=>`<tr><td><code>${escapeHTML(r.id.slice(0,20))}…</code><small>${new Date(r.created*1000).toLocaleString()}</small></td><td>${escapeHTML(r.model)}</td><td>${badge(r.status)}${r.error ? `<small>${escapeHTML(r.error)}</small>`:''}</td><td>${r.input_tokens} / ${r.output_tokens}</td><td>${r.duration.toFixed(2)}s</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">Requests appear here when you use an inference endpoint.</div>';
 }
