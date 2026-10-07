@@ -2,6 +2,26 @@
 
 One model, many machines. Soul splits an LLM into contiguous decoder stages on a star network: nodes connect outward to a small controller, which accepts API requests and routes activations through the stages.
 
+## Join the community
+
+Contribute your machine's compute by running this command in a terminal:
+
+```sh
+curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh | bash
+```
+
+The installer detects **Apple Silicon macOS** or **Linux x86_64/ARM64**, selects CPU, Metal, or a compatible NVIDIA CUDA profile, and installs Python and the locked agent dependencies for your user. No Git checkout, existing Python installation, or `sudo` is needed. It immediately starts the agent and connects to **[the Soul community](https://mastrogiovanni.ddns.net/soul)** using the built-in enrollment token `your-node-enrollment-token`; there are no credentials to fill in.
+
+**Keep the terminal open to contribute.** Press `Ctrl+C` to stop. Restart the installed agent with:
+
+```sh
+~/.local/share/soul/bin/soul-node
+```
+
+The agent uses your machine's memory and disk to serve assigned model layers. No inbound ports are needed. NVIDIA machines need a working driver; native Windows and Intel Macs are unsupported by this installer. See **[installation options, resource limits, updates, and troubleshooting](docs/install.md)**. To experiment locally instead, use the [local demo](#local-demo).
+
+## About Soul
+
 **This is an executable phase-1 inference implementation, not a training system.** It runs real transformer layers and node-local KV caches. The controller never loads model weights or imports PyTorch. The admin console is included, with no frontend build step.
 
 ![Soul admin console](docs/admin-console.jpg)
@@ -21,7 +41,7 @@ One model, many machines. Soul splits an LLM into contiguous decoder stages on a
 
 **Model support is explicit:** unquantized safetensors checkpoints with Transformers `model_type` **`llama`, `mistral`, `qwen2`, or `qwen3`**, using their standard tensor layout. Examples include Llama-family models, SmolLM2, Qwen2.5, and Qwen3 dense models. A repository's `model_type` is authoritative, not its marketing name. MoE variants, Gemma, GPT-2, multimodal models, Mamba/hybrid models, custom remote code, GGUF, and prequantized checkpoints require additional adapters. Unsupported models fail clearly; Soul does **not** claim arbitrary Hugging Face compatibility.
 
-## Quick start
+## Local demo
 
 Install [uv](https://docs.astral.sh/uv/getting-started/installation/) 0.9 or newer. From this checkout:
 
@@ -226,6 +246,7 @@ src/soul/catalog.py    pinned model metadata and strict range reader
 src/soul/planner.py    contiguous placement planner
 src/soul/protocol.py   MessagePack framing and protocol version
 src/soul/demo.py       three-process, zero-download demo
+install.sh            system-aware community agent installer (curl | bash)
 examples/             optional real Hugging Face smoke test
 tests/               numerical, protocol, and network integration tests
 pyproject.toml       uv project, node profiles, development dependency group

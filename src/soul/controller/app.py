@@ -10,7 +10,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from soul.controller.api import error_body, respond
@@ -18,6 +18,7 @@ from soul.controller.engine import Engine
 from soul.controller.registry import Peer
 from soul.controller.schemas import AnthropicRequest, ChatRequest, CompletionRequest, LoadRequest
 from soul.controller.store import Store
+from soul.installation import agent_source_archive, installer_file
 from soul.protocol import VERSION, SoulError, pack, unpack
 
 log = logging.getLogger("soul.controller")
@@ -170,6 +171,18 @@ def create_app(settings: Settings):
     @app.get("/", include_in_schema=False)
     async def index():
         return FileResponse(static / "index.html")
+
+    @app.get("/install.sh", include_in_schema=False)
+    def installer():
+        return FileResponse(installer_file("install.sh"), media_type="text/plain")
+
+    @app.get("/install/agent.tar.gz", include_in_schema=False)
+    def agent_source():
+        return Response(
+            agent_source_archive(),
+            media_type="application/gzip",
+            headers={"Content-Disposition": 'attachment; filename="soul-agent.tar.gz"'},
+        )
 
     @app.get("/healthz")
     async def health():

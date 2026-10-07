@@ -71,6 +71,13 @@ explicit = true
 [tool.hatch.build.targets.wheel]
 packages = ["src/soul"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"install.sh" = "soul/_installer/install.sh"
+"pyproject.toml" = "soul/_installer/pyproject.toml"
+"uv.lock" = "soul/_installer/uv.lock"
+"README.md" = "soul/_installer/README.md"
+".python-version" = "soul/_installer/.python-version"
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

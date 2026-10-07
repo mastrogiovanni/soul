@@ -4,7 +4,7 @@ WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 ENV PATH="/app/.venv/bin:$PATH"
 ENV CONTEXT_ROOT=/soul HF_HOME=/data/huggingface PYTHONDONTWRITEBYTECODE=1
-COPY pyproject.toml uv.lock .python-version README.md ./
+COPY pyproject.toml uv.lock .python-version README.md install.sh ./
 COPY src ./src
 RUN uv sync --locked --no-dev --no-editable --no-cache \
     && groupadd --gid 1000 soul \

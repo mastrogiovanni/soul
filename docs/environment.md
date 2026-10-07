@@ -1,5 +1,7 @@
 # Python environments with uv
 
+**Joining the community?** Use the [one-command agent installer](install.md): it detects your system, installs Python and the appropriate dependencies, and connects to the community controller. The instructions below are for working from a checkout or running your own network.
+
 Soul is a packaged uv project. Run commands from the repository root so uv can find `pyproject.toml`, `uv.lock`, and `.python-version`. The project supports Python 3.11–3.13 and selects Python 3.12 by default. uv creates `.venv` and downloads Python if a suitable interpreter is unavailable. No manual activation is necessary.
 
 ## Install uv
