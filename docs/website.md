@@ -10,6 +10,8 @@ python3 -m http.server 4173 --directory site
 
 Open `http://localhost:4173`. The gallery supports keyboard navigation and Escape; copy buttons select the command when clipboard permission is unavailable. Installation, inference instructions, and links also work without JavaScript. Layouts support small screens and reduced-motion preferences.
 
+When changing `styles.css`, update its version query in `site/index.html` so returning visitors fetch the new stylesheet immediately after deployment.
+
 ## Publishing
 
 The current GitHub plan does not allow Pages on this private repository. A public, site-only repository, `mastrogiovanni/soul-community`, serves Pages from the root of its `main` branch. The application repository stays private.
