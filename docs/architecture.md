@@ -42,7 +42,7 @@ The controller relays **hidden activations**, not KV tensors. KV is neither the 
 1. On an explicit admin preload, resolve the repository revision to a commit SHA. Read config, generation config, and safetensors index; persist these in the model catalog.
 2. Read only each shard's 8-byte header length and JSON tensor header using HTTP Range.
 3. Record exact dtype, shape, shard filename, absolute offset, and byte length for each tensor.
-4. Ask eligible nodes for their cost matrices, choose contiguous ranges, then send immutable assignment metadata.
+4. Ask eligible nodes for their cost matrices, choose at most one contiguous range per node, then send immutable assignment metadata. Preparation maximizes covered layers, then minimizes missing bytes and node count. Partial plans may skip layers when a full model cannot fit (including oversized edge stages); inference still requires complete contiguous coverage.
 5. Nodes fetch only tensor bytes belonging to their assigned range, plus edge tensors where needed. Tied embeddings are copied to both edge nodes when those edges live on separate devices.
 6. Write each tensor as an atomic, valid safetensors file. Check local SHA-256 on cache reuse and repair incomplete/corrupt files. This checksum detects local cache corruption; upstream identity comes from the pinned commit, validated ranges and HTTPS, not an independently verified per-tensor Hub checksum.
 
@@ -50,7 +50,7 @@ Range requests must return an exact `206 Content-Range`; the reader refuses a se
 
 Each node writes a model manifest beside the per-tensor cache before the first download. On connection it scans these manifests, checks tensor checksums and the local tokenizer, and reports its verified inventory plus per-model memory/missing-byte offers. Interrupted downloads preserve completed tensors. Preload stores tokenizer resources inside the model cache; inference loads them with `local_files_only=True`. The node's `load` RPC refuses missing or corrupt tensors instead of downloading them.
 
-The persistent catalog is independent of transient GPU deployments. A background reconciler refreshes offers and prepares missing shards after connection changes and offline-node removal. Preload and reconciliation acquire the generation lock, keeping placement changes outside active requests. Models can coexist on disk; runtime rotation still keeps one model stage per node in device memory. `/v1/models` calculates executable cached coverage on connected nodes, including endpoint tensors and tokenizer availability, and does not advertise incomplete deployments.
+The persistent catalog is independent of transient GPU deployments. A background reconciler refreshes offers and prepares missing shards after connection changes and offline-node removal, even if only a partial placement fits. Capacity-only shortfalls produce successful partial preloads with a warning; transfer failures remain errors. The admin view counts unique verified tensor payloads on connected compatible nodes, separately from executable placement, so gaps and offline caches do not imply readiness. Preload and reconciliation acquire the generation lock, keeping placement changes outside active requests. Models can coexist on disk; runtime rotation still keeps one model stage per node in device memory. `/v1/models` calculates executable cached coverage on connected nodes, including endpoint tensors and tokenizer availability, and does not advertise incomplete deployments.
 
 ## Stage adapter
 

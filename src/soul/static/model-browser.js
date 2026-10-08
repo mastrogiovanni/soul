@@ -57,7 +57,7 @@ async function connect() {
   } catch (error) { notice(error.message); $("auth-panel").hidden = false; }
 }
 function showDetails(data) {
-  $("detail-body").innerHTML = `<span class="badge supported">Supported · layout verified</span><dl><dt>Architecture / format</dt><dd>${esc(data.architecture)} / ${esc(data.quantization)}</dd><dt>Revision</dt><dd>${esc(data.revision.slice(0, 12))}</dd><dt>Layers / configured context</dt><dd>${data.layers} / ${data.context.toLocaleString()} tokens</dd><dt>Weight memory · FP16 nodes</dt><dd>${gib(data.weight_bytes_fp16)}</dd><dt>Weight memory · FP32 nodes</dt><dd>${gib(data.weight_bytes_fp32)}</dd><dt>Checkpoint tensor download</dt><dd>${gib(data.download_bytes)}</dd><dt>Compatible connected nodes</dt><dd>${data.compatible_nodes}</dd></dl><p>${esc(data.reason)}</p>${data.compatible_nodes ? "" : '<p>Connect updated nodes before preparing. Compatibility does not guarantee sufficient memory.</p>'}`;
+  $("detail-body").innerHTML = `<span class="badge supported">Supported · layout verified</span><dl><dt>Architecture / format</dt><dd>${esc(data.architecture)} / ${esc(data.quantization)}</dd><dt>Revision</dt><dd>${esc(data.revision.slice(0, 12))}</dd><dt>Layers / configured context</dt><dd>${data.layers} / ${data.context.toLocaleString()} tokens</dd><dt>Weight memory · FP16 nodes</dt><dd>${gib(data.weight_bytes_fp16)}</dd><dt>Weight memory · FP32 nodes</dt><dd>${gib(data.weight_bytes_fp32)}</dd><dt>Checkpoint tensor download</dt><dd>${gib(data.download_bytes)}</dd><dt>Compatible connected nodes</dt><dd>${data.compatible_nodes}</dd></dl><p>${esc(data.reason)}</p><p>Prepare now to download the shards that fit. If capacity is insufficient, Soul keeps the model with a warning and distributes missing pieces automatically when compatible nodes join.</p>`;
   $("prepare-form").hidden = false;
 }
 async function check(model) {
@@ -97,8 +97,8 @@ $("prepare-form").onsubmit = async event => {
   const model = selected.model; preparing = true; $("prepare-submit").disabled = true;
   $("detail-body").textContent = `Preparing ${model}. Follow download progress in the control room.`;
   try {
-    await api(`/admin/models/${$("prepare-action").value}`, {method:"POST", body:JSON.stringify({model, revision:selected.revision})});
-    $("detail-body").textContent = `${model} is prepared and available for inference. Open the control room and choose “Use model” for connection instructions.`;
+    const result = await api(`/admin/models/${$("prepare-action").value}`, {method:"POST", body:JSON.stringify({model, revision:selected.revision})});
+    $("detail-body").textContent = result.executable || result.status === "ready" ? `${model} is prepared and available for inference. Open the control room and choose “Use model” for connection instructions.` : `${model}: ${result.distribution?.cached_layers || 0} / ${result.layers} layers cached. ${result.warning} Open the control room to track distribution or choose “Distribute missing” after freeing capacity.`;
     $("prepare-form").hidden = true;
   } catch (error) { $("detail-body").textContent = error.message; }
   finally { preparing = false; $("prepare-submit").disabled = false; }

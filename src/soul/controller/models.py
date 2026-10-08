@@ -104,7 +104,7 @@ class Models:
             return self.remember(spec)
         return self.records[model]
 
-    def placements(self, model, *, cached_only):
+    def placements(self, model, *, cached_only, partial=False):
         spec = self.engine.specs.get(model)
         if not spec or not self.allowed(model):
             raise SoulError("Model has not been preloaded", 404, "model_not_preloaded")
@@ -134,7 +134,37 @@ class Models:
         candidates = []
         for options in (offers, ordered):
             with contextlib.suppress(SoulError):
-                candidates.append(plan(spec.layers, options, self.engine.max_layers_per_node))
+                candidates.append(
+                    plan(spec.layers, options, self.engine.max_layers_per_node, partial=partial)
+                )
+        if partial and not cached_only:
+            # New nodes may belong before, between, or after cached stages. Fill
+            # gaps around a feasible cached placement as an additional candidate,
+            # avoiding a capacity sort that would needlessly shift every shard.
+            cached = self.placements(model, cached_only=True, partial=True)
+            used = {a.node_id for a in cached}
+            covered = [0] * spec.layers
+            for assignment in cached:
+                covered[assignment.start : assignment.end] = [1] * (assignment.end - assignment.start)
+            prefix = [0]
+            for count in covered:
+                prefix.append(prefix[-1] + count)
+            remaining = [
+                {
+                    **offer,
+                    "costs": [
+                        [
+                            cost if prefix[start + i + 1] == prefix[start] else float("inf")
+                            for i, cost in enumerate(row)
+                        ]
+                        for start, row in enumerate(offer["costs"])
+                    ],
+                }
+                for offer in offers
+                if offer["node_id"] not in used
+            ]
+            additions = plan(spec.layers, remaining, self.engine.max_layers_per_node, partial=True)
+            candidates.append(sorted(cached + additions, key=lambda a: a.start))
         if not candidates:
             quantization_hint = (
                 " Quantized models require updated nodes with the matching format capability."
@@ -151,6 +181,7 @@ class Models:
         return min(
             candidates,
             key=lambda assignments: (
+                -sum(a.end - a.start for a in assignments),
                 sum(by_id[a.node_id]["missing_bytes"][a.start][a.end - a.start - 1] for a in assignments),
                 len(assignments),
             ),
@@ -162,6 +193,40 @@ class Models:
         except SoulError:
             return None
 
+    def distribution(self, spec):
+        """Unique verified payload coverage on connected, compatible nodes.
+
+        Disk coverage does not imply that a memory-feasible pipeline exists:
+        endpoint tensors may need replication, and each stage must fit one node.
+        """
+        names, nodes, tokenizer = set(), 0, False
+        for peer in self.engine.nodes.values():
+            entry = peer.inventory.get(spec.key)
+            if not peer.connected or not entry or not supports(peer.capabilities, spec):
+                continue
+            cached = set(entry["tensors"]) & spec.tensors.keys()
+            names.update(cached)
+            tokenizer |= bool(entry.get("tokenizer"))
+            nodes += bool(cached or entry.get("tokenizer"))
+        lengths = {name: tensor["length"] for name, tensor in spec.tensors.items()}
+        total = sum(lengths.values())
+        cached_bytes = sum(lengths[name] for name in names)
+        layers = [set() for _ in range(spec.layers)]
+        for name in spec.tensors:
+            if name.startswith("model.layers."):
+                layers[int(name.split(".")[2])].add(name)
+        return {
+            "cached_layers": sum(bool(layer) and layer <= names for layer in layers),
+            "total_layers": spec.layers,
+            "cached_tensors": len(names),
+            "total_tensors": len(lengths),
+            "cached_bytes": cached_bytes,
+            "total_bytes": total,
+            "missing_bytes": total - cached_bytes,
+            "tokenizer_cached": tokenizer,
+            "nodes": nodes,
+        }
+
     def views(self):
         result = []
         for model, record in self.records.items():
@@ -172,6 +237,21 @@ class Models:
             status = "ready" if ready else "available" if placement else record["status"]
             if not placement and status in ("ready", "available"):
                 status = "partial"
+            warning = None
+            if not placement:
+                if status == "downloading":
+                    warning = "Downloading assigned tensors. Inference becomes available when the full pipeline fits."
+                elif record.get("error"):
+                    warning = "Distribution interrupted. Cached tensors are kept. Choose Distribute missing to retry; new nodes also trigger a retry."
+                else:
+                    warning = "Waiting for capacity: the full model does not fit the connected nodes' memory, disk space, or stage limits. Cached tensors are kept; missing pieces are distributed automatically when compatible nodes join."
+            assignments = record.get("assignments", [])
+            if spec and not placement and status != "downloading":
+                assignments = (
+                    [asdict(a) for a in self.placements(model, cached_only=True, partial=True)]
+                    if self.allowed(model)
+                    else []
+                )
             result.append(
                 {
                     "model": model,
@@ -183,12 +263,14 @@ class Models:
                     "context": spec.max_context if spec else 0,
                     "status": status,
                     "executable": bool(placement),
-                    "error": record.get("error"),
+                    "error": record.get("error") if not placement else None,
+                    "warning": warning,
+                    "distribution": self.distribution(spec) if spec else None,
                     "assignments": deployment["assignments"]
                     if ready
                     else [asdict(a) for a in placement]
                     if placement
-                    else record.get("assignments", []),
+                    else assignments,
                 }
             )
         return result
@@ -205,7 +287,7 @@ class Models:
         spec = self.engine.specs[model]
         try:
             await self.refresh_offers(spec)
-            assignments = self.placements(model, cached_only=False)
+            assignments = self.placements(model, cached_only=False, partial=True)
             record.update(status="downloading", assignments=[asdict(a) for a in assignments], error=None)
             self.save(record)
             pending = []
@@ -228,8 +310,7 @@ class Models:
             error = next((r for r in results if isinstance(r, BaseException)), None)
             if error:
                 raise error
-            self.placements(model, cached_only=True)
-            record["status"] = "available"
+            record["status"] = "available" if self.executable(model) else "partial"
         except Exception as exc:
             record.update(status="partial", error=str(exc)[:500])
             raise

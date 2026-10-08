@@ -1,5 +1,12 @@
 # Verification record
 
+## Partial model distribution — 2026-10-08
+
+- **Automated suite:** **147 tests passed, 4 CUDA tests skipped** because CUDA was unavailable. New real HTTP/WebSocket tests cover unquantized, AWQ and GPTQ models downloaded across an initially undersized cluster, expansion one node at a time, reuse without redownloading cached stages, inference only after full coverage, offline/reconnecting nodes, no-node persistence, and retained tensors after an interrupted download.
+- **Placement:** regression tests exercise memory and disk limits, maximum layers per node, missing edge-stage capacity, gaps, and reuse of a cached suffix. Strict inference placement still rejects incomplete coverage.
+- **Browser:** an isolated controller under `/soul` and four small CPU nodes verified the preload form, exclamation mark, byte/tensor/layer progress, manual **Distribute missing** retry, and automatic progression from 2/4 to 3/4 to 4/4 cached layers as nodes joined. The warning and pending notice cleared when the model became available. No browser console warnings or errors appeared.
+- **Static checks:** Ruff lint/format, JavaScript syntax and whitespace checks passed. Tests retain existing transport/dependency deprecation warnings. This validates local test models; production-scale checkpoints and physical multi-machine capacity were not benchmarked, and the running production controller was not redeployed.
+
 ## Kubernetes and `/soul` context — 2026-10-07
 
 - **Application tests:** all **48 tests** passed, including mounted-path routing, relative redirects/assets, Swagger/OpenAPI paths, role-specific authentication, and real node WebSockets plus OpenAI streaming/Anthropic requests through a simulated Basic Auth ingress. Three additional deployment-workflow tests passed, covering preflight before build, private/idempotent credential creation, and data-preserving removal.

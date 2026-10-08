@@ -36,10 +36,22 @@ Not supported: GGUF, AWQ GEMV/Marlin, GPTQ v2/Marlin, FP8, bitsandbytes/NF4, mix
 2. **Find a compatible repository.** Examples whose publisher configurations use the supported layouts are [`Qwen/Qwen2.5-7B-Instruct-AWQ`](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-AWQ) and [`Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4`](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4). Choose the full repository ID, including the quantization suffix. No additional AWQ/GPTQ package is needed on nodes.
 3. **Click Check compatibility.** Soul reads the configuration and safetensors headers, not weight payloads. The dialog shows the pinned revision, layers, configured context, weight memory estimates for FP16/FP32 nodes, download size, and count of compatible connected nodes.
 4. **Click Prepare model.** Choose **Preload to disk** to download assigned shards into node caches, or **Preload and load GPU** to also materialize the pipeline. The browser passes the checked commit to preparation. If the controller already knows a different pinned revision of the same model, it rejects the change rather than silently replacing cached weights.
-5. **Wait for available / ready in the control room.** `available` means inference can load the cached model; `ready` means it is already resident. `partial` includes an error describing missing capacity, nodes, or download failures. The weight figures are not total runtime memory: KV cache, workspace, embeddings/head placement, allocator overhead and per-node budgets also matter.
+5. **Follow distribution in the control room.** Soul downloads the shards that fit now, even if the entire model cannot fit yet. A `partial` model has an **!** warning, cached layer/tensor counts and byte progress. It becomes `available` once a complete cached pipeline fits; `ready` means it is already resident. The weight figures are not total runtime memory: KV cache, workspace, embeddings/head placement, allocator overhead and per-node budgets also matter.
 6. **Choose Use model** in the inventory for API/client instructions. Send the exact quantized repository ID as the request's `model`. There is no separate adapter upload or quantization switch.
 
 You can also paste the ID directly into **Preload a model** in the control room. The same compatibility checks run automatically. For gated repositories, accept the publisher's terms in Hugging Face and configure `HF_TOKEN` separately on the controller and each node; the controller does not forward its token to nodes.
+
+## Download now, add capacity later
+
+Choose **Preload to disk** to distribute a supported model across the existing nodes. Each node downloads its assigned tensor ranges directly from the pinned repository into its own disk cache. The controller stores metadata rather than a full copy of the checkpoint. A node must have enough memory for its future inference stage and enough free disk for the missing tensors. Soul can cache middle stages even when an embedding or output stage cannot fit yet.
+
+If the network cannot fit the whole model, preparation still succeeds with `status: "partial"` and `executable: false`. The **Models** panel and pipeline view show an **!** warning and how much is cached on connected, compatible nodes. You can also register a model with no nodes connected; its download will start when capacity joins. No inference requests are accepted until a complete pipeline, including edge tensors and tokenizer, is available.
+
+Connect another compatible node using the control room's **Connect a node** instructions. Joining or reconnecting nodes automatically trigger another distribution pass for registered models. Existing valid tensors are reused; the new placement downloads only tensors missing from its assigned nodes. The warning disappears when the full pipeline fits. If a stage moves to a different node, that node may need its own copy of the tensors. A model that was only preloaded stays on disk until inference or **Load GPU** loads it.
+
+After freeing disk space or changing a node's memory budget, choose **Distribute missing** to retry immediately. Restart a node after changing its launch options. Download failures show a separate error; already completed tensors are kept for the next retry. Both the model intention and node caches survive restarts. Offline nodes' caches are excluded from the connected progress count until they return. Byte progress counts unique checkpoint tensor payloads, not tokenizer files, cache overhead, or replicated edge tensors; 100% cached alone does not guarantee a feasible placement.
+
+**Preload and load GPU** still returns `503 model_not_ready` if the full pipeline cannot fit, but keeps the partial download and registered model for later completion. Use **Preload to disk** when planning ahead. Large downloads share the inference scheduling lock and can delay queued requests.
 
 ## API example
 
@@ -63,6 +75,8 @@ curl --fail-with-body "$SOUL_BASE_URL/admin/models/preload" \
 ```
 
 Omitting `revision` on the first preparation resolves and pins `main`; future preparations reuse the pinned revision. Use `/admin/models/load` instead of `/preload` to load the pipeline immediately. Shared ingress Basic Auth remains separate; retain its normal credentials alongside `X-Soul-Admin-Key`.
+
+`/admin/models/preload` returns HTTP `200` after downloading the currently feasible shards, including when capacity is insufficient. Check `executable`, `warning` and `distribution` in its response or in `/admin/state`; HTTP success alone does not mean the model can run. Transport, access and download failures still return errors.
 
 ## Memory, devices, and verification
 
