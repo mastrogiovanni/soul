@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#142b2b"><title>Soul · Model browser</title>
+  <link rel="stylesheet" href="static/style.css?v=5"><link rel="stylesheet" href="static/model-browser.css?v=1">
+  <script src="static/model-browser.js?v=1" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="./" aria-label="Soul home"><span class="brand-symbol">✳</span> soul<span class="version">0.1</span></a>
+    <div class="workspace"><span class="workspace-icon">S</span><div>Distributed serving<small>Control plane</small></div><span class="workspace-dot"></span></div>
+    <p class="nav-label">WORKSPACE</p>
+    <nav aria-label="Main navigation"><a class="nav-item" href="./"><span>◫</span> Control room</a><a class="nav-item active" href="model-browser" aria-current="page"><span>⌕</span> Model browser</a></nav>
+    <div class="sidebar-bottom"><div class="network-mark"><span></span> One model. Many machines.</div><p>Find a model.<br>Plan your next pipeline.</p><a href="docs" target="_blank" rel="noopener">API reference ↗</a><button id="disconnect" class="sidebar-button">Disconnect console</button></div>
+  </aside>
+  <main>
+    <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span>Model browser</div><a href="./">Back to control room ↗</a></header>
+    <div class="content catalog-content">
+      <section class="page-heading"><div><div class="eyebrow">SOUL / MODEL LIBRARY</div><h1>Find your next model.</h1><p>Search Hugging Face, compare families, and check what your network can run.</p></div><a class="button secondary" href="#adding-models">How to add models ↓</a></section>
+      <div id="notice" class="notice" role="status" hidden></div>
+      <section id="auth-panel" class="auth-panel"><div><h2>Connect to your controller</h2><p>Use your admin key to search and prepare models.</p></div><form id="auth-form"><label class="sr-only" for="admin-key">Admin key</label><input id="admin-key" type="password" placeholder="Admin key" autocomplete="current-password" required><button class="button primary">Connect →</button></form></section>
+      <section class="catalog-support panel" aria-label="Current model support">
+        <div><span class="eyebrow">SUPPORTED FAMILIES</span><h2>Llama · Mistral · Qwen2 · Qwen3 dense</h2><p>Standard safetensors, AWQ GEMM 4-bit, and GPTQ v1 4-bit.</p></div>
+        <div><span class="eyebrow">ARCHITECTURE STILL MATTERS</span><p>Qwen3.5, MoE, vision and hybrid models need additional adapters. GGUF, FP8 and bitsandbytes checkpoints are not supported.</p></div>
+      </section>
+      <section class="panel search-panel" aria-labelledby="search-heading">
+        <h2 id="search-heading">Explore the Hub</h2>
+        <form id="search-form" class="catalog-filters">
+          <label class="search-field">Model name or publisher<input id="search-query" type="search" placeholder="e.g. Qwen2.5, Llama, mistralai…" maxlength="200"></label>
+          <label>Architecture / family<input id="family" list="families" placeholder="All families" maxlength="80" pattern="[a-zA-Z0-9_-]*"><datalist id="families"></datalist></label>
+          <label>Sort by<select id="sort"><option value="downloads">Most downloaded</option><option value="lastModified">Recently updated</option></select></label>
+          <button class="button primary" id="search-submit">Search →</button>
+        </form>
+        <div id="family-shortcuts" class="family-shortcuts" aria-label="Browse common families"></div>
+        <p class="catalog-note">Live results across the Hugging Face catalog, including unsupported models. Family filters use Hub architecture tags; enter any tag, or leave blank to search all families. Private repositories are not listed; use the control room to add one by ID.</p>
+      </section>
+      <div class="results-heading"><p id="results-status" role="status" aria-live="polite">Connect to explore models.</p><label>On this page <select id="support-filter"><option value="all">All compatibility states</option><option value="compatible">Supported candidates &amp; verified</option><option value="unsupported">Unsupported</option><option value="unknown">Not checked</option></select></label></div>
+      <div id="results" class="catalog-grid" aria-busy="false"></div>
+      <nav class="catalog-pagination" aria-label="Search result pages"><button id="previous" class="button secondary" disabled>← Previous</button><span id="page-number">Page 1</span><button id="next" class="button secondary" disabled>Next →</button></nav>
+      <section id="adding-models" class="panel catalog-guide" aria-labelledby="guide-title">
+        <div class="eyebrow">FROM SEARCH TO INFERENCE</div><h2 id="guide-title">How to add a quantized model</h2>
+        <ol><li><strong>Choose a supported checkpoint.</strong> Start with <button class="inline-link" data-example="Qwen/Qwen2.5-7B-Instruct-AWQ">Qwen/Qwen2.5-7B-Instruct-AWQ</button> or <button class="inline-link" data-example="Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4">Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4</button>. The repository must contain standard safetensors and declare the supported format in its configuration.</li><li><strong>Update and connect your nodes.</strong> Both the controller and nodes need this Soul version. Older nodes cannot serve quantized checkpoints. For gated models, accept the publisher’s license and set <code>HF_TOKEN</code> on the controller and each node.</li><li><strong>Select “Check compatibility”.</strong> Soul reads configuration and tensor headers without downloading the model weights. Review the format, weight memory estimates, context limit and compatible node count.</li><li><strong>Select “Prepare model”.</strong> Choose “Preload to disk” or “Preload and load GPU”. Soul pins the checked revision and downloads only each node’s assigned tensors. Follow downloads in the control room; “available” means ready for inference from cache.</li><li><strong>Use the exact repository ID in API requests.</strong> Open “Use model” in the control room for connection instructions. No separate adapter upload or quantization flag is needed.</li></ol>
+        <details><summary>Formats, memory and performance</summary><p>AWQ requires 4-bit AutoAWQ GEMM packing with zero points. GPTQ requires the 4-bit v1 layout, including group indices; activation ordering is supported. GEMV, Marlin, GPTQ v2, mixed-bit settings and quantized output heads are not supported.</p><p>Packed weights stay compressed in memory. Small blocks are expanded during computation using PyTorch. This saves weight memory and works with resident or streamed layers, but may be slower than unquantized models or specialized GPU engines. Embeddings, the output head, activations and KV cache remain floating point. Memory estimates are lower bounds; preparation checks actual node budgets.</p><p>The portable adapter uses the existing CPU, CUDA and Metal runtime. Numerical tests cover CPU, with Metal and CUDA checks when those devices are available. Device-specific performance and capacity depend on your hardware.</p></details>
+      </section>
+      <footer class="page-footer"><span><b>✳</b> Soul distributed serving</span><span>Compatibility is checked against this controller’s adapters.</span></footer>
+    </div>
+  </main>
+  <dialog id="model-dialog" aria-labelledby="detail-title">
+    <div class="dialog-heading"><h2 id="detail-title">Check compatibility</h2><button type="button" id="close-detail" class="close" aria-label="Close">×</button></div>
+    <p id="detail-model"></p><div id="detail-body" role="status" aria-live="polite"></div>
+    <form id="prepare-form" hidden><label for="prepare-action">Preparation</label><select id="prepare-action"><option value="preload">Preload to disk</option><option value="load">Preload and load GPU</option></select><button id="prepare-submit" class="button primary full">Prepare model →</button></form>
+    <a class="text-button" href="./">Open control room for placement and download progress ↗</a>
+  </dialog>
+</body>
+</html>

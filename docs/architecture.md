@@ -58,6 +58,8 @@ The current adapter targets the shared `model.embed_tokens`, `model.layers`, `mo
 
 Every new architecture needs more than a class name in the allowlist: verify scaling at the embedding boundary, residual state, extra conditioning inputs, sliding/linear attention, cache layout, tensor names, and tied parameters. Extend the adapter and add full-vs-sharded prefill/decode equivalence tests. Tensor-parallel collectives and expert routing are different decomposition strategies.
 
+AWQ GEMM 4-bit and GPTQ v1 4-bit checkpoints use the same stage topology. `quantization.py` validates configurations and packed tensor dimensions without importing PyTorch. Nodes replace converted projections with `PackedLinear`, preserving integer buffers and dequantizing 128 output columns at a time using PyTorch. GPTQ uses saved group indices (including activation ordering); AWQ uses its interleaved output packing. Streaming hooks include packed buffers. Capability negotiation requires `awq-gemm-4` or `gptq-4` in the node's `quantizations` list, so older nodes never receive quantized assignments. No full floating-point model is materialized.
+
 ## Autoregressive execution
 
 Tokenize on the first stage, validate context, prefill in chunks of at most 128 tokens, then decode one token per pipeline traversal. Each chunk carries the same session ID, deployment epoch and absolute token position through all stages. A node checks the expected next position before touching its cache. A stage forwards a contiguous `[1, tokens, hidden_size]` tensor. The final node samples only the last position. Additional prefill chunks do not sample tokens.
@@ -75,6 +77,8 @@ For each candidate contiguous range, a node estimates:
 `KV_per_layer = 2 × kv_heads × head_dim × max_context × element_size`
 
 `resident_weight_bytes` is the sum of that range's layer weights in resident mode, or the largest layer in stream mode, plus embeddings/head/norm as applicable. Workspace accounts for chunked attention, MLP temporaries, and a minimum 256 MiB reserve. Sliding-window KV is conservatively charged as a full context.
+
+Quantized offers charge int32 packed weights, zero points and group indices at four bytes per stored element, and floating tensors at the node's dtype. Additional workspace conservatively reserves 32 bytes per element of the largest dequantization tile. Quantization does not reduce KV cache or activation memory. The browser's weight figures exclude workspace, KV cache and placement overhead; preparing a model still requires viable per-node offers.
 
 The planner uses dynamic programming across contiguous intervals, permitting skipped nodes and minimizing download bytes before stage count. The controller considers budget order and cached-layer order and checks free disk against missing tensor bytes. It does not optimize all node permutations: unusual asymmetries may require adjusting node budgets/order or a future permutation-aware planner. Disk estimates exclude filesystem overhead and external concurrent writes; failures remain explicit. Raw byte estimates cannot perfectly predict allocator fragmentation, concurrent external workloads or backend kernels. OOM is an explicit failed request, never silently approximated computation.
 

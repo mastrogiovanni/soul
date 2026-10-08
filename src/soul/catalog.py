@@ -11,7 +11,14 @@ from pathlib import Path
 import httpx
 from huggingface_hub import HfApi, get_token, hf_hub_download, hf_hub_url
 
-from soul.protocol import ARCHITECTURES, SoulError
+from soul.protocol import SoulError
+from soul.quantization import (
+    DEQUANT_BLOCK,
+    quantization_format,
+    quantized_modules,
+    validate_config,
+    validate_tensor_layout,
+)
 
 DTYPE_BYTES = {
     "F64": 8,
@@ -41,6 +48,22 @@ class ModelSpec:
         return self.config["num_hidden_layers"]
 
     @property
+    def quantization(self):
+        return quantization_format(self.config)
+
+    def tensor_bytes(self, name, element_size):
+        tensor = self.tensors[name]
+        size = 4 if name.endswith((".qweight", ".qzeros", ".g_idx")) else element_size
+        return math.prod(tensor["shape"]) * size
+
+    def quantization_workspace(self):
+        modules = quantized_modules(self.config, self.tensors)
+        # Integer unpacking, grouped zeros/scales, float tiles and matmul temporaries.
+        return max(
+            (inputs * min(outputs, DEQUANT_BLOCK) * 32 for inputs, outputs in modules.values()), default=0
+        )
+
+    @property
     def key(self):
         return hashlib.sha256(f"{self.model_id}@{self.revision}".encode()).hexdigest()[:24]
 
@@ -64,7 +87,7 @@ class ModelSpec:
         return names
 
     def weight_bytes(self, start, end, element_size):
-        return sum(math.prod(self.tensors[n]["shape"]) * element_size for n in self.names_for(start, end))
+        return sum(self.tensor_bytes(n, element_size) for n in self.names_for(start, end))
 
     def kv_per_layer(self, element_size):
         c = self.config
@@ -194,12 +217,7 @@ def inspect_model(
             files = ["model.safetensors"]
         else:
             raise SoulError("A standard safetensors checkpoint is required", 400, "unsupported_model")
-    if config.get("model_type") not in ARCHITECTURES or config.get("quantization_config"):
-        raise SoulError(
-            f"Supported unquantized architectures: {', '.join(ARCHITECTURES)}. An adapter is required for this model.",
-            400,
-            "unsupported_model",
-        )
+    validate_config(config)
     if not 1 <= config.get("num_hidden_layers", 0) <= 512:
         raise SoulError("Invalid layer count", 400, "unsupported_model")
     reader = RangeReader(model_id, revision)
@@ -215,5 +233,6 @@ def inspect_model(
         )
     if "lm_head.weight" not in tensors and not config.get("tie_word_embeddings", False):
         raise SoulError("Checkpoint is missing its output head", 400, "unsupported_model")
+    validate_tensor_layout(config, tensors)
     context = min(max_context, config.get("max_position_embeddings", max_context))
     return ModelSpec(model_id, revision, config, tensors, context, generation_config)

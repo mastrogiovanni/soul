@@ -47,7 +47,11 @@ The agent uses your machine's memory and disk to serve assigned model layers. No
 - An admin UI for model placement, cached layers, offline-node removal, download progress, logs, queue state, request outcomes, and cumulative counters persisted in SQLite.
 - `make up` deployment to the shared spesa-style Kind/Contour cluster, with HTTPS at `/soul`, persistent controller data and generated credentials.
 
-**Model support is explicit:** unquantized safetensors checkpoints with Transformers `model_type` **`llama`, `mistral`, `qwen2`, or `qwen3`**, using their standard tensor layout. Examples include Llama-family models, SmolLM2, Qwen2.5, and Qwen3 dense models. A repository's `model_type` is authoritative, not its marketing name. MoE variants, Gemma, GPT-2, multimodal models, Mamba/hybrid models, custom remote code, GGUF, and prequantized checkpoints require additional adapters. Unsupported models fail clearly; Soul does **not** claim arbitrary Hugging Face compatibility.
+**Model support is explicit:** standard safetensors checkpoints with Transformers `model_type` **`llama`, `mistral`, `qwen2`, or `qwen3`**, either unquantized, **AWQ GEMM 4-bit**, or **GPTQ v1 4-bit**. Examples include Llama-family models, SmolLM2, Qwen2.5, and Qwen3 dense models. Packed weights stay compressed on disk and in device memory; a portable PyTorch adapter expands small blocks during computation. This reduces weight memory but is not an optimized quantized inference kernel and can be slower. Both resident and disk-streamed layers are supported.
+
+Open **Model browser** in the admin sidebar (controller URL + `/model-browser`) to search the live Hugging Face catalog by model name or architecture, see unsupported families and formats, check checkpoint layouts and memory estimates, and prepare a pinned revision. Read **[how to add quantized models](docs/models.md)** for examples and update instructions.
+
+A repository's `model_type` is authoritative, not its marketing name. Qwen3.5, MoE variants, Gemma, GPT-2, multimodal models, Mamba/hybrid models, custom remote code, GGUF, FP8, bitsandbytes, AWQ GEMV/Marlin, and GPTQ v2 require additional adapters. Quantization does not add architecture support. Unsupported models fail clearly; Soul does **not** claim arbitrary Hugging Face compatibility.
 
 ## Local demo
 

@@ -43,12 +43,12 @@ class BasicIngress:
         await self.app(scope, receive, send)
 
 
-def make_model(directory, architecture="llama", layers=4, tied=False):
+def make_model(directory, architecture="llama", layers=4, tied=False, hidden_size=32):
     torch.manual_seed(42)
     config = CONFIGS[architecture](
         vocab_size=32,
-        hidden_size=32,
-        intermediate_size=64,
+        hidden_size=hidden_size,
+        intermediate_size=hidden_size * 2,
         num_hidden_layers=layers,
         num_attention_heads=4,
         num_key_value_heads=2,
@@ -58,7 +58,7 @@ def make_model(directory, architecture="llama", layers=4, tied=False):
         bos_token_id=1,
         eos_token_id=2,
         pad_token_id=0,
-        head_dim=8,
+        head_dim=hidden_size // 4,
     )
     config._attn_implementation = "sdpa"
     model = AutoModelForCausalLM.from_config(config).eval()

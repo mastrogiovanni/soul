@@ -119,3 +119,4 @@ class AnthropicRequest(Common):
 
 class LoadRequest(StrictModel):
     model: str = Field(min_length=1, max_length=512)
+    revision: str | None = Field(default=None, min_length=1, max_length=128)

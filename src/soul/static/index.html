@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#142b2b"><title>Soul · Control room</title>
-  <link rel="stylesheet" href="static/style.css?v=4"><script src="static/app.js?v=4" defer></script>
+  <link rel="stylesheet" href="static/style.css?v=5"><script src="static/app.js?v=5" defer></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -13,6 +13,7 @@
     <nav aria-label="Main navigation">
       <button class="nav-item active" data-tab="overview"><span>◫</span> Overview</button>
       <button class="nav-item" data-tab="models"><span>▧</span> Models <b id="model-count">0</b></button>
+      <a class="nav-item" href="model-browser"><span>⌕</span> Model browser</a>
       <button class="nav-item" data-tab="nodes"><span>⌘</span> Nodes <b id="node-count">0</b></button>
       <button class="nav-item" data-tab="requests"><span>↗</span> Requests</button>
     </nav>
@@ -45,7 +46,7 @@
       <footer class="page-footer"><span><b>✳</b> Soul distributed serving</span><span id="updated">Waiting for controller</span></footer>
     </div>
   </main>
-  <dialog id="load-dialog"><form id="load-form"><div class="dialog-heading"><h2>Prepare a model</h2><button type="button" class="close" data-close="load-dialog" aria-label="Close">×</button></div><p>Download model shards to your nodes before sending inference requests. Cached models remain available when another model uses the GPU.</p><label for="model-id">Hugging Face model ID</label><input id="model-id" placeholder="Qwen/Qwen2.5-0.5B-Instruct" required><label for="model-action">Preparation</label><select id="model-action"><option value="preload">Preload to disk</option><option value="load">Preload and load GPU</option></select><div class="form-hint">Supports unquantized Llama, Mistral, Qwen2 and Qwen3 safetensors checkpoints. Gated models require HF_TOKEN on the controller and nodes.</div><button class="button primary full" id="load-submit">Prepare model →</button></form></dialog>
+  <dialog id="load-dialog"><form id="load-form"><div class="dialog-heading"><h2>Prepare a model</h2><button type="button" class="close" data-close="load-dialog" aria-label="Close">×</button></div><p>Download model shards to your nodes before sending inference requests. Cached models remain available when another model uses the GPU.</p><label for="model-id">Hugging Face model ID</label><input id="model-id" placeholder="Qwen/Qwen2.5-0.5B-Instruct" required><label for="model-action">Preparation</label><select id="model-action"><option value="preload">Preload to disk</option><option value="load">Preload and load GPU</option></select><div class="form-hint">Supports Llama, Mistral, Qwen2 and Qwen3 dense safetensors: unquantized, AWQ GEMM 4-bit or GPTQ v1 4-bit. Quantized models require updated nodes. Gated models require HF_TOKEN on the controller and nodes. <a href="model-browser#adding-models">Browse models and read the setup guide ↗</a></div><button class="button primary full" id="load-submit">Prepare model →</button></form></dialog>
   <dialog id="logs-dialog"><div class="dialog-heading"><h2 id="logs-title">Node logs</h2><button class="close" data-close="logs-dialog" aria-label="Close">×</button></div><p>Latest 300 events received in this controller session. Full rolling logs remain on the node.</p><pre id="logs-output">Loading…</pre></dialog>
   <dialog id="join-dialog"><div class="dialog-heading"><h2>Connect a node</h2><button class="close" data-close="join-dialog" aria-label="Close">×</button></div><p>Install <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener">uv 0.9 or newer</a>, then run these commands in a copy of this project.</p><label for="join-profile">Node hardware</label><select id="join-profile"><option value="node">Mac (Metal) or CPU</option><option value="node-cu126">NVIDIA · CUDA 12.6</option><option value="node-cu128">NVIDIA · CUDA 12.8</option><option value="node-cu129">NVIDIA · CUDA 12.9</option></select><pre id="join-command"></pre><div class="form-hint">For NVIDIA, choose a CUDA version supported by your GPU and driver; check nvidia-smi on the node. Use your node token, not the admin key. Each node needs its own cache directory.</div><a href="docs" target="_blank" rel="noopener" class="text-button">Explore the API ↗</a></dialog>
   <dialog id="use-dialog" aria-labelledby="use-title"><div class="dialog-heading"><h2 id="use-title">Use model</h2><button type="button" class="close" data-close="use-dialog" aria-label="Close">×</button></div>

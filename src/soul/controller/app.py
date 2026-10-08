@@ -8,12 +8,13 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from soul.controller.api import error_body, respond
+from soul.controller.browser import ModelBrowser, support_matrix
 from soul.controller.engine import Engine
 from soul.controller.registry import Peer
 from soul.controller.schemas import AnthropicRequest, ChatRequest, CompletionRequest, LoadRequest
@@ -148,6 +149,7 @@ def create_app(settings: Settings):
         store.close()
 
     app = FastAPI(title="Soul distributed serving", version="0.1.0", lifespan=lifespan)
+    browser = ModelBrowser()
     app.add_middleware(GuardMiddleware, settings=settings)
     static = Path(__file__).resolve().parents[1] / "static"
     app.mount("/static", StaticFiles(directory=static), name="static")
@@ -171,6 +173,10 @@ def create_app(settings: Settings):
     @app.get("/", include_in_schema=False)
     async def index():
         return FileResponse(static / "index.html")
+
+    @app.get("/model-browser", include_in_schema=False)
+    async def model_browser():
+        return FileResponse(static / "model-browser.html")
 
     @app.get("/install.sh", include_in_schema=False)
     def installer():
@@ -217,6 +223,23 @@ def create_app(settings: Settings):
     async def state(request: Request):
         return request.app.state.engine.snapshot()
 
+    @app.get("/admin/catalog/support")
+    async def catalog_support():
+        return support_matrix()
+
+    @app.get("/admin/catalog/search")
+    async def catalog_search(
+        q: str = Query(default="", max_length=200),
+        family: str = Query(default="", max_length=80, pattern=r"^[a-zA-Z0-9_-]*$"),
+        cursor: str = Query(default="", max_length=16384),
+        sort: str = Query(default="downloads", pattern=r"^(downloads|lastModified)$"),
+    ):
+        return await browser.search(q, family, cursor, sort)
+
+    @app.post("/admin/catalog/check")
+    async def catalog_check(body: LoadRequest, request: Request):
+        return await browser.check(request.app.state.engine, body.model, body.revision or "main")
+
     @app.get("/admin/nodes/{node_id}/logs")
     async def logs(node_id: str, request: Request):
         node = request.app.state.engine.nodes.get(node_id)
@@ -230,11 +253,11 @@ def create_app(settings: Settings):
 
     @app.post("/admin/models/preload")
     async def preload(body: LoadRequest, request: Request):
-        return await request.app.state.engine.models.preload(body.model)
+        return await request.app.state.engine.models.preload(body.model, body.revision)
 
     @app.post("/admin/models/load")
     async def load(body: LoadRequest, request: Request):
-        return await request.app.state.engine.load_model(body.model)
+        return await request.app.state.engine.load_model(body.model, body.revision)
 
     @app.post("/admin/models/unload")
     async def unload(body: LoadRequest, request: Request):

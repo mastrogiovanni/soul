@@ -10,6 +10,7 @@ from pathlib import Path
 from soul.catalog import ModelSpec, inspect_model
 from soul.planner import plan
 from soul.protocol import ARCHITECTURES, SoulError
+from soul.quantization import supports
 
 log = logging.getLogger("soul.models")
 
@@ -80,11 +81,18 @@ class Models:
         self.save(record)
         return record
 
-    async def register(self, model):
+    async def register(self, model, revision=None):
         if not self.allowed(model):
             raise SoulError("Model is not in the controller allowlist", 403, "model_not_allowed")
+        existing = self.engine.specs.get(model)
+        if revision and existing and revision != existing.revision:
+            raise SoulError(
+                "This model is already pinned to a different revision on this controller.",
+                409,
+                "revision_conflict",
+            )
         if model not in self.engine.specs:
-            revision = self.records.get(model, {}).get("revision", "main")
+            revision = revision or self.records.get(model, {}).get("revision", "main")
             try:
                 spec = await asyncio.to_thread(
                     inspect_model, model, revision, self.engine.max_context, self.engine.allow_local
@@ -103,11 +111,7 @@ class Models:
         offers = []
         for peer in self.engine.nodes.values():
             entry = peer.inventory.get(spec.key)
-            if (
-                not peer.connected
-                or not entry
-                or spec.config["model_type"] not in peer.capabilities.get("architectures", [])
-            ):
+            if not peer.connected or not entry or not supports(peer.capabilities, spec):
                 continue
             offer = entry.get("offer", {})
             if offer.get("context") != spec.max_context:
@@ -132,9 +136,14 @@ class Models:
             with contextlib.suppress(SoulError):
                 candidates.append(plan(spec.layers, options, self.engine.max_layers_per_node))
         if not candidates:
+            quantization_hint = (
+                " Quantized models require updated nodes with the matching format capability."
+                if spec.quantization != "none"
+                else ""
+            )
             raise SoulError(
                 "Model is not executable: insufficient connected memory, disk space, or cached layers. "
-                "Preload the model or connect more nodes.",
+                "Preload the model or connect more nodes." + quantization_hint,
                 503,
                 "model_not_ready",
             )
@@ -169,6 +178,7 @@ class Models:
                     "revision": record.get("revision", ""),
                     "created": record["created"],
                     "architecture": spec.config["model_type"] if spec else "unknown",
+                    "quantization": spec.quantization if spec else "unknown",
                     "layers": spec.layers if spec else 0,
                     "context": spec.max_context if spec else 0,
                     "status": status,
@@ -184,11 +194,7 @@ class Models:
         return result
 
     async def refresh_offers(self, spec):
-        peers = [
-            p
-            for p in self.engine.nodes.values()
-            if p.connected and spec.config["model_type"] in p.capabilities.get("architectures", [])
-        ]
+        peers = [p for p in self.engine.nodes.values() if p.connected and supports(p.capabilities, spec)]
         await asyncio.gather(
             *(p.call("offer", {"spec": spec.to_dict()}, timeout=self.engine.rpc_timeout) for p in peers),
             return_exceptions=True,
@@ -231,9 +237,9 @@ class Models:
             self.save(record)
         return next(v for v in self.views() if v["model"] == model)
 
-    async def preload(self, model):
+    async def preload(self, model, revision=None):
         async with self.engine.gate:
-            record = await self.register(model)
+            record = await self.register(model, revision)
             return await self.prepare(record)
 
     def wake(self):

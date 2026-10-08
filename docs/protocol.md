@@ -7,7 +7,7 @@ All node traffic goes through an outward WebSocket connection to `<controller-ba
 Node → controller:
 
 ```json
-{"type":"hello","version":2,"node_id":"persistent-uuid","name":"mac-studio","capabilities":{"device":"mps","device_name":"Apple Metal (unified memory)","budget_bytes":12884901888,"dtype":"float16","architectures":["llama","mistral","qwen2","qwen3"],"weight_mode":"resident","ram_bytes":34359738368},"inventory":[]}
+{"type":"hello","version":2,"node_id":"persistent-uuid","name":"mac-studio","capabilities":{"device":"mps","device_name":"Apple Metal (unified memory)","budget_bytes":12884901888,"dtype":"float16","architectures":["llama","mistral","qwen2","qwen3"],"quantizations":["awq-gemm-4","gptq-4"],"weight_mode":"resident","ram_bytes":34359738368},"inventory":[]}
 ```
 
 Controller → node: `{"type":"welcome","version":2,"generation":"connection-uuid"}`.

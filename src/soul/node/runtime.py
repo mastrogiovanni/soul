@@ -13,8 +13,10 @@ from torch import nn
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer, DynamicCache
 
 from soul.catalog import ModelSpec
+from soul.node.quantized import PackedLinear
 from soul.node.weights import WeightStore
 from soul.protocol import ARCHITECTURES, SoulError
+from soul.quantization import QUANTIZATIONS, quantized_modules, validate_config
 
 WIRE_DTYPES = {"float32": torch.float32, "float16": torch.float16, "bfloat16": torch.bfloat16}
 
@@ -133,11 +135,13 @@ class Runtime:
             "budget_bytes": self.budget,
             "dtype": str(self.dtype).removeprefix("torch."),
             "architectures": list(ARCHITECTURES),
+            "quantizations": list(QUANTIZATIONS),
             "weight_mode": self.weight_mode,
             "ram_bytes": psutil.virtual_memory().total,
         }
 
     def offer(self, spec: ModelSpec):
+        validate_config(spec.config)
         if spec.key not in self.cached:
             # Adopts tensor caches written by protocol-v1 clients as well.
             WeightStore(self.cache_dir, spec).remember()
@@ -148,7 +152,7 @@ class Runtime:
         element = torch.empty((), dtype=self.dtype).element_size()
         layer_bytes = [
             sum(
-                math.prod(t["shape"]) * element
+                spec.tensor_bytes(n, element)
                 for n, t in spec.tensors.items()
                 if n.startswith(f"model.layers.{i}.")
             )
@@ -163,6 +167,7 @@ class Runtime:
             8 * chunk * spec.config.get("intermediate_size", 4 * spec.config["hidden_size"]) * element
             + spec.config["num_attention_heads"] * chunk * spec.max_context * 4,
         )
+        workspace += spec.quantization_workspace()
         costs, missing_bytes = [], []
         for start in range(spec.layers):
             row, missing = [], []
@@ -215,6 +220,7 @@ class Runtime:
             self.store.require(spec.names_for(start, end))
         data = dict(spec.config)
         model_type = data.pop("model_type")
+        data.pop("quantization_config", None)
         config = AutoConfig.for_model(model_type, **data)
         config._attn_implementation = "sdpa"
         # Build only shape metadata before discarding every unassigned parameter.
@@ -235,8 +241,32 @@ class Runtime:
             model.lm_head = nn.Identity()
         # Rotary buffers are derived, non-persistent, and must be recreated off meta.
         model.model.rotary_emb = type(model.model.rotary_emb)(config=config, device=torch.device(self.device))
+        for prefix, (inputs, outputs) in quantized_modules(spec.config, spec.tensors).items():
+            global_index = int(prefix.split(".")[2])
+            if not start <= global_index < end:
+                continue
+            local = re.sub(r"^model\.layers\.\d+", f"model.layers.{global_index - start}", prefix)
+            original = model.get_submodule(local)
+            packed = {
+                suffix: spec.tensors[prefix + "." + suffix]
+                for suffix in ("qweight", "qzeros", "scales", "g_idx")
+                if prefix + "." + suffix in spec.tensors
+            }
+            parent, attr = local.rsplit(".", 1)
+            setattr(
+                model.get_submodule(parent),
+                attr,
+                PackedLinear(
+                    inputs,
+                    outputs,
+                    spec.quantization,
+                    spec.config["quantization_config"]["group_size"],
+                    packed,
+                    original.bias is not None,
+                ),
+            )
         self.model = model
-        for name, _ in list(model.named_parameters(remove_duplicate=False)):
+        for name in self._weight_names(model):
             if self.weight_mode == "stream" and name.startswith("model.layers."):
                 continue
             self._assign(name)
@@ -244,7 +274,7 @@ class Runtime:
             for index, layer in enumerate(model.model.layers):
 
                 def load_layer(module, args, i=index):
-                    for name, _ in list(module.named_parameters()):
+                    for name in self._weight_names(module):
                         self._assign(f"model.layers.{i}.{name}")
 
                 def release_layer(module, args, output):
@@ -259,6 +289,14 @@ class Runtime:
             )
         self.epoch = epoch
 
+    @staticmethod
+    def _weight_names(module):
+        return [name for name, _ in module.named_parameters(remove_duplicate=False)] + [
+            name
+            for name, _ in module.named_buffers()
+            if name.endswith((".qweight", ".qzeros", ".scales", ".g_idx"))
+        ]
+
     def _assign(self, name):
         source = re.sub(r"^model\.layers\.(\d+)\.", lambda m: f"model.layers.{int(m[1]) + self.start}.", name)
         if source == "lm_head.weight" and source not in self.spec.tensors:
@@ -266,11 +304,15 @@ class Runtime:
         if source not in self.spec.tensors:
             raise SoulError(f"Adapter cannot load required tensor {source}", 400, "unsupported_model")
         parent, attr = name.rsplit(".", 1)
-        setattr(
-            self.model.get_submodule(parent),
-            attr,
-            nn.Parameter(self.store.tensor(source, self.device, self.dtype), requires_grad=False),
-        )
+        module = self.model.get_submodule(parent)
+        integer = attr in ("qweight", "qzeros", "g_idx")
+        tensor = self.store.tensor(source, self.device, torch.int32 if integer else self.dtype)
+        if attr == "g_idx" and (int(tensor.min()) < 0 or int(tensor.max()) >= module.scales.shape[0]):
+            raise SoulError(f"Invalid GPTQ group indices: {source}", 400, "unsupported_model")
+        if attr in module._buffers:
+            setattr(module, attr, tensor)
+        else:
+            setattr(module, attr, nn.Parameter(tensor, requires_grad=False))
 
     def check(self, epoch):
         if self.model is None or epoch != self.epoch:

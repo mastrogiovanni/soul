@@ -194,8 +194,8 @@ class Engine:
             self.store.save("deployments", model_id, deployment)
         return deployment
 
-    async def load_model(self, model):
-        await self.models.preload(model)
+    async def load_model(self, model, revision=None):
+        await self.models.preload(model, revision)
         async with self.gate:
             return await self.ensure_model(model)
 

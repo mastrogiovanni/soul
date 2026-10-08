@@ -14,9 +14,12 @@ For a shared ingress requiring HTTP Basic Auth, retain its `Authorization: Basic
 | `POST /v1/completions` | One string prompt, nonstream/stream |
 | `POST /v1/messages` | Anthropic text messages/system, nonstream/stream |
 | `GET /admin/state` | Nodes, model assignments, metrics, recent requests, queue |
+| `GET /admin/catalog/support` | Supported formats and common architecture families |
+| `GET /admin/catalog/search` | Live Hub search: `q`, architecture tag `family`, `sort=downloads\|lastModified`, opaque `cursor`; 24 results per page |
+| `POST /admin/catalog/check` | `{"model":"owner/repo","revision":"optional-commit"}`; read-only checkpoint validation, pinned revision and weight memory estimates |
 | `GET /admin/nodes/{id}/logs` | Recent node events |
 | `DELETE /admin/nodes/{id}` | Forget an offline node and schedule repair; `409` for a connected node |
-| `POST /admin/models/preload` | `{"model":"owner/repo"}`; inspect, persist catalog entry, place and download shards to disk |
+| `POST /admin/models/preload` | `{"model":"owner/repo","revision":"optional-commit"}`; inspect, persist catalog entry, place and download shards to disk |
 | `POST /admin/models/load` | Same body; preload then materialize the model on GPUs |
 | `POST /admin/models/unload` | `{"model":"owner/repo"}`; releases a ready deployment |
 | `WS /internal/nodes` | Authenticated MessagePack node channel |
@@ -28,6 +31,8 @@ Authentication: `Authorization: Bearer <SOUL_API_KEY>`.
 `GET /v1/models` and its `/models` alias use the inference key. They list every known model with a complete cached placement that fits currently connected nodes, including models not resident in GPU memory. Incomplete/offline models remain visible through `/admin/state`. The list is derived from fresh connection inventories and node offers, not merely old deployment records.
 
 Preload requires the admin key, waits for downloads, and returns a model record with `status`, `executable`, and `assignments`. `available` means executable from disk; `ready` means already loaded into a live GPU pipeline. `partial` means missing shards or capacity; `error` describes the latest preparation failure. A failed preload retains its pinned catalog entry. Joining, disconnected, and removed nodes trigger background reconciliation; retry explicitly with the same preload endpoint after fixing a download or disk-space problem. Unloading GPU weights retains cached availability and does not cancel catalog membership.
+
+The admin model records also expose `quantization` (`none`, `awq-gemm-4`, or `gptq-4`). Quantized models use the same preparation and inference APIs; see [supported layouts and setup](models.md). Catalog search includes unsupported models and provides reasons. A `candidate` search result confirms configuration compatibility only; `/admin/catalog/check` additionally validates tensor metadata without registering the model. Checking does not download weight payloads or reserve capacity. An explicit preparation revision that conflicts with an already registered revision returns `409 revision_conflict`.
 
 Inference on an unknown model returns `404 model_not_preloaded`. A known model lacking a usable cached placement returns `503 model_not_ready`. Requests never initiate tensor downloads. The first request for an available model may still load cached weights into device memory.
 
