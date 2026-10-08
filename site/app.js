@@ -1,4 +1,17 @@
-"use strict";
+import { getMessages } from "./i18n.mjs?v=20261008-languages";
+
+const messages = getMessages(document.documentElement.lang);
+
+// Real links also work without JavaScript. Enhancement keeps the current section.
+function updateLanguageLinks() {
+  document.querySelectorAll("[data-language-link]").forEach((link) => {
+    const destination = new URL(link.href);
+    destination.hash = window.location.hash;
+    link.href = destination.href;
+  });
+}
+updateLanguageLinks();
+window.addEventListener("hashchange", updateLanguageLinks);
 
 // All interactions are local: no analytics, form collection, or credentials.
 const statusMessage = document.querySelector("#copy-status");
@@ -19,7 +32,7 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
     const source = document.getElementById(button.dataset.copy);
     try {
       await navigator.clipboard.writeText(source.textContent.trim());
-      announce(button.dataset.copyMessage || "Copied. Paste into your terminal when you’re ready.");
+      announce(button.dataset.copyMessage || messages.copied);
     } catch {
       // Keep the text usable when clipboard permission is unavailable.
       const selection = window.getSelection();
@@ -27,7 +40,7 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
       range.selectNodeContents(source);
       selection.removeAllRanges();
       selection.addRange(range);
-      announce("Text selected. Use your device’s Copy action to copy it.");
+      announce(messages.copyFallback);
     }
   });
 });

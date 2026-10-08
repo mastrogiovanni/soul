@@ -2,7 +2,7 @@
 
 Public website: **https://mastrogiovanni.github.io/soul-community/**
 
-The source of truth is `site/` in this repository. It is a standalone static site with no build dependencies, tracking, data collection, or embedded credentials. Preview it with:
+The published files are in `site/`. Italian is the default at the main URL; English is available at `https://mastrogiovanni.github.io/soul-community/en/`. Both are static HTML with shared assets, no tracking, data collection, or embedded credentials. Preview it with:
 
 ```sh
 python3 -m http.server 4173 --directory site
@@ -10,7 +10,23 @@ python3 -m http.server 4173 --directory site
 
 Open `http://localhost:4173`. The gallery supports keyboard navigation and Escape; copy buttons select the command when clipboard permission is unavailable. Installation, inference instructions, and links also work without JavaScript. Layouts support small screens and reduced-motion preferences.
 
-When changing `styles.css`, update its version query in `site/index.html` so returning visitors fetch the new stylesheet immediately after deployment.
+## Languages and editing
+
+The IT / EN switch stays visible on small screens. Both language links work without JavaScript; with JavaScript, switching preserves the current section anchor. The language comes from the URL, not browser preferences or stored settings, so the main address always opens in Italian. Each page has its own document language, canonical address, localized social metadata, and reciprocal `hreflang` links.
+
+Edit the shared layout and English content in `site/en/index.html`. Italian text lives in `website/locales/it.json`, keyed by normalized English phrases. Generate the Italian homepage after editing either source:
+
+```sh
+python3 scripts/build-site-locales.py
+python3 scripts/build-site-locales.py --check
+node --test tests/site/*.test.mjs
+```
+
+The generator uses only the Python standard library and fails on any missing translation. It translates visible text, accessible names, image descriptions, metadata, copy messages, and human-readable API example comments while keeping commands, API fields, model IDs, and model facts intact. Commit the generated `site/index.html` together with its sources. CI and the publisher check that the Italian HTML is current. The committed pages need no build step on GitHub Pages.
+
+Dynamic calculator and clipboard messages live in `site/i18n.mjs`; Italian uses decimal commas and English uses decimal points. Gallery captions use the translated HTML. The language changes only the community website; the separately hosted controller and external model cards keep their own languages.
+
+When changing shared CSS or JavaScript, update the version queries in the English page and any relevant module imports, then regenerate Italian. Relative assets use `../` in English and resolve from the root in Italian. Do not edit the generated Italian HTML directly.
 
 ## Publishing
 
@@ -62,4 +78,4 @@ The catalog and model-card links remain readable without JavaScript; calculator/
 
 ## Verification
 
-Before publishing, inspect desktop and mobile layouts, follow the section links, open every gallery image, verify next/previous/Escape controls, copy the install and API commands, expand FAQ/installation details, and check for horizontal overflow and browser errors. For the model explorer, change both memory inputs and precision, try the presets and filters, check invalid/zero-capacity states, and verify the layout on narrow screens. Check the public installer and controller links independently; publishing this static site does not deploy the controller.
+Before publishing, inspect both languages on desktop and mobile, verify switching in both directions retains a section anchor, check Italian calculator/clipboard messages and translated metadata, follow the section links, open every gallery image, verify next/previous/Escape controls, copy the install and API commands, expand FAQ/installation details, and check for horizontal overflow and browser errors. For the model explorer, change both memory inputs and precision, try the presets and filters, check invalid/zero-capacity states, and verify the layout on narrow screens. Check the public installer and controller links independently; publishing this static site does not deploy the controller.

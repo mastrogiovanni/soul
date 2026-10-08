@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#1d332b" />
+    <meta
+      name="description"
+      content="Soul aims to make large language models easier to access for communities and nonprofits through shared compute, accepting higher latency for batch and background work."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Soul — Great minds. Shared machines." />
+    <meta
+      property="og:description"
+      content="Shared AI for communities and nonprofits. Less setup, shared compute, and useful work that can wait: email processing, invoice analysis, reporting, and more."
+    />
+    <meta
+      property="og:image"
+      content="https://mastrogiovanni.github.io/soul-community/assets/network.jpg"
+    />
+    <meta
+      property="og:url"
+      content="https://mastrogiovanni.github.io/soul-community/en/"
+    />
+    <link
+      rel="canonical"
+      href="https://mastrogiovanni.github.io/soul-community/en/"
+    />
+    <link rel="alternate" hreflang="it" href="https://mastrogiovanni.github.io/soul-community/" />
+    <link rel="alternate" hreflang="en" href="https://mastrogiovanni.github.io/soul-community/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://mastrogiovanni.github.io/soul-community/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="it_IT" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../styles.css?v=20261008-languages" />
+    <script type="module" src="../app.js?v=20261008-languages"></script>
+    <script type="module" src="../model-explorer.js?v=20261008-languages"></script>
+    <title>Soul — Great minds. Shared machines.</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="Soul home"
+        ><svg viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 3v34M3 20h34M8 8l24 24M8 32 32 8" /></svg
+        >soul<span class="brand-note">THE COMMUNITY NETWORK</span></a
+      >
+      <nav aria-label="Main navigation">
+        <a href="#network">Why join</a><a href="#how-it-works">How it works</a
+        ><a href="#use-cases">Use cases</a><a href="#models">Models</a>
+      </nav>
+      <div class="header-actions">
+        <div class="language-switch" role="group" aria-label="Site language">
+          <a href="../" data-language-link lang="it" hreflang="it" aria-label="Italiano">IT</a>
+          <a href="./" data-language-link lang="en" hreflang="en" aria-label="English" aria-current="page">EN</a>
+        </div>
+        <a class="button button-small" href="#join"
+          >Join the network <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <img
+          class="hero-art"
+          src="../assets/network.jpg"
+          width="1536"
+          height="1024"
+          alt=""
+          fetchpriority="high"
+        />
+        <div class="hero-shade"></div>
+        <div class="hero-content">
+          <p class="eyebrow">
+            <span class="little-star" aria-hidden="true">✳</span> COMPUTE IS
+            BETTER TOGETHER
+          </p>
+          <h1 id="hero-title">Great minds.<br />Shared <em>machines.</em></h1>
+          <p class="hero-description">
+            Help communities and nonprofit organizations use large language
+            models with less effort. Share compute and accept longer waits for
+            useful work that can happen in the background.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-lime" href="#join"
+              >Find your place in the network
+              <span aria-hidden="true">↗</span></a
+            ><a class="text-link" href="#how-it-works"
+              >See how it works <span aria-hidden="true">↓</span></a
+            >
+          </div>
+          <div class="hero-note">
+            <span class="dot"></span> One model. Many machines. Built together.
+          </div>
+        </div>
+        <div class="art-caption">
+          A vision of shared compute <span>01 / SOUL</span>
+        </div>
+      </section>
+
+      <div class="compatibility" aria-label="Compatible hardware">
+        <span
+          >Different machines.<br /><strong>One shared purpose.</strong></span
+        >
+        <p><span aria-hidden="true">⌘</span> Apple Silicon</p>
+        <p><span aria-hidden="true">▧</span> NVIDIA on Linux</p>
+        <p><span aria-hidden="true">▤</span> Linux CPU</p>
+        <a href="#requirements"
+          >Find your fit <span aria-hidden="true">↗</span></a
+        >
+      </div>
+
+      <section class="section" id="network" aria-labelledby="network-title">
+        <div class="section-heading">
+          <p class="eyebrow">01 / AI IN SERVICE OF COMMUNITIES</p>
+          <div class="heading-row">
+            <h2 id="network-title">
+              A little of your compute.<br />A lot more <em>possibility.</em>
+            </h2>
+            <p>
+              Soul’s aim is to make large language models accessible to
+              communities and nonprofit organizations with little setup effort.
+              Shared infrastructure helps lower the barrier to getting started;
+              higher and variable latency is a tradeoff we accept.
+            </p>
+          </div>
+        </div>
+        <div class="benefit-grid">
+          <article class="benefit">
+            <span class="benefit-icon" aria-hidden="true">↗</span
+            ><span class="index">01</span>
+            <h3>Build with real inference.</h3>
+            <p>
+              Use community-prepared language models through familiar OpenAI-
+              and Anthropic-compatible APIs. Bring them into your experiments,
+              tools, and background workflows that can deliver results later.
+            </p>
+            <a href="#inference"
+              >Explore inference access <span aria-hidden="true">↗</span></a
+            >
+          </article>
+          <article class="benefit">
+            <span class="benefit-icon" aria-hidden="true">⊞</span
+            ><span class="index">02</span>
+            <h3>Make room for more.</h3>
+            <p>
+              Pool memory across connected machines. Different computers can
+              hold different layers, helping the network serve models that may
+              not fit on one contributor’s device.
+            </p>
+            <a href="#models"
+              >Explore models that could fit <span aria-hidden="true">↗</span></a
+            >
+          </article>
+          <article class="benefit">
+            <span class="benefit-icon" aria-hidden="true">✳</span
+            ><span class="index">03</span>
+            <h3>Help the network recover.</h3>
+            <p>
+              More available machines give the controller more places to rebuild
+              missing model stages. Your contribution can help restore capacity
+              when another node goes offline.
+            </p>
+            <a href="#network-faq"
+              >Understand resilience <span aria-hidden="true">↗</span></a
+            >
+          </article>
+        </div>
+        <aside class="growth-note">
+          <span class="little-star" aria-hidden="true">✳</span>
+          <p>
+            <strong>More of us. More potential.</strong> More capable hardware
+            and cached model layers can reduce preparation time and improve
+            service capacity. Actual speed depends on the model, machines, and
+            network; adding nodes does not guarantee faster responses.
+          </p>
+        </aside>
+      </section>
+
+      <section
+        class="how-section"
+        id="how-it-works"
+        aria-labelledby="how-title"
+      >
+        <div class="how-copy">
+          <p class="eyebrow">02 / ONE CONNECTED SYSTEM</p>
+          <h2 id="how-title">Your machine.<br />A bigger <em>picture.</em></h2>
+          <p>
+            Soul splits a language model into stages. Your node runs its
+            assigned layers, while a lightweight controller connects the stages
+            and serves the inference API.
+          </p>
+          <ol class="simple-steps">
+            <li>
+              <span>01</span>
+              <div>
+                <h3>You connect.</h3>
+                <p>
+                  The agent makes an outbound connection to the community
+                  controller. No inbound ports to open.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span>02</span>
+              <div>
+                <h3>The network shares the work.</h3>
+                <p>
+                  Nodes download their assigned model tensors and contribute
+                  memory and computation.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span>03</span>
+              <div>
+                <h3>Ideas become answers.</h3>
+                <p>
+                  The controller routes requests through the model’s stages and
+                  streams generated text to the caller.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <div
+          class="network-diagram"
+          role="img"
+          aria-label="An inference client connects to one Soul controller. Three compute nodes connect to that controller and run successive groups of model layers. Nodes do not connect directly to one another."
+        >
+          <div class="diagram-label">
+            THE SOUL NETWORK <span>ILLUSTRATED</span>
+          </div>
+          <div class="client-chip">Your app <span>↕</span> Inference API</div>
+          <div class="diagram-wire"></div>
+          <div class="controller-symbol">
+            <span aria-hidden="true">✳</span>
+          </div>
+          <strong class="controller-label">Soul controller</strong
+          ><span class="controller-subtitle">One place to connect</span>
+          <svg
+            class="network-wires"
+            viewBox="0 0 440 92"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path d="M220 0V32M64 92V32H376V92M220 32V92" />
+          </svg>
+          <div class="diagram-nodes">
+            <div>
+              <span class="node-icon" aria-hidden="true">⌘</span
+              ><strong>Your Mac</strong><small>Model stage 1</small>
+            </div>
+            <div>
+              <span class="node-icon" aria-hidden="true">▧</span
+              ><strong>A GPU node</strong><small>Model stage 2</small>
+            </div>
+            <div>
+              <span class="node-icon" aria-hidden="true">▤</span
+              ><strong>A Linux node</strong><small>Model stage 3</small>
+            </div>
+          </div>
+          <p class="diagram-footer">
+            <span class="dot"></span> Separate machines. Shared model capacity.
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="section use-cases-section"
+        id="use-cases"
+        aria-labelledby="use-cases-title"
+      >
+        <div class="section-heading">
+          <p class="eyebrow">03 / MADE FOR WORK THAT CAN WAIT</p>
+          <div class="heading-row">
+            <h2 id="use-cases-title">
+              Less busywork.<br />More time for your <em>mission.</em>
+            </h2>
+            <p>
+              Some answers are useful even when they arrive later. Soul is
+              intended for batch systems and background processes whose value
+              does not depend on a real-time response.
+            </p>
+          </div>
+        </div>
+        <div class="use-cases-grid">
+          <article class="use-case">
+            <span class="case-number">01 / INBOX</span>
+            <h3>Email processing</h3>
+            <p>
+              Sort incoming messages by topic, summarize long threads, and
+              prepare reply drafts for volunteers to review when they next
+              check the shared inbox.
+            </p>
+          </article>
+          <article class="use-case">
+            <span class="case-number">02 / ADMINISTRATION</span>
+            <h3>Invoice analysis</h3>
+            <p>
+              Turn extracted invoice text into draft records of suppliers,
+              amounts, dates, and expense categories for a treasurer to check
+              before entering them in the accounts.
+            </p>
+          </article>
+          <article class="use-case">
+            <span class="case-number">03 / OPERATIONS</span>
+            <h3>Process improvement</h3>
+            <p>
+              Review activity notes and recurring support requests to spot
+              repeated steps, slow handoffs, and opportunities to simplify
+              everyday work for the team.
+            </p>
+          </article>
+          <article class="use-case">
+            <span class="case-number">04 / FUNDING</span>
+            <h3>Grant opportunity summaries</h3>
+            <p>
+              Summarize public funding calls, pull out deadlines and application
+              requirements, and prepare a reading list for the next fundraising
+              meeting.
+            </p>
+          </article>
+          <article class="use-case">
+            <span class="case-number">05 / COLLABORATION</span>
+            <h3>Meeting follow-ups</h3>
+            <p>
+              Turn existing meeting notes or transcripts into draft minutes,
+              decisions, and action lists, ready for the coordinator to review
+              and share later.
+            </p>
+          </article>
+          <article class="use-case">
+            <span class="case-number">06 / OUTREACH</span>
+            <h3>Multilingual communication</h3>
+            <p>
+              Prepare translation drafts and plain-language versions of event
+              announcements, newsletters, and volunteer guides for people to
+              review before publication.
+            </p>
+          </article>
+          <article class="use-case">
+            <span class="case-number">07 / SHARED KNOWLEDGE</span>
+            <h3>A more useful document archive</h3>
+            <p>
+              Summarize and suggest topic tags for extracted text from older
+              reports, guides, and project notes, helping volunteers find useful
+              information in the organization’s existing archive.
+            </p>
+          </article>
+          <article class="use-case">
+            <span class="case-number">08 / LISTENING</span>
+            <h3>Community feedback digests</h3>
+            <p>
+              Group anonymized survey comments and event feedback into themes,
+              recurring questions, and suggestions for the team’s next
+              planning session.
+            </p>
+          </article>
+          <article class="use-case">
+            <span class="case-number">09 / REPORTING</span>
+            <h3>Impact report drafts</h3>
+            <p>
+              Bring together program updates and volunteer activity notes into
+              a draft monthly narrative, with the team checking the facts and
+              figures before it goes to supporters.
+            </p>
+          </article>
+        </div>
+        <aside class="workflow-note">
+          <div>
+            <h3>Collect the work. Process it in the background. Review it later.</h3>
+            <p>
+              These are workflow ideas you can build with Soul. Your application
+              or automation tool handles scheduling, text extraction, retries,
+              and saving results; Soul provides the language-model inference.
+              Completion time depends on the model and available network capacity.
+            </p>
+          </div>
+          <a class="text-link" href="#inference">
+            Connect your workflow <span aria-hidden="true">↗</span>
+          </a>
+        </aside>
+      </section>
+
+      <section class="section models-section" id="models" aria-labelledby="models-title">
+        <div class="section-heading">
+          <p class="eyebrow">MODEL EXPLORER / PLAN WHAT’S POSSIBLE</p>
+          <div class="heading-row">
+            <h2 id="models-title">What could we run<br /><em>together?</em></h2>
+            <p>Explore models available to download, then estimate which could fit
+              the memory your network contributes. A few more machines can open
+              up more possibilities.</p>
+          </div>
+        </div>
+        <div class="model-planner">
+          <form id="network-estimate" class="network-estimate" aria-describedby="estimate-help">
+            <fieldset disabled>
+              <legend>Imagine your network</legend>
+              <p id="estimate-help">Use a rough average. Enter memory dedicated to Soul,
+                not the machine’s total RAM or GPU memory.</p>
+              <div class="network-inputs">
+                <label for="network-machines">Contributing machines
+                  <input id="network-machines" type="number" min="0" max="1000" step="1" value="4" required inputmode="numeric" />
+                </label>
+                <label for="network-memory">Memory per machine <span>(GiB)</span>
+                  <input id="network-memory" type="number" min="1" max="1024" step="0.25" value="8" required inputmode="decimal" />
+                </label>
+                <label for="network-precision">Hardware / weight precision
+                  <select id="network-precision">
+                    <option value="4">CPU or mixed · 32-bit</option>
+                    <option value="2">GPU / Apple Metal · 16-bit</option>
+                  </select>
+                </label>
+              </div>
+              <div class="network-presets" aria-label="Example networks">
+                <span>Try a network</span>
+                <button type="button" data-network-preset data-machines="4" data-memory="8" aria-pressed="true">4 × 8 GiB</button>
+                <button type="button" data-network-preset data-machines="8" data-memory="16" aria-pressed="false">8 × 16 GiB</button>
+                <button type="button" data-network-preset data-machines="32" data-memory="16" aria-pressed="false">32 × 16 GiB</button>
+              </div>
+              <p id="estimate-error" class="estimate-error" role="status" hidden>Enter 0–1,000 whole machines and 1–1,024 GiB per machine, in steps of 0.25 GiB.</p>
+            </fieldset>
+          </form>
+          <div class="network-total" aria-live="polite" aria-atomic="true">
+            <p class="eyebrow">YOUR ESTIMATED SHARED MEMORY</p>
+            <p class="capacity-number"><strong id="network-capacity">—</strong> <span>GiB</span></p>
+            <p id="capacity-description">Enable JavaScript to calculate an estimate.</p>
+            <p id="fit-summary">Compare one model at a time.</p>
+            <span class="scenario-label">Illustrative scenario · not live network data</span>
+          </div>
+        </div>
+        <noscript><p class="model-notice">The catalog below works without JavaScript. Enable JavaScript for the local memory calculator and filters.</p></noscript>
+        <div class="model-catalog-heading">
+          <div><h3>A model for your next idea.</h3><p>Curated candidates, not a list of models currently installed.</p></div>
+          <a class="text-link" href="#inference">See live availability with your API key <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="model-filters">
+          <label for="model-search">Find a model
+            <input id="model-search" type="search" placeholder="Search name or family…" disabled />
+          </label>
+          <label class="model-fit-toggle"><input type="checkbox" id="model-fit-only" disabled /> Only likely to fit</label>
+          <p id="model-result-count" role="status">9 models in the catalog</p>
+        </div>
+        <table class="model-table" role="table" aria-label="Downloadable model candidates and estimated memory fit" aria-describedby="model-estimate-note">
+          <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">MODEL / PARAMETERS</th><th role="columnheader" scope="col">MEMORY ESTIMATE</th><th role="columnheader" scope="col">YOUR NETWORK</th></tr></thead>
+          <tbody role="rowgroup">
+              <tr role="row" data-model="Qwen/Qwen2.5-0.5B-Instruct" data-parameters="494032768" data-architecture="qwen2" data-revision="7ae557604adf67be50417f59c2c2f167def9a775">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct">Qwen2.5-0.5B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>A small starting point for labels and short drafts.</p>
+                  <div class="model-meta"><span>0.49B parameters · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-0" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-0.5B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-0">Qwen/Qwen2.5-0.5B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="HuggingFaceTB/SmolLM2-1.7B-Instruct" data-parameters="1711376384" data-architecture="llama" data-revision="31b70e2e869a7173562077fd711b654946d38674">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct">SmolLM2-1.7B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>Try rewriting and summarizing short English text.</p>
+                  <div class="model-meta"><span>1.71B parameters · llama</span>
+                    <button class="model-copy" data-copy="model-id-1" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for SmolLM2-1.7B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-1">HuggingFaceTB/SmolLM2-1.7B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen2.5-3B-Instruct" data-parameters="3085938688" data-architecture="qwen2" data-revision="aa8e72537993ba99e69dfaafa59ed015b17504d1">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-3B-Instruct">Qwen2.5-3B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>Explore email triage and everyday summaries.</p>
+                  <div class="model-meta"><span>3.09B parameters · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-2" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-3B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-2">Qwen/Qwen2.5-3B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="mistralai/Mistral-7B-Instruct-v0.3" data-parameters="7248023552" data-architecture="mistral" data-revision="c170c708c41dac9275d15a8fff4eca08d52bab71">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3">Mistral-7B-Instruct-v0.3 <span aria-hidden="true">↗</span></a>
+                  <p>Explore document summaries and draft responses.</p>
+                  <div class="model-meta"><span>7.25B parameters · mistral</span>
+                    <button class="model-copy" data-copy="model-id-3" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Mistral-7B-Instruct-v0.3">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-3">mistralai/Mistral-7B-Instruct-v0.3</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen2.5-7B-Instruct" data-parameters="7615616512" data-architecture="qwen2" data-revision="a09a35458c702b33eeacc393d103063234e8bc28">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct">Qwen2.5-7B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>Try structured extraction and community report drafts.</p>
+                  <div class="model-meta"><span>7.62B parameters · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-4" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-7B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-4">Qwen/Qwen2.5-7B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen3-8B" data-parameters="8190735360" data-architecture="qwen3" data-revision="b968826d9c46dd6066d109eabc6255188de91218">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-8B">Qwen3-8B <span aria-hidden="true">↗</span></a>
+                  <p>Explore reasoning tasks and document workflows.</p>
+                  <div class="model-meta"><span>8.19B parameters · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-5" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-8B">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-5">Qwen/Qwen3-8B</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen3-14B" data-parameters="14768307200" data-architecture="qwen3" data-revision="40c069824f4251a91eefaf281ebe4c544efd3e18">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-14B">Qwen3-14B <span aria-hidden="true">↗</span></a>
+                  <p>Room to experiment with more involved analysis.</p>
+                  <div class="model-meta"><span>14.77B parameters · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-6" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-14B">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-6">Qwen/Qwen3-14B</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen3-32B" data-parameters="32762123264" data-architecture="qwen3" data-revision="9216db5781bf21249d130ec9da846c4624c16137">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-32B">Qwen3-32B <span aria-hidden="true">↗</span></a>
+                  <p>A larger candidate for multi-step reasoning workflows.</p>
+                  <div class="model-meta"><span>32.76B parameters · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-7" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-32B">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-7">Qwen/Qwen3-32B</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+              <tr role="row" data-model="Qwen/Qwen2.5-72B-Instruct" data-parameters="72706203648" data-architecture="qwen2" data-revision="495f39366efef23836d0cfae4fbe635880d2be31">
+                <td role="cell" class="model-identity">
+                  <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct">Qwen2.5-72B-Instruct <span aria-hidden="true">↗</span></a>
+                  <p>An ambitious target for a much larger shared network.</p>
+                  <div class="model-meta"><span>72.71B parameters · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-8" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-72B-Instruct">Copy ID ⧉</button></div>
+                  <code class="model-id" id="model-id-8">Qwen/Qwen2.5-72B-Instruct</code>
+                </td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+              </tr>
+          </tbody>
+        </table>
+        <div class="model-empty-state">
+          <p id="model-empty" hidden>No models match these filters. Try a different search or a larger network estimate.</p>
+          <button type="button" id="model-filter-reset" class="text-link" hidden>Clear filters ↗</button>
+        </div>
+        <details class="model-method" id="model-estimate-note">
+          <summary>How we estimate fit <span aria-hidden="true">+</span></summary>
+          <div>
+            <p><strong>Simple sizing, no benchmarks.</strong> Shared capacity is machines × contributed memory.
+              Model memory is parameter count × 4 bytes for CPU/mixed or × 2 bytes for GPU/Metal,
+              converted to GiB, plus 25% and 2 GiB for rough overhead, rounded up.
+              “Likely to fit” means at least 10% spare capacity above that estimate; “Tight fit” means less.</p>
+            <p>We assume one model at a time and similarly sized machines. CPU/mixed uses a conservative
+              32-bit estimate; GPU/Metal assumes all participating nodes use 16-bit weights.
+              These are unquantized, dense text models using Soul’s Llama, Mistral, Qwen2, or Qwen3 adapters.
+              Quantized, mixture-of-experts, and multimodal variants are outside this catalog.</p>
+            <p>Total memory is only a first check. A model still needs to fit across individual machines,
+              with room for its layers, context cache, and runtime. Disk space, node availability, and
+              connections also matter. More memory does not predict response speed or guarantee installation.</p>
+            <p>Model names and parameter counts were checked against the publishers’ Hugging Face metadata
+              on 7 October 2026. Follow each model link for its model card and license. These examples
+              are a curated selection, not every supported model or a performance recommendation.</p>
+          </div>
+        </details>
+        <aside class="model-next-step">
+          <span class="little-star" aria-hidden="true">✳</span>
+          <div><h3>Found a model that fits your plans?</h3>
+            <p>Copy its model ID and ask the network operator to download and prepare it in the controller’s
+              Models panel. Once it is prepared and executable, discover it through the inference API.</p></div>
+          <a class="button button-small" href="https://mastrogiovanni.ddns.net/soul/">Open the controller <span aria-hidden="true">↗</span></a>
+        </aside>
+      </section>
+
+      <section class="section gallery-section" aria-labelledby="gallery-title">
+        <div class="section-heading">
+          <p class="eyebrow">04 / A CLOSER LOOK</p>
+          <div class="heading-row">
+            <h2 id="gallery-title">
+              Small contributions.<br /><em>Shared horizons.</em>
+            </h2>
+            <p>
+              From the computer on your desk to the controller bringing it all
+              together. Explore the different sides of Soul.
+            </p>
+          </div>
+        </div>
+        <div class="gallery">
+          <figure>
+            <a
+              class="gallery-open"
+              href="../assets/workspace.jpg"
+              data-gallery="0"
+              aria-label="Enlarge: A place for your machine"
+              ><img
+                src="../assets/workspace.jpg"
+                alt="Illustrative sunlit workspace with a laptop on a wooden desk"
+                width="1536"
+                height="1024"
+                loading="lazy"
+              /><span class="image-tag">THE CONTRIBUTOR</span
+              ><span class="expand-icon" aria-hidden="true">↗</span></a
+            >
+            <figcaption>
+              <span>01</span>
+              <div>
+                <h3>A place for your machine.</h3>
+                <p>Connect compatible hardware you already have.</p>
+              </div>
+            </figcaption>
+          </figure>
+          <figure>
+            <a
+              class="gallery-open console-preview"
+              href="../assets/console.jpg"
+              data-gallery="1"
+              aria-label="Enlarge: A window into the network"
+              ><img
+                src="../assets/console.jpg"
+                alt="Soul demo admin console showing two CPU nodes, model distribution, and request activity"
+                width="1265"
+                height="1236"
+                loading="lazy"
+              /><span class="image-tag">THE CONTROL ROOM</span
+              ><span class="expand-icon" aria-hidden="true">↗</span></a
+            >
+            <figcaption>
+              <span>02</span>
+              <div>
+                <h3>A window into the network.</h3>
+                <p>Real console, shown with local demo data.</p>
+              </div>
+            </figcaption>
+          </figure>
+          <figure>
+            <a
+              class="gallery-open"
+              href="../assets/network.jpg"
+              data-gallery="2"
+              aria-label="Enlarge: Something greater, together"
+              ><img
+                src="../assets/network.jpg"
+                alt="Conceptual artwork of glowing connections between metal cubes around a central sphere"
+                width="1536"
+                height="1024"
+                loading="lazy"
+              /><span class="image-tag">THE BIGGER PICTURE</span
+              ><span class="expand-icon" aria-hidden="true">↗</span></a
+            >
+            <figcaption>
+              <span>03</span>
+              <div>
+                <h3>Something greater, together.</h3>
+                <p>Every available node adds possibilities.</p>
+              </div>
+            </figcaption>
+          </figure>
+        </div>
+        <p class="gallery-footnote">
+          Workspace and network images are AI-created illustrations. The console
+          image is a product screenshot, not live network statistics.
+        </p>
+      </section>
+
+      <section class="join-section" id="join" aria-labelledby="join-title">
+        <div class="join-intro">
+          <p class="eyebrow">05 / YOU’RE PART OF THE PICTURE</p>
+          <h2 id="join-title">Give your compute<br />some <em>company.</em></h2>
+          <p>
+            Run the agent on the machine you want to contribute. It installs the
+            dependencies, chooses a compatible compute profile, and connects to
+            the Soul community controller.
+          </p>
+          <a class="text-link" href="https://mastrogiovanni.ddns.net/soul/"
+            >Open the controller <span aria-hidden="true">↗</span></a
+          >
+        </div>
+        <div class="join-panel">
+          <div class="terminal-heading">
+            <span><i></i><i></i><i></i></span><span>YOUR TERMINAL</span
+            ><span aria-hidden="true">↗</span>
+          </div>
+          <div class="terminal-body">
+            <p class="terminal-comment"># One command to join the community</p>
+            <pre><code id="install-command">curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh | bash</code></pre>
+            <button
+              class="button button-lime copy-button"
+              data-copy="install-command"
+            >
+              Copy install command <span aria-hidden="true">⧉</span>
+            </button>
+            <p class="terminal-note">
+              No Git checkout, preinstalled Python, or sudo required.
+            </p>
+          </div>
+          <div class="join-reminder">
+            <span aria-hidden="true">↳</span>
+            <p>
+              Keep the terminal open to contribute.<br />Press <kbd>Ctrl</kbd> +
+              <kbd>C</kbd> whenever you want to stop.
+            </p>
+          </div>
+        </div>
+        <div class="requirements" id="requirements">
+          <div>
+            <span class="eyebrow">BEFORE YOU CONNECT</span>
+            <h3>A good fit for your machine.</h3>
+          </div>
+          <ul>
+            <li>
+              <strong>Apple Silicon macOS</strong
+              ><span>Run natively, with Metal or CPU.</span>
+            </li>
+            <li>
+              <strong>Linux x86_64 or ARM64</strong
+              ><span>glibc 2.28+. CPU or supported NVIDIA GPU.</span>
+            </li>
+            <li>
+              <strong>Memory, disk &amp; connection</strong
+              ><span
+                >The agent uses your resources and downloads assigned weights.
+                Initial setup can take several minutes.</span
+              >
+            </li>
+          </ul>
+        </div>
+        <details class="install-details">
+          <summary>
+            Installation options, resource limits &amp; troubleshooting
+            <span aria-hidden="true">+</span>
+          </summary>
+          <div class="details-content">
+            <h3>Choose your contribution</h3>
+            <p>
+              Set a node name and an 8 GiB memory budget. This is a planning
+              budget, not hard resource isolation.
+            </p>
+            <div class="code-line">
+              <pre><code id="limited-command">curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh | bash -s -- -- --name my-soul-node --memory-gb 8</code></pre>
+              <button
+                data-copy="limited-command"
+                aria-label="Copy installation command with memory budget"
+              >
+                Copy
+              </button>
+            </div>
+            <h3>Restart when you’re ready</h3>
+            <div class="code-line">
+              <pre><code id="restart-command">~/.local/share/soul/bin/soul-node</code></pre>
+              <button
+                data-copy="restart-command"
+                aria-label="Copy restart command"
+              >
+                Copy
+              </button>
+            </div>
+            <p>
+              The default budget is 75% of available device memory. Model
+              tensors stay on disk for reuse; there is no automatic disk quota.
+              Electricity, bandwidth, and hardware are your contribution. The
+              agent does not install a boot service.
+            </p>
+            <h3>Check the fit</h3>
+            <p>
+              NVIDIA requires a working driver and compatible CUDA profile.
+              Native Windows, Intel Macs, and Alpine/musl are not supported by
+              this installer. Windows users can use a supported WSL2 Linux
+              environment.
+            </p>
+            <h3>If you can’t connect</h3>
+            <p>
+              Check your internet connection and
+              <code>~/.cache/soul/node.log</code>. If the installer is
+              unavailable or enrollment is rejected, contact the operator. If
+              the controller requires an additional sign-in, the operator must
+              provide those credentials.
+            </p>
+            <p>
+              <a href="https://mastrogiovanni.ddns.net/soul/install.sh"
+                >Read the installer before running it ↗</a
+              >
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <section
+        class="section inference-section"
+        id="inference"
+        aria-labelledby="inference-title"
+      >
+        <div>
+          <p class="eyebrow">06 / FROM CONTRIBUTION TO CREATION</p>
+          <h2 id="inference-title">Make something<br />with <em>Soul.</em></h2>
+          <p class="section-description">
+            Connect your organization’s tools to the community’s prepared
+            models. Process work in batches through your own automation, and
+            make the results available when your team is ready to review them.
+          </p>
+          <ul class="check-list">
+            <li>OpenAI-compatible chat and text completions</li>
+            <li>Anthropic-compatible Messages API</li>
+            <li>JSON or streaming responses for your existing tools</li>
+          </ul>
+          <div class="access-note">
+            <strong>Get your inference access.</strong>
+            <p>
+              Ask the operator for an inference API key and the available model
+              IDs. Joining as a compute node does not automatically issue an API
+              key; the enrollment token is separate.
+            </p>
+            <a class="text-link" href="https://github.com/mastrogiovanni"
+              >Find the community operator <span aria-hidden="true">↗</span></a
+            >
+          </div>
+        </div>
+        <div class="api-panel">
+          <div class="api-heading">
+            <span>YOUR FIRST REQUEST</span
+            ><button
+              data-copy="api-command"
+              aria-label="Copy inference example"
+            >
+              Copy code ⧉
+            </button>
+          </div>
+          <pre><code id="api-command"># Set the inference key supplied by the operator.
+export SOUL_API_KEY='YOUR_INFERENCE_KEY'
+
+# Discover prepared, available models.
+curl --fail-with-body \
+  https://mastrogiovanni.ddns.net/soul/v1/models \
+  -H "Authorization: Bearer $SOUL_API_KEY"
+
+# Replace MODEL_ID with an ID from that list.
+curl --fail-with-body \
+  https://mastrogiovanni.ddns.net/soul/v1/chat/completions \
+  -H "Authorization: Bearer $SOUL_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "MODEL_ID",
+    "messages": [{
+      "role": "user",
+      "content": "Summarize these volunteer notes: Food collection moved to Friday. Maya will confirm drivers."
+    }],
+    "max_tokens": 80,
+    "stream": false
+  }'</code></pre>
+          <div class="api-footer">
+            Already using an OpenAI-compatible client?<br /><strong
+              >Set its base URL to
+              <code>https://mastrogiovanni.ddns.net/soul/v1</code>.</strong
+            ><a href="https://mastrogiovanni.ddns.net/soul/docs"
+              >Explore the API reference ↗</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="section faq-section" aria-labelledby="faq-title">
+        <div>
+          <p class="eyebrow">A FEW THINGS TO KNOW</p>
+          <h2 id="faq-title">Good questions.<br /><em>Clear answers.</em></h2>
+        </div>
+        <div class="faq-list">
+          <details id="latency-faq">
+            <summary>
+              Why accept higher latency?<span aria-hidden="true">+</span>
+            </summary>
+            <p>
+              Soul prioritizes helping communities and nonprofits access large
+              language models with less setup effort by sharing available
+              machines. This can mean longer, variable waits. Email digests,
+              document processing, and periodic reports can still be useful
+              when completed later. Applications that need immediate,
+              predictable responses are a less suitable fit.
+            </p>
+          </details>
+          <details>
+            <summary>
+              Does Soul include a batch job platform?<span aria-hidden="true">+</span>
+            </summary>
+            <p>
+              Soul currently provides inference APIs with a bounded request
+              queue and one active generation at a time. It does not include a
+              durable background job service or a dedicated Batch API. Your
+              application schedules individual inference calls, saves progress,
+              and retries failed work. The use cases above are ideas for
+              integrations, not preinstalled applications.
+            </p>
+          </details>
+          <details id="network-faq">
+            <summary>
+              Does more compute mean more speed and redundancy?<span
+                aria-hidden="true"
+                >+</span
+              >
+            </summary>
+            <p>
+              More suitable nodes add memory capacity and placement choices. The
+              controller can repair missing model stages when enough capacity
+              remains, and reusable cached tensors can reduce preparation time.
+              Today Soul runs one active generation at a time. A disconnected
+              node can interrupt a request, and adding stages can add network
+              latency. There is one controller; automatic controller failover,
+              replicas, and concurrent pipelines are future work.
+            </p>
+          </details>
+          <details>
+            <summary>
+              Can I use the system after I join?<span aria-hidden="true"
+                >+</span
+              >
+            </summary>
+            <p>
+              Members can use prepared models with an inference API key supplied
+              by the operator. Node enrollment and inference access use
+              different credentials. Model availability depends on connected
+              capacity, and the operator manages the catalog. This site does not
+              create an account or issue a key.
+            </p>
+          </details>
+          <details>
+            <summary>
+              What am I sharing, and can I stop?<span aria-hidden="true"
+                >+</span
+              >
+            </summary>
+            <p>
+              Your node contributes memory, processing, disk space, electricity,
+              and network bandwidth. You can set a memory budget and stop the
+              foreground agent with Ctrl+C. Downloaded model files remain cached
+              for reuse. Stopping a node that is serving a model can interrupt
+              an active request.
+            </p>
+          </details>
+          <details>
+            <summary>
+              Which models can the community run?<span aria-hidden="true"
+                >+</span
+              >
+            </summary>
+            <p>
+              Soul currently supports standard, unquantized safetensors models
+              with llama, mistral, qwen2, or qwen3 architectures. Availability
+              depends on administrator preparation, model permissions, and
+              network capacity. It does not provide proprietary OpenAI or
+              Anthropic models; its APIs use compatible request formats.
+              <a href="#models">Browse model candidates and estimate their memory needs.</a>
+            </p>
+          </details>
+          <details>
+            <summary>
+              Is this a private place for sensitive prompts?<span
+                aria-hidden="true"
+                >+</span
+              >
+            </summary>
+            <p>
+              Participating nodes process prompts, intermediate activations, and
+              parts of the model. Only use a network whose operators and
+              contributors you trust, and avoid sending confidential information
+              to an untrusted community. HTTPS protects connections; it does not
+              hide computation from the machines doing the work.
+            </p>
+          </details>
+          <details>
+            <summary>
+              Where do I get help?<span aria-hidden="true">+</span>
+            </summary>
+            <p>
+              Start with the installation options above or the
+              <a href="https://mastrogiovanni.ddns.net/soul/docs"
+                >controller’s API reference</a
+              >. For enrollment, an inference key, or an additional controller
+              sign-in,
+              <a href="https://github.com/mastrogiovanni"
+                >find the operator on GitHub</a
+              >.
+            </p>
+          </details>
+        </div>
+      </section>
+      <section class="closing">
+        <span class="closing-star" aria-hidden="true">✳</span>
+        <p>The next node could be yours.</p>
+        <a class="button button-lime" href="#join"
+          >Let’s build it together <span aria-hidden="true">↗</span></a
+        >
+      </section>
+    </main>
+    <footer>
+      <a class="brand" href="#" aria-label="Soul home"
+        ><svg viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 3v34M3 20h34M8 8l24 24M8 32 32 8" /></svg
+        >soul</a
+      >
+      <p>One model. Many machines.</p>
+      <div>
+        <a href="#models">Model explorer ↗</a>
+        <a href="https://mastrogiovanni.ddns.net/soul/">Controller ↗</a
+        ><a href="https://mastrogiovanni.ddns.net/soul/docs">API reference ↗</a
+        ><a href="https://github.com/mastrogiovanni">Community operator ↗</a>
+      </div>
+    </footer>
+
+    <dialog id="gallery-dialog" aria-labelledby="gallery-caption">
+      <div class="lightbox-bar">
+        <span>SOUL / A CLOSER LOOK</span
+        ><button id="gallery-close" aria-label="Close image gallery">
+          Close ×
+        </button>
+      </div>
+      <img id="gallery-image" src="../assets/workspace.jpg" alt="" />
+      <div class="lightbox-bottom">
+        <button id="gallery-previous" aria-label="Previous image">←</button>
+        <p id="gallery-caption"></p>
+        <button id="gallery-next" aria-label="Next image">→</button>
+      </div>
+    </dialog>
+    <p id="copy-status" class="toast" role="status" aria-live="polite"></p>
+  </body>
+</html>

@@ -1,4 +1,5 @@
 import { estimateNetwork, estimateModel } from "./model-estimator.mjs?v=20261007-models";
+import { getMessages } from "./i18n.mjs?v=20261008-languages";
 
 const form = document.querySelector("#network-estimate");
 const controls = form.querySelector("fieldset");
@@ -8,8 +9,8 @@ const precision = document.querySelector("#network-precision");
 const search = document.querySelector("#model-search");
 const fitOnly = document.querySelector("#model-fit-only");
 const rows = [...document.querySelectorAll("[data-model]")];
-const format = new Intl.NumberFormat("en", { maximumFractionDigits: 2 });
-const labels = { likely: "Likely to fit", tight: "Tight fit", "more-memory": "More memory needed" };
+const messages = getMessages(document.documentElement.lang);
+const { format, labels } = messages;
 
 function update() {
   const network = form.checkValidity()
@@ -23,8 +24,8 @@ function update() {
   document.querySelector("#estimate-error").hidden = Boolean(network);
   document.querySelector("#network-capacity").textContent = network ? format.format(network.capacityGiB) : "—";
   document.querySelector("#capacity-description").textContent = network
-    ? `${network.machines} machines × ${format.format(network.memoryGiB)} GiB contributed each`
-    : "Enter a valid network estimate to compare models.";
+    ? messages.networkDescription(network)
+    : messages.invalidNetwork;
 
   rows.forEach((row) => {
     const estimate = estimateModel(Number(row.dataset.parameters), network);
@@ -32,15 +33,15 @@ function update() {
     const detail = row.querySelector(".fit-detail");
     row.querySelector(".model-memory").textContent = estimate ? `~${format.format(estimate.requiredGiB)} GiB` : "—";
     badge.dataset.fit = estimate?.status ?? "unknown";
-    badge.textContent = estimate ? labels[estimate.status] : "Estimate unavailable";
+    badge.textContent = estimate ? labels[estimate.status] : messages.unavailable;
     if (estimate) {
       if (estimate.status === "likely") likely++;
       if (estimate.status === "tight") tight++;
       detail.textContent = estimate.additionalMachines > 0
-        ? `About ${estimate.additionalMachines} more ${format.format(network.memoryGiB)} GiB machine${estimate.additionalMachines === 1 ? "" : "s"} needed`
-        : `Memory equivalent: ~${estimate.machinesNeeded} machine${estimate.machinesNeeded === 1 ? "" : "s"}`;
+        ? messages.moreMachines(estimate.additionalMachines, network.memoryGiB)
+        : messages.memoryEquivalent(estimate.machinesNeeded);
     } else {
-      detail.textContent = "Check the network inputs above.";
+      detail.textContent = messages.checkInputs;
     }
     const matches = `${row.dataset.model} ${row.dataset.architecture}`.toLowerCase().includes(query);
     row.hidden = !matches || (fitOnly.checked && (!estimate || estimate.status !== "likely"));
@@ -48,9 +49,9 @@ function update() {
   });
 
   document.querySelector("#fit-summary").textContent = network
-    ? `${likely} likely to fit · ${tight} tight fit · ${rows.length - likely - tight} need more memory`
-    : "Model fit estimates are unavailable until the inputs are valid.";
-  document.querySelector("#model-result-count").textContent = `${visible} of ${rows.length} models shown`;
+    ? messages.fitSummary(likely, tight, rows.length)
+    : messages.invalidSummary;
+  document.querySelector("#model-result-count").textContent = messages.resultCount(visible, rows.length);
   document.querySelector("#model-empty").hidden = visible > 0;
   document.querySelector("#model-filter-reset").hidden = visible > 0;
   document.querySelectorAll("[data-network-preset]").forEach((button) => {

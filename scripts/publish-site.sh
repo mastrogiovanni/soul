@@ -7,6 +7,7 @@ destination=$(mktemp -d "${TMPDIR:-/tmp}/soul-pages.XXXXXX")
 trap 'rm -rf "$destination"' EXIT
 
 test -f "$root/site/index.html"
+python3 "$root/scripts/build-site-locales.py" --check
 git clone --quiet --depth 1 git@github.com:mastrogiovanni/soul-community.git "$destination"
 git -C "$destination" checkout -B main
 rsync -a --delete --exclude='.git' "$root/site/" "$destination/"

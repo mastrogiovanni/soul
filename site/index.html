@@ -1,18 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1d332b" />
     <meta
       name="description"
-      content="Soul aims to make large language models easier to access for communities and nonprofits through shared compute, accepting higher latency for batch and background work."
+      content="Soul vuole rendere i grandi modelli linguistici più accessibili a comunità e organizzazioni non profit grazie a risorse condivise, accettando tempi di attesa più lunghi per attività in batch e in background."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Soul — Great minds. Shared machines." />
+    <meta property="og:title" content="Soul — Grandi idee. Risorse condivise." />
     <meta
       property="og:description"
-      content="Shared AI for communities and nonprofits. Less setup, shared compute, and useful work that can wait: email processing, invoice analysis, reporting, and more."
+      content="IA condivisa per comunità e organizzazioni non profit. Meno configurazione, risorse condivise e attività che possono aspettare: gestione delle email, analisi delle fatture, report e molto altro."
     />
     <meta
       property="og:image"
@@ -26,28 +26,35 @@
       rel="canonical"
       href="https://mastrogiovanni.github.io/soul-community/"
     />
+    <link rel="alternate" hreflang="it" href="https://mastrogiovanni.github.io/soul-community/" />
+    <link rel="alternate" hreflang="en" href="https://mastrogiovanni.github.io/soul-community/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://mastrogiovanni.github.io/soul-community/" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=20261007-models" />
-    <script src="app.js?v=20261007-models" defer></script>
-    <script type="module" src="model-explorer.js?v=20261007-models"></script>
-    <title>Soul — Great minds. Shared machines.</title>
+    <link rel="stylesheet" href="styles.css?v=20261008-languages" />
+    <script type="module" src="app.js?v=20261008-languages"></script>
+    <script type="module" src="model-explorer.js?v=20261008-languages"></script>
+    <title>Soul — Grandi idee. Risorse condivise.</title>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a class="skip-link" href="#main">Vai al contenuto</a>
     <header class="site-header">
-      <a class="brand" href="#" aria-label="Soul home"
+      <a class="brand" href="#" aria-label="Pagina iniziale di Soul"
         ><svg viewBox="0 0 40 40" aria-hidden="true">
-          <path d="M20 3v34M3 20h34M8 8l24 24M8 32 32 8" /></svg
-        >soul<span class="brand-note">THE COMMUNITY NETWORK</span></a
-      >
-      <nav aria-label="Main navigation">
-        <a href="#network">Why join</a><a href="#how-it-works">How it works</a
-        ><a href="#use-cases">Use cases</a><a href="#models">Models</a>
+          <path d="M20 3v34M3 20h34M8 8l24 24M8 32 32 8" /></svg>soul<span class="brand-note">LA RETE DELLA COMUNITÀ</span></a>
+      <nav aria-label="Navigazione principale">
+        <a href="#network">Perché partecipare</a><a href="#how-it-works">Come funziona</a><a href="#use-cases">Casi d’uso</a><a href="#models">Modelli</a>
       </nav>
-      <a class="button button-small" href="#join"
-        >Join the network <span aria-hidden="true">↗</span></a
-      >
+      <div class="header-actions">
+        <div class="language-switch" role="group" aria-label="Lingua del sito">
+          <a href="./" data-language-link lang="it" hreflang="it" aria-label="Italiano" aria-current="page">IT</a>
+          <a href="en/" data-language-link lang="en" hreflang="en" aria-label="English">EN</a>
+        </div>
+        <a class="button button-small" href="#join"
+          >Unisciti alla rete <span aria-hidden="true">↗</span></a>
+      </div>
     </header>
 
     <main id="main">
@@ -63,107 +70,82 @@
         <div class="hero-shade"></div>
         <div class="hero-content">
           <p class="eyebrow">
-            <span class="little-star" aria-hidden="true">✳</span> COMPUTE IS
-            BETTER TOGETHER
+            <span class="little-star" aria-hidden="true">✳</span> IL CALCOLO È MIGLIORE INSIEME
           </p>
-          <h1 id="hero-title">Great minds.<br />Shared <em>machines.</em></h1>
+          <h1 id="hero-title">Grandi idee.<br />Risorse <em>condivise.</em></h1>
           <p class="hero-description">
-            Help communities and nonprofit organizations use large language
-            models with less effort. Share compute and accept longer waits for
-            useful work that can happen in the background.
+            Aiuta comunità e organizzazioni non profit a usare i grandi modelli linguistici con meno sforzo. Condividi risorse di calcolo e accetta attese più lunghe per attività utili che possono essere svolte in background.
           </p>
           <div class="hero-actions">
             <a class="button button-lime" href="#join"
-              >Find your place in the network
-              <span aria-hidden="true">↗</span></a
-            ><a class="text-link" href="#how-it-works"
-              >See how it works <span aria-hidden="true">↓</span></a
-            >
+              >Trova il tuo posto nella rete
+              <span aria-hidden="true">↗</span></a><a class="text-link" href="#how-it-works"
+              >Scopri come funziona <span aria-hidden="true">↓</span></a>
           </div>
           <div class="hero-note">
-            <span class="dot"></span> One model. Many machines. Built together.
+            <span class="dot"></span> Un modello. Tante macchine. Un progetto comune.
           </div>
         </div>
         <div class="art-caption">
-          A vision of shared compute <span>01 / SOUL</span>
+          Una visione del calcolo condiviso <span>01 / SOUL</span>
         </div>
       </section>
 
-      <div class="compatibility" aria-label="Compatible hardware">
+      <div class="compatibility" aria-label="Hardware compatibile">
         <span
-          >Different machines.<br /><strong>One shared purpose.</strong></span
-        >
+          >Macchine diverse.<br /><strong>Un obiettivo comune.</strong></span>
         <p><span aria-hidden="true">⌘</span> Apple Silicon</p>
-        <p><span aria-hidden="true">▧</span> NVIDIA on Linux</p>
-        <p><span aria-hidden="true">▤</span> Linux CPU</p>
+        <p><span aria-hidden="true">▧</span> NVIDIA su Linux</p>
+        <p><span aria-hidden="true">▤</span> CPU su Linux</p>
         <a href="#requirements"
-          >Find your fit <span aria-hidden="true">↗</span></a
-        >
+          >Verifica i requisiti <span aria-hidden="true">↗</span></a>
       </div>
 
       <section class="section" id="network" aria-labelledby="network-title">
         <div class="section-heading">
-          <p class="eyebrow">01 / AI IN SERVICE OF COMMUNITIES</p>
+          <p class="eyebrow">01 / IA AL SERVIZIO DELLE COMUNITÀ</p>
           <div class="heading-row">
             <h2 id="network-title">
-              A little of your compute.<br />A lot more <em>possibility.</em>
+              Un po’ delle tue risorse.<br />Molte più <em>possibilità.</em>
             </h2>
             <p>
-              Soul’s aim is to make large language models accessible to
-              communities and nonprofit organizations with little setup effort.
-              Shared infrastructure helps lower the barrier to getting started;
-              higher and variable latency is a tradeoff we accept.
+              Soul vuole rendere i grandi modelli linguistici accessibili a comunità e organizzazioni non profit, con poco lavoro di configurazione. Un’infrastruttura condivisa rende più facile iniziare: in cambio, accettiamo tempi di risposta più lunghi e variabili.
             </p>
           </div>
         </div>
         <div class="benefit-grid">
           <article class="benefit">
-            <span class="benefit-icon" aria-hidden="true">↗</span
-            ><span class="index">01</span>
-            <h3>Build with real inference.</h3>
+            <span class="benefit-icon" aria-hidden="true">↗</span><span class="index">01</span>
+            <h3>Crea con l’inferenza.</h3>
             <p>
-              Use community-prepared language models through familiar OpenAI-
-              and Anthropic-compatible APIs. Bring them into your experiments,
-              tools, and background workflows that can deliver results later.
+              Usa i modelli linguistici preparati dalla comunità tramite API compatibili con OpenAI e Anthropic. Integrali nei tuoi esperimenti, strumenti e processi in background che possono fornire risultati in un secondo momento.
             </p>
             <a href="#inference"
-              >Explore inference access <span aria-hidden="true">↗</span></a
-            >
+              >Scopri come accedere all’inferenza <span aria-hidden="true">↗</span></a>
           </article>
           <article class="benefit">
-            <span class="benefit-icon" aria-hidden="true">⊞</span
-            ><span class="index">02</span>
-            <h3>Make room for more.</h3>
+            <span class="benefit-icon" aria-hidden="true">⊞</span><span class="index">02</span>
+            <h3>Fai spazio a nuovi modelli.</h3>
             <p>
-              Pool memory across connected machines. Different computers can
-              hold different layers, helping the network serve models that may
-              not fit on one contributor’s device.
+              Metti in comune la memoria delle macchine connesse. Computer diversi possono ospitare strati diversi del modello, permettendo alla rete di eseguire modelli che potrebbero non entrare nel dispositivo di un singolo partecipante.
             </p>
             <a href="#models"
-              >Explore models that could fit <span aria-hidden="true">↗</span></a
-            >
+              >Esplora i modelli adatti alla rete <span aria-hidden="true">↗</span></a>
           </article>
           <article class="benefit">
-            <span class="benefit-icon" aria-hidden="true">✳</span
-            ><span class="index">03</span>
-            <h3>Help the network recover.</h3>
+            <span class="benefit-icon" aria-hidden="true">✳</span><span class="index">03</span>
+            <h3>Aiuta la rete a ripartire.</h3>
             <p>
-              More available machines give the controller more places to rebuild
-              missing model stages. Your contribution can help restore capacity
-              when another node goes offline.
+              Più macchine disponibili offrono al controller più opzioni per ricostruire le parti mancanti di un modello. Il tuo contributo può aiutare a recuperare capacità quando un altro nodo si disconnette.
             </p>
             <a href="#network-faq"
-              >Understand resilience <span aria-hidden="true">↗</span></a
-            >
+              >Scopri come la rete si riprende <span aria-hidden="true">↗</span></a>
           </article>
         </div>
         <aside class="growth-note">
           <span class="little-star" aria-hidden="true">✳</span>
           <p>
-            <strong>More of us. More potential.</strong> More capable hardware
-            and cached model layers can reduce preparation time and improve
-            service capacity. Actual speed depends on the model, machines, and
-            network; adding nodes does not guarantee faster responses.
+            <strong>Più siamo, più possibilità abbiamo.</strong> Hardware più potente e strati del modello già in cache possono ridurre i tempi di preparazione e aumentare la capacità del servizio. La velocità effettiva dipende dal modello, dalle macchine e dalla rete: aggiungere nodi non garantisce risposte più rapide.
           </p>
         </aside>
       </section>
@@ -174,41 +156,36 @@
         aria-labelledby="how-title"
       >
         <div class="how-copy">
-          <p class="eyebrow">02 / ONE CONNECTED SYSTEM</p>
-          <h2 id="how-title">Your machine.<br />A bigger <em>picture.</em></h2>
+          <p class="eyebrow">02 / UN UNICO SISTEMA CONNESSO</p>
+          <h2 id="how-title">Il tuo computer.<br />Un progetto <em>più grande.</em></h2>
           <p>
-            Soul splits a language model into stages. Your node runs its
-            assigned layers, while a lightweight controller connects the stages
-            and serves the inference API.
+            Soul suddivide un modello linguistico in fasi. Il tuo nodo esegue gli strati che gli vengono assegnati, mentre un controller leggero collega le fasi e fornisce l’API di inferenza.
           </p>
           <ol class="simple-steps">
             <li>
               <span>01</span>
               <div>
-                <h3>You connect.</h3>
+                <h3>Ti connetti.</h3>
                 <p>
-                  The agent makes an outbound connection to the community
-                  controller. No inbound ports to open.
+                  L’agente apre una connessione in uscita verso il controller della comunità. Non serve aprire porte in ingresso.
                 </p>
               </div>
             </li>
             <li>
               <span>02</span>
               <div>
-                <h3>The network shares the work.</h3>
+                <h3>La rete condivide il lavoro.</h3>
                 <p>
-                  Nodes download their assigned model tensors and contribute
-                  memory and computation.
+                  I nodi scaricano i tensori del modello loro assegnati e mettono a disposizione memoria e capacità di calcolo.
                 </p>
               </div>
             </li>
             <li>
               <span>03</span>
               <div>
-                <h3>Ideas become answers.</h3>
+                <h3>Le idee diventano risposte.</h3>
                 <p>
-                  The controller routes requests through the model’s stages and
-                  streams generated text to the caller.
+                  Il controller inoltra le richieste attraverso le fasi del modello e invia il testo generato al chiamante in streaming.
                 </p>
               </div>
             </li>
@@ -217,18 +194,17 @@
         <div
           class="network-diagram"
           role="img"
-          aria-label="An inference client connects to one Soul controller. Three compute nodes connect to that controller and run successive groups of model layers. Nodes do not connect directly to one another."
+          aria-label="Un client di inferenza si connette a un controller Soul. Tre nodi di calcolo si connettono al controller ed eseguono gruppi successivi di strati del modello. I nodi non si connettono direttamente tra loro."
         >
           <div class="diagram-label">
-            THE SOUL NETWORK <span>ILLUSTRATED</span>
+            LA RETE SOUL <span>SCHEMA ILLUSTRATIVO</span>
           </div>
-          <div class="client-chip">Your app <span>↕</span> Inference API</div>
+          <div class="client-chip">La tua app <span>↕</span> API di inferenza</div>
           <div class="diagram-wire"></div>
           <div class="controller-symbol">
             <span aria-hidden="true">✳</span>
           </div>
-          <strong class="controller-label">Soul controller</strong
-          ><span class="controller-subtitle">One place to connect</span>
+          <strong class="controller-label">Controller Soul</strong><span class="controller-subtitle">Un punto di connessione comune</span>
           <svg
             class="network-wires"
             viewBox="0 0 440 92"
@@ -239,20 +215,17 @@
           </svg>
           <div class="diagram-nodes">
             <div>
-              <span class="node-icon" aria-hidden="true">⌘</span
-              ><strong>Your Mac</strong><small>Model stage 1</small>
+              <span class="node-icon" aria-hidden="true">⌘</span><strong>Il tuo Mac</strong><small>Fase 1 del modello</small>
             </div>
             <div>
-              <span class="node-icon" aria-hidden="true">▧</span
-              ><strong>A GPU node</strong><small>Model stage 2</small>
+              <span class="node-icon" aria-hidden="true">▧</span><strong>Un nodo GPU</strong><small>Fase 2 del modello</small>
             </div>
             <div>
-              <span class="node-icon" aria-hidden="true">▤</span
-              ><strong>A Linux node</strong><small>Model stage 3</small>
+              <span class="node-icon" aria-hidden="true">▤</span><strong>Un nodo Linux</strong><small>Fase 3 del modello</small>
             </div>
           </div>
           <p class="diagram-footer">
-            <span class="dot"></span> Separate machines. Shared model capacity.
+            <span class="dot"></span> Macchine distinte. Capacità condivisa per il modello.
           </p>
         </div>
       </section>
@@ -263,322 +236,284 @@
         aria-labelledby="use-cases-title"
       >
         <div class="section-heading">
-          <p class="eyebrow">03 / MADE FOR WORK THAT CAN WAIT</p>
+          <p class="eyebrow">03 / PER IL LAVORO CHE PUÒ ASPETTARE</p>
           <div class="heading-row">
             <h2 id="use-cases-title">
-              Less busywork.<br />More time for your <em>mission.</em>
+              Meno attività ripetitive.<br />Più tempo per la tua <em>missione.</em>
             </h2>
             <p>
-              Some answers are useful even when they arrive later. Soul is
-              intended for batch systems and background processes whose value
-              does not depend on a real-time response.
+              Alcune risposte sono utili anche quando arrivano più tardi. Soul è pensato per sistemi batch e processi in background il cui valore non dipende da una risposta in tempo reale.
             </p>
           </div>
         </div>
         <div class="use-cases-grid">
           <article class="use-case">
-            <span class="case-number">01 / INBOX</span>
-            <h3>Email processing</h3>
+            <span class="case-number">01 / POSTA IN ARRIVO</span>
+            <h3>Gestione delle email</h3>
             <p>
-              Sort incoming messages by topic, summarize long threads, and
-              prepare reply drafts for volunteers to review when they next
-              check the shared inbox.
+              Classifica i messaggi in arrivo per argomento, riassumi le conversazioni più lunghe e prepara bozze di risposta che i volontari potranno rivedere al prossimo accesso alla casella condivisa.
             </p>
           </article>
           <article class="use-case">
-            <span class="case-number">02 / ADMINISTRATION</span>
-            <h3>Invoice analysis</h3>
+            <span class="case-number">02 / AMMINISTRAZIONE</span>
+            <h3>Analisi delle fatture</h3>
             <p>
-              Turn extracted invoice text into draft records of suppliers,
-              amounts, dates, and expense categories for a treasurer to check
-              before entering them in the accounts.
+              Trasforma il testo estratto dalle fatture in bozze con fornitori, importi, date e categorie di spesa, da far verificare al tesoriere prima della registrazione contabile.
             </p>
           </article>
           <article class="use-case">
-            <span class="case-number">03 / OPERATIONS</span>
-            <h3>Process improvement</h3>
+            <span class="case-number">03 / ATTIVITÀ OPERATIVE</span>
+            <h3>Ottimizzazione dei processi</h3>
             <p>
-              Review activity notes and recurring support requests to spot
-              repeated steps, slow handoffs, and opportunities to simplify
-              everyday work for the team.
+              Analizza le note sulle attività e le richieste di assistenza ricorrenti per individuare passaggi ripetuti, rallentamenti e opportunità per semplificare il lavoro quotidiano del gruppo.
             </p>
           </article>
           <article class="use-case">
-            <span class="case-number">04 / FUNDING</span>
-            <h3>Grant opportunity summaries</h3>
+            <span class="case-number">04 / FINANZIAMENTI</span>
+            <h3>Sintesi dei bandi di finanziamento</h3>
             <p>
-              Summarize public funding calls, pull out deadlines and application
-              requirements, and prepare a reading list for the next fundraising
-              meeting.
+              Riassumi i bandi pubblici, estrai scadenze e requisiti di partecipazione e prepara una lista da esaminare alla prossima riunione sulla raccolta fondi.
             </p>
           </article>
           <article class="use-case">
-            <span class="case-number">05 / COLLABORATION</span>
-            <h3>Meeting follow-ups</h3>
+            <span class="case-number">05 / COLLABORAZIONE</span>
+            <h3>Il seguito delle riunioni</h3>
             <p>
-              Turn existing meeting notes or transcripts into draft minutes,
-              decisions, and action lists, ready for the coordinator to review
-              and share later.
+              Trasforma appunti o trascrizioni delle riunioni in bozze di verbali, decisioni e attività da svolgere, pronte per essere riviste e condivise dal coordinatore.
             </p>
           </article>
           <article class="use-case">
-            <span class="case-number">06 / OUTREACH</span>
-            <h3>Multilingual communication</h3>
+            <span class="case-number">06 / COMUNICAZIONE</span>
+            <h3>Comunicazione multilingue</h3>
             <p>
-              Prepare translation drafts and plain-language versions of event
-              announcements, newsletters, and volunteer guides for people to
-              review before publication.
+              Prepara bozze di traduzione e versioni in linguaggio semplice di annunci, newsletter e guide per i volontari, da rivedere prima della pubblicazione.
             </p>
           </article>
           <article class="use-case">
-            <span class="case-number">07 / SHARED KNOWLEDGE</span>
-            <h3>A more useful document archive</h3>
+            <span class="case-number">07 / CONOSCENZA CONDIVISA</span>
+            <h3>Un archivio documentale più utile</h3>
             <p>
-              Summarize and suggest topic tags for extracted text from older
-              reports, guides, and project notes, helping volunteers find useful
-              information in the organization’s existing archive.
+              Riassumi e suggerisci etichette tematiche per i testi estratti da vecchi report, guide e appunti di progetto, aiutando i volontari a trovare informazioni utili nell’archivio dell’organizzazione.
             </p>
           </article>
           <article class="use-case">
-            <span class="case-number">08 / LISTENING</span>
-            <h3>Community feedback digests</h3>
+            <span class="case-number">08 / ASCOLTO</span>
+            <h3>Sintesi dei commenti della comunità</h3>
             <p>
-              Group anonymized survey comments and event feedback into themes,
-              recurring questions, and suggestions for the team’s next
-              planning session.
+              Raggruppa i commenti anonimizzati dei sondaggi e i riscontri sugli eventi per temi, domande ricorrenti e proposte da discutere nella prossima sessione di pianificazione.
             </p>
           </article>
           <article class="use-case">
-            <span class="case-number">09 / REPORTING</span>
-            <h3>Impact report drafts</h3>
+            <span class="case-number">09 / RENDICONTAZIONE</span>
+            <h3>Bozze dei report d’impatto</h3>
             <p>
-              Bring together program updates and volunteer activity notes into
-              a draft monthly narrative, with the team checking the facts and
-              figures before it goes to supporters.
+              Riunisci gli aggiornamenti sui programmi e le note sulle attività dei volontari in una bozza di resoconto mensile, lasciando al gruppo la verifica di fatti e cifre prima dell’invio ai sostenitori.
             </p>
           </article>
         </div>
         <aside class="workflow-note">
           <div>
-            <h3>Collect the work. Process it in the background. Review it later.</h3>
+            <h3>Raccogli le attività. Elaborale in background. Rivedi i risultati più tardi.</h3>
             <p>
-              These are workflow ideas you can build with Soul. Your application
-              or automation tool handles scheduling, text extraction, retries,
-              and saving results; Soul provides the language-model inference.
-              Completion time depends on the model and available network capacity.
+              Queste sono idee di processi che puoi realizzare con Soul. La tua applicazione o il tuo strumento di automazione gestisce la pianificazione, l’estrazione del testo, i nuovi tentativi e il salvataggio dei risultati; Soul fornisce l’inferenza del modello linguistico. I tempi di completamento dipendono dal modello e dalla capacità disponibile nella rete.
             </p>
           </div>
           <a class="text-link" href="#inference">
-            Connect your workflow <span aria-hidden="true">↗</span>
+            Collega il tuo processo <span aria-hidden="true">↗</span>
           </a>
         </aside>
       </section>
 
       <section class="section models-section" id="models" aria-labelledby="models-title">
         <div class="section-heading">
-          <p class="eyebrow">MODEL EXPLORER / PLAN WHAT’S POSSIBLE</p>
+          <p class="eyebrow">ESPLORA I MODELLI / IMMAGINA LE POSSIBILITÀ</p>
           <div class="heading-row">
-            <h2 id="models-title">What could we run<br /><em>together?</em></h2>
-            <p>Explore models available to download, then estimate which could fit
-              the memory your network contributes. A few more machines can open
-              up more possibilities.</p>
+            <h2 id="models-title">Quali modelli per<br /><em>la nostra rete?</em></h2>
+            <p>Esplora i modelli disponibili al download e stima quali potrebbero entrare nella memoria condivisa della rete. Qualche macchina in più può aprire nuove possibilità.</p>
           </div>
         </div>
         <div class="model-planner">
           <form id="network-estimate" class="network-estimate" aria-describedby="estimate-help">
             <fieldset disabled>
-              <legend>Imagine your network</legend>
-              <p id="estimate-help">Use a rough average. Enter memory dedicated to Soul,
-                not the machine’s total RAM or GPU memory.</p>
+              <legend>Immagina la tua rete</legend>
+              <p id="estimate-help">Basta una media indicativa. Inserisci la memoria dedicata a Soul, non tutta la RAM o la memoria GPU della macchina.</p>
               <div class="network-inputs">
-                <label for="network-machines">Contributing machines
+                <label for="network-machines">Macchine partecipanti
                   <input id="network-machines" type="number" min="0" max="1000" step="1" value="4" required inputmode="numeric" />
                 </label>
-                <label for="network-memory">Memory per machine <span>(GiB)</span>
+                <label for="network-memory">Memoria per macchina <span>(GiB)</span>
                   <input id="network-memory" type="number" min="1" max="1024" step="0.25" value="8" required inputmode="decimal" />
                 </label>
-                <label for="network-precision">Hardware / weight precision
+                <label for="network-precision">Hardware / precisione dei pesi
                   <select id="network-precision">
-                    <option value="4">CPU or mixed · 32-bit</option>
-                    <option value="2">GPU / Apple Metal · 16-bit</option>
+                    <option value="4">CPU o rete mista · 32 bit</option>
+                    <option value="2">GPU / Apple Metal · 16 bit</option>
                   </select>
                 </label>
               </div>
-              <div class="network-presets" aria-label="Example networks">
-                <span>Try a network</span>
+              <div class="network-presets" aria-label="Reti di esempio">
+                <span>Prova una rete</span>
                 <button type="button" data-network-preset data-machines="4" data-memory="8" aria-pressed="true">4 × 8 GiB</button>
                 <button type="button" data-network-preset data-machines="8" data-memory="16" aria-pressed="false">8 × 16 GiB</button>
                 <button type="button" data-network-preset data-machines="32" data-memory="16" aria-pressed="false">32 × 16 GiB</button>
               </div>
-              <p id="estimate-error" class="estimate-error" role="status" hidden>Enter 0–1,000 whole machines and 1–1,024 GiB per machine, in steps of 0.25 GiB.</p>
+              <p id="estimate-error" class="estimate-error" role="status" hidden>Inserisci da 0 a 1.000 macchine intere e da 1 a 1.024 GiB per macchina, a intervalli di 0,25 GiB.</p>
             </fieldset>
           </form>
           <div class="network-total" aria-live="polite" aria-atomic="true">
-            <p class="eyebrow">YOUR ESTIMATED SHARED MEMORY</p>
+            <p class="eyebrow">LA TUA MEMORIA CONDIVISA STIMATA</p>
             <p class="capacity-number"><strong id="network-capacity">—</strong> <span>GiB</span></p>
-            <p id="capacity-description">Enable JavaScript to calculate an estimate.</p>
-            <p id="fit-summary">Compare one model at a time.</p>
-            <span class="scenario-label">Illustrative scenario · not live network data</span>
+            <p id="capacity-description">Attiva JavaScript per calcolare una stima.</p>
+            <p id="fit-summary">Confronta un modello alla volta.</p>
+            <span class="scenario-label">Scenario di esempio · non sono dati in tempo reale</span>
           </div>
         </div>
-        <noscript><p class="model-notice">The catalog below works without JavaScript. Enable JavaScript for the local memory calculator and filters.</p></noscript>
+        <noscript><p class="model-notice">Il catalogo qui sotto funziona anche senza JavaScript. Attiva JavaScript per usare il calcolatore locale della memoria e i filtri.</p></noscript>
         <div class="model-catalog-heading">
-          <div><h3>A model for your next idea.</h3><p>Curated candidates, not a list of models currently installed.</p></div>
-          <a class="text-link" href="#inference">See live availability with your API key <span aria-hidden="true">↗</span></a>
+          <div><h3>Un modello per la tua prossima idea.</h3><p>Una selezione di modelli da valutare, non l’elenco di quelli già installati.</p></div>
+          <a class="text-link" href="#inference">Verifica la disponibilità con la tua chiave API <span aria-hidden="true">↗</span></a>
         </div>
         <div class="model-filters">
-          <label for="model-search">Find a model
-            <input id="model-search" type="search" placeholder="Search name or family…" disabled />
+          <label for="model-search">Cerca un modello
+            <input id="model-search" type="search" placeholder="Cerca per nome o famiglia…" disabled />
           </label>
-          <label class="model-fit-toggle"><input type="checkbox" id="model-fit-only" disabled /> Only likely to fit</label>
-          <p id="model-result-count" role="status">9 models in the catalog</p>
+          <label class="model-fit-toggle"><input type="checkbox" id="model-fit-only" disabled /> Solo con margine</label>
+          <p id="model-result-count" role="status">9 modelli nel catalogo</p>
         </div>
-        <table class="model-table" role="table" aria-label="Downloadable model candidates and estimated memory fit" aria-describedby="model-estimate-note">
-          <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">MODEL / PARAMETERS</th><th role="columnheader" scope="col">MEMORY ESTIMATE</th><th role="columnheader" scope="col">YOUR NETWORK</th></tr></thead>
+        <table class="model-table" role="table" aria-label="Modelli scaricabili e stima della memoria necessaria" aria-describedby="model-estimate-note">
+          <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">MODELLO / PARAMETRI</th><th role="columnheader" scope="col">MEMORIA STIMATA</th><th role="columnheader" scope="col">LA TUA RETE</th></tr></thead>
           <tbody role="rowgroup">
               <tr role="row" data-model="Qwen/Qwen2.5-0.5B-Instruct" data-parameters="494032768" data-architecture="qwen2" data-revision="7ae557604adf67be50417f59c2c2f167def9a775">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct">Qwen2.5-0.5B-Instruct <span aria-hidden="true">↗</span></a>
-                  <p>A small starting point for labels and short drafts.</p>
-                  <div class="model-meta"><span>0.49B parameters · qwen2</span>
-                    <button class="model-copy" data-copy="model-id-0" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-0.5B-Instruct">Copy ID ⧉</button></div>
+                  <p>Un piccolo punto di partenza per etichette e bozze brevi.</p>
+                  <div class="model-meta"><span>0,49 mld di parametri · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-0" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello Qwen2.5-0.5B-Instruct">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-0">Qwen/Qwen2.5-0.5B-Instruct</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
               <tr role="row" data-model="HuggingFaceTB/SmolLM2-1.7B-Instruct" data-parameters="1711376384" data-architecture="llama" data-revision="31b70e2e869a7173562077fd711b654946d38674">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct">SmolLM2-1.7B-Instruct <span aria-hidden="true">↗</span></a>
-                  <p>Try rewriting and summarizing short English text.</p>
-                  <div class="model-meta"><span>1.71B parameters · llama</span>
-                    <button class="model-copy" data-copy="model-id-1" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for SmolLM2-1.7B-Instruct">Copy ID ⧉</button></div>
+                  <p>Prova a riscrivere e riassumere brevi testi in inglese.</p>
+                  <div class="model-meta"><span>1,71 mld di parametri · llama</span>
+                    <button class="model-copy" data-copy="model-id-1" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello SmolLM2-1.7B-Instruct">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-1">HuggingFaceTB/SmolLM2-1.7B-Instruct</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
               <tr role="row" data-model="Qwen/Qwen2.5-3B-Instruct" data-parameters="3085938688" data-architecture="qwen2" data-revision="aa8e72537993ba99e69dfaafa59ed015b17504d1">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-3B-Instruct">Qwen2.5-3B-Instruct <span aria-hidden="true">↗</span></a>
-                  <p>Explore email triage and everyday summaries.</p>
-                  <div class="model-meta"><span>3.09B parameters · qwen2</span>
-                    <button class="model-copy" data-copy="model-id-2" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-3B-Instruct">Copy ID ⧉</button></div>
+                  <p>Sperimenta la classificazione delle email e i riepiloghi quotidiani.</p>
+                  <div class="model-meta"><span>3,09 mld di parametri · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-2" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello Qwen2.5-3B-Instruct">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-2">Qwen/Qwen2.5-3B-Instruct</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
               <tr role="row" data-model="mistralai/Mistral-7B-Instruct-v0.3" data-parameters="7248023552" data-architecture="mistral" data-revision="c170c708c41dac9275d15a8fff4eca08d52bab71">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3">Mistral-7B-Instruct-v0.3 <span aria-hidden="true">↗</span></a>
-                  <p>Explore document summaries and draft responses.</p>
-                  <div class="model-meta"><span>7.25B parameters · mistral</span>
-                    <button class="model-copy" data-copy="model-id-3" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Mistral-7B-Instruct-v0.3">Copy ID ⧉</button></div>
+                  <p>Sperimenta riepiloghi di documenti e bozze di risposta.</p>
+                  <div class="model-meta"><span>7,25 mld di parametri · mistral</span>
+                    <button class="model-copy" data-copy="model-id-3" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello Mistral-7B-Instruct-v0.3">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-3">mistralai/Mistral-7B-Instruct-v0.3</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
               <tr role="row" data-model="Qwen/Qwen2.5-7B-Instruct" data-parameters="7615616512" data-architecture="qwen2" data-revision="a09a35458c702b33eeacc393d103063234e8bc28">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct">Qwen2.5-7B-Instruct <span aria-hidden="true">↗</span></a>
-                  <p>Try structured extraction and community report drafts.</p>
-                  <div class="model-meta"><span>7.62B parameters · qwen2</span>
-                    <button class="model-copy" data-copy="model-id-4" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-7B-Instruct">Copy ID ⧉</button></div>
+                  <p>Prova l’estrazione di dati strutturati e le bozze di report per la comunità.</p>
+                  <div class="model-meta"><span>7,62 mld di parametri · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-4" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello Qwen2.5-7B-Instruct">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-4">Qwen/Qwen2.5-7B-Instruct</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
               <tr role="row" data-model="Qwen/Qwen3-8B" data-parameters="8190735360" data-architecture="qwen3" data-revision="b968826d9c46dd6066d109eabc6255188de91218">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-8B">Qwen3-8B <span aria-hidden="true">↗</span></a>
-                  <p>Explore reasoning tasks and document workflows.</p>
-                  <div class="model-meta"><span>8.19B parameters · qwen3</span>
-                    <button class="model-copy" data-copy="model-id-5" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-8B">Copy ID ⧉</button></div>
+                  <p>Sperimenta attività di ragionamento e processi documentali.</p>
+                  <div class="model-meta"><span>8,19 mld di parametri · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-5" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello Qwen3-8B">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-5">Qwen/Qwen3-8B</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
               <tr role="row" data-model="Qwen/Qwen3-14B" data-parameters="14768307200" data-architecture="qwen3" data-revision="40c069824f4251a91eefaf281ebe4c544efd3e18">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-14B">Qwen3-14B <span aria-hidden="true">↗</span></a>
-                  <p>Room to experiment with more involved analysis.</p>
-                  <div class="model-meta"><span>14.77B parameters · qwen3</span>
-                    <button class="model-copy" data-copy="model-id-6" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-14B">Copy ID ⧉</button></div>
+                  <p>Spazio per sperimentare analisi più articolate.</p>
+                  <div class="model-meta"><span>14,77 mld di parametri · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-6" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello Qwen3-14B">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-6">Qwen/Qwen3-14B</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
               <tr role="row" data-model="Qwen/Qwen3-32B" data-parameters="32762123264" data-architecture="qwen3" data-revision="9216db5781bf21249d130ec9da846c4624c16137">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/Qwen/Qwen3-32B">Qwen3-32B <span aria-hidden="true">↗</span></a>
-                  <p>A larger candidate for multi-step reasoning workflows.</p>
-                  <div class="model-meta"><span>32.76B parameters · qwen3</span>
-                    <button class="model-copy" data-copy="model-id-7" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen3-32B">Copy ID ⧉</button></div>
+                  <p>Un modello più grande per processi con più passaggi di ragionamento.</p>
+                  <div class="model-meta"><span>32,76 mld di parametri · qwen3</span>
+                    <button class="model-copy" data-copy="model-id-7" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello Qwen3-32B">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-7">Qwen/Qwen3-32B</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
               <tr role="row" data-model="Qwen/Qwen2.5-72B-Instruct" data-parameters="72706203648" data-architecture="qwen2" data-revision="495f39366efef23836d0cfae4fbe635880d2be31">
                 <td role="cell" class="model-identity">
                   <a class="model-name" href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct">Qwen2.5-72B-Instruct <span aria-hidden="true">↗</span></a>
-                  <p>An ambitious target for a much larger shared network.</p>
-                  <div class="model-meta"><span>72.71B parameters · qwen2</span>
-                    <button class="model-copy" data-copy="model-id-8" data-copy-message="Model ID copied. Share it with your network operator." aria-label="Copy model ID for Qwen2.5-72B-Instruct">Copy ID ⧉</button></div>
+                  <p>Un obiettivo ambizioso per una rete condivisa molto più grande.</p>
+                  <div class="model-meta"><span>72,71 mld di parametri · qwen2</span>
+                    <button class="model-copy" data-copy="model-id-8" data-copy-message="ID del modello copiato. Condividilo con il gestore della rete." aria-label="Copia l’ID del modello Qwen2.5-72B-Instruct">Copia ID ⧉</button></div>
                   <code class="model-id" id="model-id-8">Qwen/Qwen2.5-72B-Instruct</code>
                 </td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Memory estimate</span><strong class="model-memory">—</strong><span class="memory-note">including rough overhead</span></td>
-                <td role="cell"><span class="cell-label" aria-hidden="true">Your network</span><span class="fit-status" data-fit="unknown">Enable estimates</span><span class="fit-detail">Use the calculator above.</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">Memoria stimata</span><strong class="model-memory">—</strong><span class="memory-note">include un margine per il funzionamento</span></td>
+                <td role="cell"><span class="cell-label" aria-hidden="true">La tua rete</span><span class="fit-status" data-fit="unknown">Attiva le stime</span><span class="fit-detail">Usa il calcolatore qui sopra.</span></td>
               </tr>
           </tbody>
         </table>
         <div class="model-empty-state">
-          <p id="model-empty" hidden>No models match these filters. Try a different search or a larger network estimate.</p>
-          <button type="button" id="model-filter-reset" class="text-link" hidden>Clear filters ↗</button>
+          <p id="model-empty" hidden>Nessun modello corrisponde ai filtri. Prova un’altra ricerca o aumenta la dimensione stimata della rete.</p>
+          <button type="button" id="model-filter-reset" class="text-link" hidden>Azzera i filtri ↗</button>
         </div>
         <details class="model-method" id="model-estimate-note">
-          <summary>How we estimate fit <span aria-hidden="true">+</span></summary>
+          <summary>Come stimiamo la memoria <span aria-hidden="true">+</span></summary>
           <div>
-            <p><strong>Simple sizing, no benchmarks.</strong> Shared capacity is machines × contributed memory.
-              Model memory is parameter count × 4 bytes for CPU/mixed or × 2 bytes for GPU/Metal,
-              converted to GiB, plus 25% and 2 GiB for rough overhead, rounded up.
-              “Likely to fit” means at least 10% spare capacity above that estimate; “Tight fit” means less.</p>
-            <p>We assume one model at a time and similarly sized machines. CPU/mixed uses a conservative
-              32-bit estimate; GPU/Metal assumes all participating nodes use 16-bit weights.
-              These are unquantized, dense text models using Soul’s Llama, Mistral, Qwen2, or Qwen3 adapters.
-              Quantized, mixture-of-experts, and multimodal variants are outside this catalog.</p>
-            <p>Total memory is only a first check. A model still needs to fit across individual machines,
-              with room for its layers, context cache, and runtime. Disk space, node availability, and
-              connections also matter. More memory does not predict response speed or guarantee installation.</p>
-            <p>Model names and parameter counts were checked against the publishers’ Hugging Face metadata
-              on 7 October 2026. Follow each model link for its model card and license. These examples
-              are a curated selection, not every supported model or a performance recommendation.</p>
+            <p><strong>Una stima semplice, senza benchmark.</strong> La capacità condivisa è il numero di macchine × la memoria offerta. La memoria del modello è il numero di parametri × 4 byte per CPU/reti miste o × 2 byte per GPU/Metal, convertito in GiB, con l’aggiunta del 25% e di 2 GiB per il funzionamento, arrotondando per eccesso. «Memoria con margine» indica almeno il 10% di capacità libera oltre questa stima; «Memoria al limite» indica un margine inferiore.</p>
+            <p>Ipotizziamo un modello alla volta e macchine con memoria simile. CPU/rete mista usa una stima prudente a 32 bit; GPU/Metal presuppone che tutti i nodi partecipanti usino pesi a 16 bit. Sono modelli testuali densi, non quantizzati, che usano gli adattatori Llama, Mistral, Qwen2 o Qwen3 di Soul. Le varianti quantizzate, mixture-of-experts e multimodali non sono incluse in questo catalogo.</p>
+            <p>La memoria totale è solo una prima verifica. Il modello deve comunque poter essere distribuito tra le singole macchine, con spazio per gli strati, la cache del contesto e l’esecuzione. Contano anche lo spazio su disco, la disponibilità dei nodi e le connessioni. Più memoria non permette di prevedere la velocità di risposta e non garantisce l’installazione.</p>
+            <p>I nomi dei modelli e il numero di parametri sono stati verificati nei metadati Hugging Face dei rispettivi autori il 7 ottobre 2026. Apri il link di ciascun modello per consultarne la scheda e la licenza. Questi esempi sono una selezione: non comprendono tutti i modelli supportati e non sono raccomandazioni sulle prestazioni.</p>
           </div>
         </details>
         <aside class="model-next-step">
           <span class="little-star" aria-hidden="true">✳</span>
-          <div><h3>Found a model that fits your plans?</h3>
-            <p>Copy its model ID and ask the network operator to download and prepare it in the controller’s
-              Models panel. Once it is prepared and executable, discover it through the inference API.</p></div>
-          <a class="button button-small" href="https://mastrogiovanni.ddns.net/soul/">Open the controller <span aria-hidden="true">↗</span></a>
+          <div><h3>Hai trovato un modello adatto ai tuoi progetti?</h3>
+            <p>Copia il suo ID e chiedi al gestore della rete di scaricarlo e prepararlo nel pannello Models del controller. Quando sarà pronto ed eseguibile, lo troverai tramite l’API di inferenza.</p></div>
+          <a class="button button-small" href="https://mastrogiovanni.ddns.net/soul/">Apri il controller <span aria-hidden="true">↗</span></a>
         </aside>
       </section>
 
       <section class="section gallery-section" aria-labelledby="gallery-title">
         <div class="section-heading">
-          <p class="eyebrow">04 / A CLOSER LOOK</p>
+          <p class="eyebrow">04 / UNO SGUARDO DA VICINO</p>
           <div class="heading-row">
             <h2 id="gallery-title">
-              Small contributions.<br /><em>Shared horizons.</em>
+              Piccoli contributi.<br /><em>Orizzonti condivisi.</em>
             </h2>
             <p>
-              From the computer on your desk to the controller bringing it all
-              together. Explore the different sides of Soul.
+              Dal computer sulla tua scrivania al controller che coordina il lavoro. Scopri i diversi aspetti di Soul.
             </p>
           </div>
         </div>
@@ -588,21 +523,19 @@
               class="gallery-open"
               href="assets/workspace.jpg"
               data-gallery="0"
-              aria-label="Enlarge: A place for your machine"
+              aria-label="Ingrandisci: Un posto per il tuo computer"
               ><img
                 src="assets/workspace.jpg"
-                alt="Illustrative sunlit workspace with a laptop on a wooden desk"
+                alt="Illustrazione di una postazione illuminata dal sole, con un portatile su una scrivania in legno"
                 width="1536"
                 height="1024"
                 loading="lazy"
-              /><span class="image-tag">THE CONTRIBUTOR</span
-              ><span class="expand-icon" aria-hidden="true">↗</span></a
-            >
+              /><span class="image-tag">CHI CONTRIBUISCE</span><span class="expand-icon" aria-hidden="true">↗</span></a>
             <figcaption>
               <span>01</span>
               <div>
-                <h3>A place for your machine.</h3>
-                <p>Connect compatible hardware you already have.</p>
+                <h3>Un posto per il tuo computer.</h3>
+                <p>Collega l’hardware compatibile che già possiedi.</p>
               </div>
             </figcaption>
           </figure>
@@ -611,21 +544,19 @@
               class="gallery-open console-preview"
               href="assets/console.jpg"
               data-gallery="1"
-              aria-label="Enlarge: A window into the network"
+              aria-label="Ingrandisci: Una finestra sulla rete"
               ><img
                 src="assets/console.jpg"
-                alt="Soul demo admin console showing two CPU nodes, model distribution, and request activity"
+                alt="Console dimostrativa di amministrazione Soul con due nodi CPU, distribuzione dei modelli e attività delle richieste"
                 width="1265"
                 height="1236"
                 loading="lazy"
-              /><span class="image-tag">THE CONTROL ROOM</span
-              ><span class="expand-icon" aria-hidden="true">↗</span></a
-            >
+              /><span class="image-tag">LA SALA DI CONTROLLO</span><span class="expand-icon" aria-hidden="true">↗</span></a>
             <figcaption>
               <span>02</span>
               <div>
-                <h3>A window into the network.</h3>
-                <p>Real console, shown with local demo data.</p>
+                <h3>Una finestra sulla rete.</h3>
+                <p>La console reale, con dati dimostrativi locali.</p>
               </div>
             </figcaption>
           </figure>
@@ -634,148 +565,125 @@
               class="gallery-open"
               href="assets/network.jpg"
               data-gallery="2"
-              aria-label="Enlarge: Something greater, together"
+              aria-label="Ingrandisci: Qualcosa di più grande, insieme"
               ><img
                 src="assets/network.jpg"
-                alt="Conceptual artwork of glowing connections between metal cubes around a central sphere"
+                alt="Illustrazione concettuale di connessioni luminose tra cubi metallici attorno a una sfera centrale"
                 width="1536"
                 height="1024"
                 loading="lazy"
-              /><span class="image-tag">THE BIGGER PICTURE</span
-              ><span class="expand-icon" aria-hidden="true">↗</span></a
-            >
+              /><span class="image-tag">IL PROGETTO COMUNE</span><span class="expand-icon" aria-hidden="true">↗</span></a>
             <figcaption>
               <span>03</span>
               <div>
-                <h3>Something greater, together.</h3>
-                <p>Every available node adds possibilities.</p>
+                <h3>Qualcosa di più grande, insieme.</h3>
+                <p>Ogni nodo disponibile aggiunge possibilità.</p>
               </div>
             </figcaption>
           </figure>
         </div>
         <p class="gallery-footnote">
-          Workspace and network images are AI-created illustrations. The console
-          image is a product screenshot, not live network statistics.
+          Le immagini della postazione e della rete sono illustrazioni generate con l’IA. L’immagine della console è una schermata del prodotto, non una visualizzazione delle statistiche in tempo reale.
         </p>
       </section>
 
       <section class="join-section" id="join" aria-labelledby="join-title">
         <div class="join-intro">
-          <p class="eyebrow">05 / YOU’RE PART OF THE PICTURE</p>
-          <h2 id="join-title">Give your compute<br />some <em>company.</em></h2>
+          <p class="eyebrow">05 / ANCHE TU FAI PARTE DEL PROGETTO</p>
+          <h2 id="join-title">Dai alle tue risorse<br />una nuova <em>compagnia.</em></h2>
           <p>
-            Run the agent on the machine you want to contribute. It installs the
-            dependencies, chooses a compatible compute profile, and connects to
-            the Soul community controller.
+            Avvia l’agente sulla macchina che vuoi mettere a disposizione. Installa le dipendenze, sceglie un profilo di calcolo compatibile e si connette al controller della comunità Soul.
           </p>
           <a class="text-link" href="https://mastrogiovanni.ddns.net/soul/"
-            >Open the controller <span aria-hidden="true">↗</span></a
-          >
+            >Apri il controller <span aria-hidden="true">↗</span></a>
         </div>
         <div class="join-panel">
           <div class="terminal-heading">
-            <span><i></i><i></i><i></i></span><span>YOUR TERMINAL</span
-            ><span aria-hidden="true">↗</span>
+            <span><i></i><i></i><i></i></span><span>IL TUO TERMINALE</span><span aria-hidden="true">↗</span>
           </div>
           <div class="terminal-body">
-            <p class="terminal-comment"># One command to join the community</p>
+            <p class="terminal-comment"># Un solo comando per unirti alla comunità</p>
             <pre><code id="install-command">curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh | bash</code></pre>
             <button
               class="button button-lime copy-button"
               data-copy="install-command"
             >
-              Copy install command <span aria-hidden="true">⧉</span>
+              Copia il comando di installazione <span aria-hidden="true">⧉</span>
             </button>
             <p class="terminal-note">
-              No Git checkout, preinstalled Python, or sudo required.
+              Non servono un checkout Git, Python preinstallato o sudo.
             </p>
           </div>
           <div class="join-reminder">
             <span aria-hidden="true">↳</span>
             <p>
-              Keep the terminal open to contribute.<br />Press <kbd>Ctrl</kbd> +
-              <kbd>C</kbd> whenever you want to stop.
+              Tieni aperto il terminale per contribuire.<br />Premi <kbd>Ctrl</kbd> +
+              <kbd>C</kbd> quando vuoi interrompere.
             </p>
           </div>
         </div>
         <div class="requirements" id="requirements">
           <div>
-            <span class="eyebrow">BEFORE YOU CONNECT</span>
-            <h3>A good fit for your machine.</h3>
+            <span class="eyebrow">PRIMA DI CONNETTERTI</span>
+            <h3>Verifica il tuo computer.</h3>
           </div>
           <ul>
             <li>
-              <strong>Apple Silicon macOS</strong
-              ><span>Run natively, with Metal or CPU.</span>
+              <strong>macOS con Apple Silicon</strong><span>Esecuzione nativa, con Metal o CPU.</span>
             </li>
             <li>
-              <strong>Linux x86_64 or ARM64</strong
-              ><span>glibc 2.28+. CPU or supported NVIDIA GPU.</span>
+              <strong>Linux x86_64 o ARM64</strong><span>glibc 2.28+. CPU o GPU NVIDIA supportata.</span>
             </li>
             <li>
-              <strong>Memory, disk &amp; connection</strong
-              ><span
-                >The agent uses your resources and downloads assigned weights.
-                Initial setup can take several minutes.</span
-              >
+              <strong>Memoria, disco e connessione</strong><span
+                >L’agente usa le tue risorse e scarica i pesi assegnati. La configurazione iniziale può richiedere diversi minuti.</span>
             </li>
           </ul>
         </div>
         <details class="install-details">
           <summary>
-            Installation options, resource limits &amp; troubleshooting
+            Opzioni di installazione, limiti delle risorse e risoluzione dei problemi
             <span aria-hidden="true">+</span>
           </summary>
           <div class="details-content">
-            <h3>Choose your contribution</h3>
+            <h3>Scegli il tuo contributo</h3>
             <p>
-              Set a node name and an 8 GiB memory budget. This is a planning
-              budget, not hard resource isolation.
+              Imposta un nome per il nodo e un budget di memoria di 8 GiB. È un limite usato per pianificare il lavoro, non un isolamento rigido delle risorse.
             </p>
             <div class="code-line">
               <pre><code id="limited-command">curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh | bash -s -- -- --name my-soul-node --memory-gb 8</code></pre>
               <button
                 data-copy="limited-command"
-                aria-label="Copy installation command with memory budget"
+                aria-label="Copia il comando di installazione con budget di memoria"
               >
-                Copy
+                Copia
               </button>
             </div>
-            <h3>Restart when you’re ready</h3>
+            <h3>Riavvia quando vuoi</h3>
             <div class="code-line">
               <pre><code id="restart-command">~/.local/share/soul/bin/soul-node</code></pre>
               <button
                 data-copy="restart-command"
-                aria-label="Copy restart command"
+                aria-label="Copia il comando di riavvio"
               >
-                Copy
+                Copia
               </button>
             </div>
             <p>
-              The default budget is 75% of available device memory. Model
-              tensors stay on disk for reuse; there is no automatic disk quota.
-              Electricity, bandwidth, and hardware are your contribution. The
-              agent does not install a boot service.
+              Il budget predefinito è il 75% della memoria disponibile sul dispositivo. I tensori del modello restano sul disco per essere riutilizzati; non è previsto un limite automatico allo spazio occupato. Elettricità, banda e hardware sono il tuo contributo. L’agente non installa un servizio di avvio automatico.
             </p>
-            <h3>Check the fit</h3>
+            <h3>Controlla la compatibilità</h3>
             <p>
-              NVIDIA requires a working driver and compatible CUDA profile.
-              Native Windows, Intel Macs, and Alpine/musl are not supported by
-              this installer. Windows users can use a supported WSL2 Linux
-              environment.
+              NVIDIA richiede un driver funzionante e un profilo CUDA compatibile. Questo programma di installazione non supporta Windows nativo, Mac Intel e Alpine/musl. Su Windows puoi usare un ambiente Linux WSL2 supportato.
             </p>
-            <h3>If you can’t connect</h3>
+            <h3>Se non riesci a connetterti</h3>
             <p>
-              Check your internet connection and
-              <code>~/.cache/soul/node.log</code>. If the installer is
-              unavailable or enrollment is rejected, contact the operator. If
-              the controller requires an additional sign-in, the operator must
-              provide those credentials.
+              Controlla la connessione internet e il file
+              <code>~/.cache/soul/node.log</code>. Se il programma di installazione non è disponibile o l’iscrizione del nodo viene rifiutata, contatta il gestore. Se il controller richiede un ulteriore accesso, il gestore deve fornirti le relative credenziali.
             </p>
             <p>
               <a href="https://mastrogiovanni.ddns.net/soul/install.sh"
-                >Read the installer before running it ↗</a
-              >
+                >Leggi il programma di installazione prima di eseguirlo ↗</a>
             </p>
           </div>
         </details>
@@ -787,49 +695,43 @@
         aria-labelledby="inference-title"
       >
         <div>
-          <p class="eyebrow">06 / FROM CONTRIBUTION TO CREATION</p>
-          <h2 id="inference-title">Make something<br />with <em>Soul.</em></h2>
+          <p class="eyebrow">06 / DAL CONTRIBUTO ALLA CREAZIONE</p>
+          <h2 id="inference-title">Crea qualcosa<br />con <em>Soul.</em></h2>
           <p class="section-description">
-            Connect your organization’s tools to the community’s prepared
-            models. Process work in batches through your own automation, and
-            make the results available when your team is ready to review them.
+            Collega gli strumenti della tua organizzazione ai modelli preparati dalla comunità. Elabora le attività in batch tramite le tue automazioni e rendi disponibili i risultati quando il gruppo sarà pronto a rivederli.
           </p>
           <ul class="check-list">
-            <li>OpenAI-compatible chat and text completions</li>
-            <li>Anthropic-compatible Messages API</li>
-            <li>JSON or streaming responses for your existing tools</li>
+            <li>Completamenti di chat e testo compatibili con OpenAI</li>
+            <li>API Messages compatibile con Anthropic</li>
+            <li>Risposte JSON o in streaming per gli strumenti che già usi</li>
           </ul>
           <div class="access-note">
-            <strong>Get your inference access.</strong>
+            <strong>Ottieni l’accesso all’inferenza.</strong>
             <p>
-              Ask the operator for an inference API key and the available model
-              IDs. Joining as a compute node does not automatically issue an API
-              key; the enrollment token is separate.
+              Chiedi al gestore una chiave API di inferenza e gli ID dei modelli disponibili. Partecipare come nodo di calcolo non assegna automaticamente una chiave API: il token di iscrizione del nodo è separato.
             </p>
             <a class="text-link" href="https://github.com/mastrogiovanni"
-              >Find the community operator <span aria-hidden="true">↗</span></a
-            >
+              >Trova il gestore della comunità <span aria-hidden="true">↗</span></a>
           </div>
         </div>
         <div class="api-panel">
           <div class="api-heading">
-            <span>YOUR FIRST REQUEST</span
-            ><button
+            <span>LA TUA PRIMA RICHIESTA</span><button
               data-copy="api-command"
-              aria-label="Copy inference example"
+              aria-label="Copia l’esempio di inferenza"
             >
-              Copy code ⧉
+              Copia il codice ⧉
             </button>
           </div>
-          <pre><code id="api-command"># Set the inference key supplied by the operator.
+          <pre><code id="api-command"># Imposta la chiave di inferenza fornita dal gestore.
 export SOUL_API_KEY='YOUR_INFERENCE_KEY'
 
-# Discover prepared, available models.
+# Scopri i modelli preparati e disponibili.
 curl --fail-with-body \
   https://mastrogiovanni.ddns.net/soul/v1/models \
   -H "Authorization: Bearer $SOUL_API_KEY"
 
-# Replace MODEL_ID with an ID from that list.
+# Sostituisci MODEL_ID con un ID presente nella lista.
 curl --fail-with-body \
   https://mastrogiovanni.ddns.net/soul/v1/chat/completions \
   -H "Authorization: Bearer $SOUL_API_KEY" \
@@ -838,181 +740,133 @@ curl --fail-with-body \
     "model": "MODEL_ID",
     "messages": [{
       "role": "user",
-      "content": "Summarize these volunteer notes: Food collection moved to Friday. Maya will confirm drivers."
+      "content": "Riassumi queste note dei volontari: La raccolta alimentare è spostata a venerdì. Maya confermerà gli autisti."
     }],
     "max_tokens": 80,
     "stream": false
   }'</code></pre>
           <div class="api-footer">
-            Already using an OpenAI-compatible client?<br /><strong
-              >Set its base URL to
-              <code>https://mastrogiovanni.ddns.net/soul/v1</code>.</strong
-            ><a href="https://mastrogiovanni.ddns.net/soul/docs"
-              >Explore the API reference ↗</a
-            >
+            Usi già un client compatibile con OpenAI?<br /><strong
+              >Imposta come URL di base
+              <code>https://mastrogiovanni.ddns.net/soul/v1</code>.</strong><a href="https://mastrogiovanni.ddns.net/soul/docs"
+              >Consulta la documentazione API ↗</a>
           </div>
         </div>
       </section>
 
       <section class="section faq-section" aria-labelledby="faq-title">
         <div>
-          <p class="eyebrow">A FEW THINGS TO KNOW</p>
-          <h2 id="faq-title">Good questions.<br /><em>Clear answers.</em></h2>
+          <p class="eyebrow">ALCUNE COSE DA SAPERE</p>
+          <h2 id="faq-title">Domande utili.<br /><em>Risposte chiare.</em></h2>
         </div>
         <div class="faq-list">
           <details id="latency-faq">
             <summary>
-              Why accept higher latency?<span aria-hidden="true">+</span>
+              Perché accettare tempi di risposta più lunghi?<span aria-hidden="true">+</span>
             </summary>
             <p>
-              Soul prioritizes helping communities and nonprofits access large
-              language models with less setup effort by sharing available
-              machines. This can mean longer, variable waits. Email digests,
-              document processing, and periodic reports can still be useful
-              when completed later. Applications that need immediate,
-              predictable responses are a less suitable fit.
+              Soul vuole soprattutto aiutare comunità e organizzazioni non profit ad accedere ai grandi modelli linguistici con meno lavoro di configurazione, condividendo le macchine disponibili. Questo può comportare attese più lunghe e variabili. Riepiloghi delle email, elaborazione di documenti e report periodici restano utili anche se completati più tardi. Le applicazioni che richiedono risposte immediate e prevedibili sono meno adatte.
             </p>
           </details>
           <details>
             <summary>
-              Does Soul include a batch job platform?<span aria-hidden="true">+</span>
+              Soul include una piattaforma per attività batch?<span aria-hidden="true">+</span>
             </summary>
             <p>
-              Soul currently provides inference APIs with a bounded request
-              queue and one active generation at a time. It does not include a
-              durable background job service or a dedicated Batch API. Your
-              application schedules individual inference calls, saves progress,
-              and retries failed work. The use cases above are ideas for
-              integrations, not preinstalled applications.
+              Al momento Soul fornisce API di inferenza con una coda di richieste limitata e una sola generazione attiva alla volta. Non include un servizio persistente per attività in background né un’API Batch dedicata. La tua applicazione pianifica le singole chiamate di inferenza, salva i progressi e riprova le attività non riuscite. I casi d’uso descritti sono idee di integrazione, non applicazioni preinstallate.
             </p>
           </details>
           <details id="network-faq">
             <summary>
-              Does more compute mean more speed and redundancy?<span
+              Più risorse significano più velocità e ridondanza?<span
                 aria-hidden="true"
-                >+</span
-              >
+                >+</span>
             </summary>
             <p>
-              More suitable nodes add memory capacity and placement choices. The
-              controller can repair missing model stages when enough capacity
-              remains, and reusable cached tensors can reduce preparation time.
-              Today Soul runs one active generation at a time. A disconnected
-              node can interrupt a request, and adding stages can add network
-              latency. There is one controller; automatic controller failover,
-              replicas, and concurrent pipelines are future work.
+              Più nodi adatti aggiungono memoria e opzioni per distribuire il modello. Il controller può ricostruire le fasi mancanti quando resta capacità sufficiente, e i tensori riutilizzabili in cache possono ridurre i tempi di preparazione. Oggi Soul esegue una sola generazione attiva alla volta. La disconnessione di un nodo può interrompere una richiesta e l’aggiunta di fasi può aumentare la latenza di rete. Il controller è uno solo: sostituzione automatica del controller in caso di guasto, repliche e pipeline concorrenti sono sviluppi futuri.
             </p>
           </details>
           <details>
             <summary>
-              Can I use the system after I join?<span aria-hidden="true"
-                >+</span
-              >
+              Posso usare il sistema dopo essermi unito alla rete?<span aria-hidden="true"
+                >+</span>
             </summary>
             <p>
-              Members can use prepared models with an inference API key supplied
-              by the operator. Node enrollment and inference access use
-              different credentials. Model availability depends on connected
-              capacity, and the operator manages the catalog. This site does not
-              create an account or issue a key.
+              I partecipanti possono usare i modelli preparati con una chiave API di inferenza fornita dal gestore. L’iscrizione del nodo e l’accesso all’inferenza usano credenziali diverse. La disponibilità dei modelli dipende dalla capacità connessa e il gestore amministra il catalogo. Questo sito non crea un account e non rilascia chiavi.
             </p>
           </details>
           <details>
             <summary>
-              What am I sharing, and can I stop?<span aria-hidden="true"
-                >+</span
-              >
+              Che cosa condivido e posso interrompere?<span aria-hidden="true"
+                >+</span>
             </summary>
             <p>
-              Your node contributes memory, processing, disk space, electricity,
-              and network bandwidth. You can set a memory budget and stop the
-              foreground agent with Ctrl+C. Downloaded model files remain cached
-              for reuse. Stopping a node that is serving a model can interrupt
-              an active request.
+              Il tuo nodo mette a disposizione memoria, calcolo, spazio su disco, elettricità e banda di rete. Puoi impostare un budget di memoria e interrompere l’agente in primo piano con Ctrl+C. I file dei modelli scaricati restano in cache per essere riutilizzati. Interrompere un nodo che sta eseguendo un modello può interrompere una richiesta attiva.
             </p>
           </details>
           <details>
             <summary>
-              Which models can the community run?<span aria-hidden="true"
-                >+</span
-              >
+              Quali modelli può eseguire la comunità?<span aria-hidden="true"
+                >+</span>
             </summary>
             <p>
-              Soul currently supports standard, unquantized safetensors models
-              with llama, mistral, qwen2, or qwen3 architectures. Availability
-              depends on administrator preparation, model permissions, and
-              network capacity. It does not provide proprietary OpenAI or
-              Anthropic models; its APIs use compatible request formats.
-              <a href="#models">Browse model candidates and estimate their memory needs.</a>
+              Soul supporta attualmente modelli safetensors standard, non quantizzati, con architetture llama, mistral, qwen2 o qwen3. La disponibilità dipende dalla preparazione da parte dell’amministratore, dai permessi del modello e dalla capacità della rete. Non fornisce i modelli proprietari di OpenAI o Anthropic: le sue API usano formati di richiesta compatibili.
+              <a href="#models">Esplora i modelli e stima quanta memoria richiedono.</a>
             </p>
           </details>
           <details>
             <summary>
-              Is this a private place for sensitive prompts?<span
+              È un ambiente riservato per contenuti sensibili?<span
                 aria-hidden="true"
-                >+</span
-              >
+                >+</span>
             </summary>
             <p>
-              Participating nodes process prompts, intermediate activations, and
-              parts of the model. Only use a network whose operators and
-              contributors you trust, and avoid sending confidential information
-              to an untrusted community. HTTPS protects connections; it does not
-              hide computation from the machines doing the work.
+              I nodi partecipanti elaborano i prompt, le attivazioni intermedie e parti del modello. Usa solo una rete di cui ritieni affidabili gestori e partecipanti ed evita di inviare informazioni riservate a una comunità di cui non ti fidi. HTTPS protegge le connessioni, ma non nasconde l’elaborazione alle macchine che la eseguono.
             </p>
           </details>
           <details>
             <summary>
-              Where do I get help?<span aria-hidden="true">+</span>
+              Dove posso trovare aiuto?<span aria-hidden="true">+</span>
             </summary>
             <p>
-              Start with the installation options above or the
+              Inizia dalle opzioni di installazione qui sopra o dalla
               <a href="https://mastrogiovanni.ddns.net/soul/docs"
-                >controller’s API reference</a
-              >. For enrollment, an inference key, or an additional controller
-              sign-in,
+                >documentazione API del controller</a>. Per l’iscrizione del nodo, una chiave di inferenza o un ulteriore accesso al controller,
               <a href="https://github.com/mastrogiovanni"
-                >find the operator on GitHub</a
-              >.
+                >trova il gestore su GitHub</a>.
             </p>
           </details>
         </div>
       </section>
       <section class="closing">
         <span class="closing-star" aria-hidden="true">✳</span>
-        <p>The next node could be yours.</p>
+        <p>Il prossimo nodo potrebbe essere il tuo.</p>
         <a class="button button-lime" href="#join"
-          >Let’s build it together <span aria-hidden="true">↗</span></a
-        >
+          >Costruiamolo insieme <span aria-hidden="true">↗</span></a>
       </section>
     </main>
     <footer>
-      <a class="brand" href="#" aria-label="Soul home"
+      <a class="brand" href="#" aria-label="Pagina iniziale di Soul"
         ><svg viewBox="0 0 40 40" aria-hidden="true">
-          <path d="M20 3v34M3 20h34M8 8l24 24M8 32 32 8" /></svg
-        >soul</a
-      >
-      <p>One model. Many machines.</p>
+          <path d="M20 3v34M3 20h34M8 8l24 24M8 32 32 8" /></svg>soul</a>
+      <p>Un modello. Tante macchine.</p>
       <div>
-        <a href="#models">Model explorer ↗</a>
-        <a href="https://mastrogiovanni.ddns.net/soul/">Controller ↗</a
-        ><a href="https://mastrogiovanni.ddns.net/soul/docs">API reference ↗</a
-        ><a href="https://github.com/mastrogiovanni">Community operator ↗</a>
+        <a href="#models">Esplora i modelli ↗</a>
+        <a href="https://mastrogiovanni.ddns.net/soul/">Controller ↗</a><a href="https://mastrogiovanni.ddns.net/soul/docs">Documentazione API ↗</a><a href="https://github.com/mastrogiovanni">Gestore della comunità ↗</a>
       </div>
     </footer>
 
     <dialog id="gallery-dialog" aria-labelledby="gallery-caption">
       <div class="lightbox-bar">
-        <span>SOUL / A CLOSER LOOK</span
-        ><button id="gallery-close" aria-label="Close image gallery">
-          Close ×
+        <span>SOUL / UNO SGUARDO DA VICINO</span><button id="gallery-close" aria-label="Chiudi la galleria di immagini">
+          Chiudi ×
         </button>
       </div>
       <img id="gallery-image" src="assets/workspace.jpg" alt="" />
       <div class="lightbox-bottom">
-        <button id="gallery-previous" aria-label="Previous image">←</button>
+        <button id="gallery-previous" aria-label="Immagine precedente">←</button>
         <p id="gallery-caption"></p>
-        <button id="gallery-next" aria-label="Next image">→</button>
+        <button id="gallery-next" aria-label="Immagine successiva">→</button>
       </div>
     </dialog>
     <p id="copy-status" class="toast" role="status" aria-live="polite"></p>

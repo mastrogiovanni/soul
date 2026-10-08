@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: python3 scripts/build-site-locales.py --check
       - run: node --test tests/site/*.test.mjs
       - uses: astral-sh/setup-uv@v6
         with:
