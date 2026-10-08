@@ -22,6 +22,7 @@ class Peer:
         self.connected = True
         self.send_lock = asyncio.Lock()
         self.inventory = {}
+        self.downloading = False
         self.update_inventory(hello.get("inventory", []))
 
     def update_inventory(self, entries):

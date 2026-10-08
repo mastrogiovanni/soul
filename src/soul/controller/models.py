@@ -7,6 +7,8 @@ import time
 from dataclasses import asdict, replace
 from pathlib import Path
 
+import anyio
+
 from soul.catalog import ModelSpec, inspect_model
 from soul.planner import plan
 from soul.protocol import ARCHITECTURES, SoulError
@@ -119,6 +121,8 @@ class Models:
         for peer in self.engine.nodes.values():
             if self.engine.cache.paused(peer.id):
                 continue
+            if cached_only and peer.downloading and not peer.capabilities.get("concurrent_preload"):
+                continue
             entry = peer.inventory.get(spec.key)
             if not peer.connected or not entry or not supports(peer.capabilities, spec):
                 continue
@@ -126,7 +130,7 @@ class Models:
             if offer.get("context") != spec.max_context:
                 continue
             costs = offer["costs"]
-            if cached_only:
+            if cached_only or not self.can_download(peer):
                 costs = [
                     [
                         cost if offer["missing_bytes"][s][i] == 0 else float("inf")
@@ -254,6 +258,11 @@ class Models:
                     warning = "Downloading assigned tensors. Inference becomes available when the full pipeline fits."
                 elif record.get("error"):
                     warning = "Distribution interrupted. Cached tensors are kept. Choose Distribute missing to retry; new nodes also trigger a retry."
+                elif spec and any(
+                    peer.connected and not self.can_download(peer) and supports(peer.capabilities, spec)
+                    for peer in self.engine.nodes.values()
+                ):
+                    warning = "Some nodes need an update to download while serving. Update and restart their agents, or unload their GPU models and choose Distribute missing."
                 else:
                     warning = "Waiting for capacity: the full model does not fit the connected nodes' memory, disk space, or stage limits. Cached tensors are kept; missing pieces are distributed automatically when compatible nodes join."
             assignments = record.get("assignments", [])
@@ -286,11 +295,30 @@ class Models:
             )
         return result
 
+    def can_download(self, peer):
+        if peer.capabilities.get("concurrent_preload"):
+            return True
+        if peer.status.get("status") in ("ready", "loading"):
+            return False
+        # Old agents have one RPC worker. Preserve their loaded/loading stages
+        # instead of placing a long download ahead of the next inference RPC.
+        return not any(
+            deployment["status"] in ("ready", "loading")
+            and any(
+                a["node_id"] == peer.id and a["generation"] == peer.generation
+                for a in deployment["assignments"]
+            )
+            for deployment in self.engine.deployments.values()
+        )
+
     async def refresh_offers(self, spec):
         peers = [
             p
             for p in self.engine.nodes.values()
-            if p.connected and not self.engine.cache.paused(p.id) and supports(p.capabilities, spec)
+            if p.connected
+            and not self.engine.cache.paused(p.id)
+            and supports(p.capabilities, spec)
+            and (not p.downloading or p.capabilities.get("concurrent_preload"))
         ]
         await asyncio.gather(
             *(p.call("offer", {"spec": spec.to_dict()}, timeout=self.engine.rpc_timeout) for p in peers),
@@ -305,11 +333,13 @@ class Models:
             assignments = self.placements(model, cached_only=False, partial=True)
             record.update(status="downloading", assignments=[asdict(a) for a in assignments], error=None)
             self.save(record)
-            pending = []
+            pending, downloading = [], []
             for assignment in assignments:
                 peer = self.engine.nodes[assignment.node_id]
                 offer = peer.inventory[spec.key]["offer"]
                 if offer["missing_bytes"][assignment.start][assignment.end - assignment.start - 1]:
+                    peer.downloading = True
+                    downloading.append(peer)
                     pending.append(
                         peer.call(
                             "preload",
@@ -321,7 +351,20 @@ class Models:
                             timeout=self.engine.load_timeout,
                         )
                     )
-            results = await asyncio.gather(*pending, return_exceptions=True)
+            try:
+                results = await asyncio.gather(*pending, return_exceptions=True)
+            except asyncio.CancelledError:
+                # A cancelled RPC can leave its download worker running. Fence
+                # it before another preparation or deletion may use that cache.
+                with anyio.CancelScope(shield=True):
+                    for peer in downloading:
+                        peer.disconnect("Preparation interrupted")
+                        with contextlib.suppress(Exception):
+                            await peer.ws.close(code=1011)
+                raise
+            finally:
+                for peer in downloading:
+                    peer.downloading = False
             error = next((r for r in results if isinstance(r, BaseException)), None)
             if error:
                 raise error
@@ -334,7 +377,7 @@ class Models:
         return next(v for v in self.views() if v["model"] == model)
 
     async def preload(self, model, revision=None):
-        async with self.engine.gate:
+        async with self.engine.preparation_gate:
             record = await self.register(model, revision)
             return await self.prepare(record)
 
@@ -355,9 +398,12 @@ class Models:
         while True:
             await self.changed.wait()
             self.changed.clear()
-            # Use the same gate as inference: no shard replacement during a request.
-            async with self.engine.gate:
-                await self.engine.cache.reconcile()
+            async with self.engine.preparation_gate:
+                if self.engine.cache.snapshot() or any(
+                    r["pending"] for r in self.engine.cache.nodes.values()
+                ):
+                    async with self.engine.gate:
+                        await self.engine.cache.reconcile()
                 for model in list(self.records):
                     if not self.allowed(model):
                         continue

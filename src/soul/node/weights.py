@@ -6,6 +6,7 @@ import os
 import shutil
 import stat
 import struct
+import uuid
 from pathlib import Path
 
 from safetensors import safe_open
@@ -21,9 +22,12 @@ class WeightStore:
         self.root.mkdir(parents=True, exist_ok=True)
 
     def remember(self):
-        temporary = self.root / "manifest.partial"
-        temporary.write_text(json.dumps(self.spec.to_dict()))
-        temporary.replace(self.root / "manifest.json")
+        temporary = self.root / f"manifest.{uuid.uuid4().hex}.partial"
+        try:
+            temporary.write_text(json.dumps(self.spec.to_dict()))
+            temporary.replace(self.root / "manifest.json")
+        finally:
+            temporary.unlink(missing_ok=True)
 
     def available(self):
         result = []

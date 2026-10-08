@@ -7,6 +7,7 @@ import logging
 import random
 import re
 import socket
+import threading
 import time
 import unicodedata
 import uuid
@@ -93,10 +94,23 @@ class NodeClient:
             self.headers["Authorization"] = f"Basic {credential}"
         self.runtime = Runtime(cache_dir, **runtime_options)
         self.status = {"status": "idle"}
+        self.download_status = None
         self.initial_inventory = []
         handler = RotatingFileHandler(cache_dir / "node.log", maxBytes=5 * 1024**2, backupCount=2)
         handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
         log.addHandler(handler)
+
+    def status_snapshot(self):
+        status = dict(self.status)
+        download = self.download_status
+        if download is not None:
+            status["download"] = download
+            if status["status"] == "idle":
+                status.update(status="downloading", model=download["model"])
+            status.update(
+                {k: v for k, v in download.items() if k in ("downloaded_bytes", "total_bytes", "tensor")}
+            )
+        return status
 
     async def serve_connection(self, ws):
         send_lock = asyncio.Lock()
@@ -104,6 +118,12 @@ class NodeClient:
         async def send(message):
             async with send_lock:
                 await ws.send(pack(message))
+
+        async def send_status(kind="status"):
+            async with send_lock:
+                # Capture at publication time, not in the download thread: an
+                # older progress callback must not restore a stale GPU epoch.
+                await ws.send(pack({"type": kind, **self.status_snapshot(), "time": time.time()}))
 
         await send(
             {
@@ -121,17 +141,20 @@ class NodeClient:
         # Reconnection always starts without KV state or an authoritative assignment.
         await asyncio.to_thread(self.runtime.unload)
         self.status = {"status": "idle"}
+        self.download_status = None
         loop = asyncio.get_running_loop()
+        stopping = threading.Event()
 
         def progress(done, total, tensor):
-            self.status = {
-                **self.status,
-                "status": "downloading",
+            if stopping.is_set():
+                raise SoulError("Download connection closed")
+            self.download_status = {
+                **(self.download_status or {}),
                 "downloaded_bytes": done,
                 "total_bytes": total,
                 "tensor": tensor,
             }
-            future = asyncio.run_coroutine_threadsafe(send({"type": "status", **self.status}), loop)
+            future = asyncio.run_coroutine_threadsafe(send_status(), loop)
             try:
                 future.result(timeout=5)
             except Exception:
@@ -142,53 +165,98 @@ class NodeClient:
 
         async def heartbeat():
             while True:
-                await send({"type": "heartbeat", **self.status, "time": time.time()})
+                await send_status("heartbeat")
                 await asyncio.sleep(5)
 
-        task = asyncio.create_task(heartbeat())
-        try:
+        # Downloads have a separate worker; all GPU/KV operations retain FIFO
+        # ordering. A deletion drains earlier downloads and takes their lock.
+        execution_queue, download_queue = asyncio.Queue(32), asyncio.Queue(32)
+        cache_lock = asyncio.Lock()
+        inventory_lock = asyncio.Lock()
+
+        async def report_inventory(message):
+            # Serialize snapshot + publication so a slow offer cannot overwrite
+            # the inventory reported by a newly completed concurrent preload.
+            async with inventory_lock:
+                inventory = await in_thread(self.runtime.inventory)
+                if message["type"] == "result":
+                    message["result"]["inventory"] = inventory
+                else:
+                    message["inventory"] = inventory
+                await send(message)
+
+        async def execute(request):
+            method, args = request["method"], request.get("args", {})
+            try:
+                result = await in_thread(self.dispatch, method, args, progress)
+                if method in ("preload", "load", "unload", "release", "delete_model", "clear_cache"):
+                    await send_status()
+                message = {"type": "result", "id": request["id"], "result": result}
+                if method in ("offer", "preload", "delete_model", "clear_cache"):
+                    await report_inventory(message)
+                else:
+                    await send(message)
+                if method in ("preload", "load", "unload", "release", "delete_model", "clear_cache"):
+                    await send({"type": "log", "level": "INFO", "message": f"{method} completed"})
+            except Exception as exc:
+                log.exception("RPC %s failed", method)
+                if method in ("preload", "load", "delete_model", "clear_cache"):
+                    await report_inventory({"type": "inventory"})
+                if method in ("delete_model", "clear_cache") and self.runtime.model is None:
+                    self.status = {"status": "idle"}
+                if method in ("load", "forward"):
+                    await in_thread(self.runtime.unload)
+                    self.status = {"status": "error", "error": str(exc)[:500]}
+                await send_status()
+                await send(
+                    {
+                        "type": "result",
+                        "id": request["id"],
+                        "error": str(exc)[:500],
+                        "status": exc.status if isinstance(exc, SoulError) else 503,
+                    }
+                )
+                await send({"type": "log", "level": "ERROR", "message": f"{method}: {str(exc)[:500]}"})
+
+        async def worker(queue, downloads=False):
+            while True:
+                request = await queue.get()
+                try:
+                    destructive = request["method"] in ("delete_model", "clear_cache")
+                    if destructive:
+                        await download_queue.join()
+                    if downloads or destructive:
+                        async with cache_lock:
+                            await execute(request)
+                    else:
+                        await execute(request)
+                finally:
+                    queue.task_done()
+
+        async def receive():
             async for data in ws:
                 request = unpack(data)
                 if request["type"] != "rpc":
                     raise ValueError("Expected an RPC request")
-                method, args = request["method"], request.get("args", {})
-                try:
-                    work = asyncio.create_task(asyncio.to_thread(self.dispatch, method, args, progress))
-                    try:
-                        result = await asyncio.shield(work)
-                    except asyncio.CancelledError:
-                        # Do not let an old worker mutate the cache/GPU after a new handshake.
-                        with contextlib.suppress(Exception):
-                            await work
-                        raise
-                    if method in ("preload", "load", "unload", "release", "delete_model", "clear_cache"):
-                        await send({"type": "status", **self.status})
-                    await send({"type": "result", "id": request["id"], "result": result})
-                    if method in ("preload", "load", "unload", "release", "delete_model", "clear_cache"):
-                        await send({"type": "log", "level": "INFO", "message": f"{method} completed"})
-                except Exception as exc:
-                    log.exception("RPC %s failed", method)
-                    if method in ("preload", "load", "delete_model", "clear_cache"):
-                        await send({"type": "inventory", "inventory": self.runtime.inventory()})
-                    if method in ("delete_model", "clear_cache") and self.runtime.model is None:
-                        self.status = {"status": "idle"}
-                        await send({"type": "status", **self.status})
-                    if method in ("load", "forward"):
-                        await asyncio.to_thread(self.runtime.unload)
-                        self.status = {"status": "error", "error": str(exc)[:500]}
-                    await send(
-                        {
-                            "type": "result",
-                            "id": request["id"],
-                            "error": str(exc)[:500],
-                            "status": exc.status if isinstance(exc, SoulError) else 503,
-                        }
-                    )
-                    await send({"type": "log", "level": "ERROR", "message": f"{method}: {str(exc)[:500]}"})
+                queue = download_queue if request["method"] == "preload" else execution_queue
+                await queue.put(request)
+
+        tasks = [
+            asyncio.create_task(receive()),
+            asyncio.create_task(heartbeat()),
+            asyncio.create_task(worker(execution_queue)),
+            asyncio.create_task(worker(download_queue, downloads=True)),
+        ]
+        try:
+            done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+            for task in done:
+                task.result()
         finally:
-            task.cancel()
-            with contextlib.suppress(asyncio.CancelledError, Exception):
-                await task
+            stopping.set()
+            for task in tasks:
+                task.cancel()
+            # in_thread drains active work before reconnecting or unloading.
+            await asyncio.gather(*tasks, return_exceptions=True)
 
     def dispatch(self, method, args, progress):
         if method in ("delete_model", "clear_cache"):
@@ -198,14 +266,12 @@ class NodeClient:
             freed = self.runtime.delete_cache(model, args.get("keys", []))
             if self.runtime.model is None:
                 self.status = {"status": "idle"}
-            return {"freed_bytes": freed, "inventory": self.runtime.inventory()}
+            return {"freed_bytes": freed}
         if method == "offer":
             offer = self.runtime.offer(ModelSpec(**args["spec"]))
-            return {**offer, "inventory": self.runtime.inventory()}
+            return offer
         if method == "preload":
-            previous = self.status
-            self.status = {
-                "status": "downloading",
+            self.download_status = {
                 "model": args["spec"]["model_id"],
                 "start": args["start"],
                 "end": args["end"],
@@ -213,8 +279,8 @@ class NodeClient:
             try:
                 self.runtime.preload(ModelSpec(**args["spec"]), args["start"], args["end"], progress)
             finally:
-                self.status = previous
-            return {"cached": True, "inventory": self.runtime.inventory()}
+                self.download_status = None
+            return {"cached": True}
         if method == "load":
             self.status = {"status": "loading"}
             self.runtime.load(

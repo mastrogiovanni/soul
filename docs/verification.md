@@ -1,5 +1,11 @@
 # Verification record
 
+## Serving during model downloads — 2026-10-08
+
+- **Automated suite:** **168 tests passed, 4 CUDA tests skipped** because CUDA was unavailable. Nine new integration cases hold real node downloads open while checking controller state, model listings, normal and streaming inference, both GPU-resident and disk-cached models, explicit and background preparation, prompt rejection of incomplete models, download failures, cancellation/reconnect fencing, queued cache clearing, and legacy-node compatibility. Inference finishes before the test releases downloads.
+- **Browser:** an isolated controller under `/soul` and two CPU nodes completed an inference while both nodes' other-model downloads were held. The Nodes page showed **ready** alongside the separate download model/progress; the downloading model's topology showed **downloading**. No browser console warnings/errors appeared. The temporary controller, nodes, and browser tab were stopped afterward.
+- **Static checks:** Ruff lint/format, JavaScript syntax, and whitespace checks passed. Existing dependency deprecation warnings remain. This verifies concurrent disk preparation and serving, not simultaneous generations or production-scale I/O throughput. Controller and node agents must both be updated for same-node download/inference concurrency; the production controller was not redeployed here.
+
 ## Model deletion and node cache cleanup — 2026-10-08
 
 - **Automated suite:** **159 tests passed, 4 CUDA tests skipped** because CUDA was unavailable. New tests exercise admin authentication, loaded-model removal, retained models, offline cleanup and reconnects, restart persistence, older node capability handling, filesystem errors/retries, per-node download pause/resume, damaged manifests, invalid cache keys, symlink boundaries, repeated deletion, and serialization with inference. An initial run encountered an inference timeout; its isolated rerun and the full rerun passed.

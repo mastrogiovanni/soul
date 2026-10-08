@@ -59,6 +59,9 @@ class Engine:
         self.deployments = {d["model"]: {**d, "status": "stale"} for d in store.load("deployments")}
         self.specs = {}
         self.gate = asyncio.Lock()
+        # Disk preparation never owns the generation gate. Destructive cache
+        # operations acquire preparation first, then generation, in that order.
+        self.preparation_gate = asyncio.Lock()
         self.waiting = 0
         self.active = None
         self.max_context, self.max_queue, self.queue_timeout = max_context, max_queue, queue_timeout

@@ -51,7 +51,7 @@ Connect another compatible node using the control room's **Connect a node** inst
 
 After freeing disk space or changing a node's memory budget, choose **Distribute missing** to retry immediately. Restart a node after changing its launch options. Download failures show a separate error; already completed tensors are kept for the next retry. Both the model intention and node caches survive restarts. Offline nodes' caches are excluded from the connected progress count until they return. Byte progress counts unique checkpoint tensor payloads, not tokenizer files, cache overhead, or replicated edge tensors; 100% cached alone does not guarantee a feasible placement.
 
-**Preload and load GPU** still returns `503 model_not_ready` if the full pipeline cannot fit, but keeps the partial download and registered model for later completion. Use **Preload to disk** when planning ahead. Large downloads share the inference scheduling lock and can delay queued requests.
+**Preload and load GPU** still returns `503 model_not_ready` if the full pipeline cannot fit, but keeps the partial download and registered model for later completion. Use **Preload to disk** when planning ahead. Downloads run independently of inference. Ready and fully cached models can serve requests while another model downloads, including on the same updated nodes. Incomplete models return `503 model_not_ready` promptly. Update and restart the controller and node agents; older nodes defer new downloads while hosting a ready GPU stage. The controller still runs one generation at a time.
 
 ## Delete models and reclaim node space
 

@@ -151,6 +151,7 @@ class Runtime:
             "architectures": list(ARCHITECTURES),
             "quantizations": list(QUANTIZATIONS),
             "cache_management": True,
+            "concurrent_preload": True,
             "weight_mode": self.weight_mode,
             "ram_bytes": psutil.virtual_memory().total,
         }

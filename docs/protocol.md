@@ -7,7 +7,7 @@ All node traffic goes through an outward WebSocket connection to `<controller-ba
 Node → controller:
 
 ```json
-{"type":"hello","version":2,"node_id":"persistent-uuid","name":"mac-studio","capabilities":{"device":"mps","device_name":"Apple Metal (unified memory)","budget_bytes":12884901888,"dtype":"float16","architectures":["llama","mistral","qwen2","qwen3"],"quantizations":["awq-gemm-4","gptq-4"],"weight_mode":"resident","ram_bytes":34359738368},"inventory":[]}
+{"type":"hello","version":2,"node_id":"persistent-uuid","name":"mac-studio","capabilities":{"device":"mps","device_name":"Apple Metal (unified memory)","budget_bytes":12884901888,"dtype":"float16","architectures":["llama","mistral","qwen2","qwen3"],"quantizations":["awq-gemm-4","gptq-4"],"cache_management":true,"concurrent_preload":true,"weight_mode":"resident","ram_bytes":34359738368},"inventory":[]}
 ```
 
 Controller → node: `{"type":"welcome","version":2,"generation":"connection-uuid"}`.
@@ -39,7 +39,7 @@ Node → controller: `{"type":"result","id":"uuid","result":{...}}` or `{"type":
 
 `ModelSpec` contains model_id, resolved revision SHA, raw Transformers config, generation_config, max_context, and a map of tensor name → shard filename, byte offset/length, dtype and shape. No Hugging Face access token crosses this protocol. Tensors use the standard checkpoint layout and are reindexed locally inside the runtime.
 
-Nodes send asynchronous events: `heartbeat` every 5 seconds, `status` for progress/state, and `log` with level/message. The controller disconnects a node after 30 seconds without events. Node RPCs run in order; heartbeat/status transport remains live while GPU/download work runs in a worker thread.
+Nodes send asynchronous events: `heartbeat` every 5 seconds, `status` for progress/state, and `log` with level/message. The controller disconnects a node after 30 seconds without events. Nodes with `concurrent_preload: true` run `preload` in a separate FIFO download worker. All other RPCs retain FIFO execution ordering; cache deletion also waits for outstanding downloads. This permits GPU inference and disk-only downloads on the same node. Heartbeats/status retain the resident model and epoch and add an independent `download` object (`model`, `start`, `end`, `downloaded_bytes`, `total_bytes`, `tensor`) while a transfer is active. Progress fields appear as bytes arrive. Inventory snapshots are published in order across both workers. Controllers defer downloads on older nodes with ready GPU stages and avoid inference RPCs to older nodes already downloading. Upgrade/restart both controller and nodes for concurrency.
 
 A memory offer contains `budget_bytes`, triangular `costs[start][end-start-1]`, triangular `missing_bytes`, `disk_free_bytes`, `context`, and `weight_mode`. Missing bytes include a one-byte sentinel when first-stage tokenizer preparation is needed. Zero means the range is fully prepared. Offers account for the node's dtype, context, endpoints, KV cache, and workspace. Inventory updates accompany successful offer/preload results; an `inventory` event reports the remaining verified cache after a failed preload/load. These reports describe disk contents independently of GPU status. The controller does not send inference to a partial pipeline, and only preload/reconciliation downloads missing tensors.
 

@@ -56,7 +56,7 @@ class CacheManager:
         }
 
     async def delete_model(self, model):
-        async with self.engine.gate:
+        async with self.engine.preparation_gate, self.engine.gate:
             if model not in self.engine.models.records and model not in self.deleted:
                 raise SoulError("Unknown model", 404, "not_found")
             first_deletion = model not in self.deleted
@@ -101,7 +101,7 @@ class CacheManager:
             return {"deleted": model, **record}
 
     async def clear_node(self, node_id):
-        async with self.engine.gate:
+        async with self.engine.preparation_gate, self.engine.gate:
             if node_id not in self.engine.nodes and node_id not in self.engine.old_nodes:
                 raise SoulError("Unknown node", 404, "not_found")
             record = {"node_id": node_id, "pending": True, "error": None, "freed_bytes": 0}
@@ -113,7 +113,7 @@ class CacheManager:
             return {**record, "cache_paused": True}
 
     async def resume_node(self, node_id):
-        async with self.engine.gate:
+        async with self.engine.preparation_gate, self.engine.gate:
             if node_id not in self.engine.nodes and node_id not in self.engine.old_nodes:
                 raise SoulError("Unknown node", 404, "not_found")
             if self.nodes.get(node_id, {}).get("pending"):
@@ -126,7 +126,7 @@ class CacheManager:
             return {"node_id": node_id, "cache_paused": False}
 
     async def retry(self):
-        async with self.engine.gate:
+        async with self.engine.preparation_gate, self.engine.gate:
             await self.reconcile()
             self.engine.models.wake()
             return {"pending_models": self.snapshot(), "nodes": list(self.nodes.values())}
@@ -142,7 +142,7 @@ class CacheManager:
         return result
 
     async def reconcile(self):
-        # Callers hold the same gate as inference and preparation. Intentions stay
+        # Callers hold both preparation and generation gates. Intentions stay
         # pending until the current connection acknowledges deletion; cancellation
         # or a restart cannot allow downloads to race an unfinished removal.
         for node_id, record in list(self.nodes.items()):
