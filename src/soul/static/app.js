@@ -128,7 +128,49 @@ async function copyUsage(id) {
   }
 }
 
+let pendingDeletion = null, destructiveBusy = false;
+function confirmDeletion(kind, id) {
+  if (destructiveBusy) return;
+  const node = snapshot.nodes.find(n => n.node_id === id);
+  pendingDeletion = {kind, id};
+  $("delete-title").textContent = kind === "model" ? "Delete model?" : "Clear every cached layer?";
+  $("delete-target").textContent = kind === "model" ? id : `${node?.name || id} (${id})`;
+  $("delete-description").textContent = kind === "model" ? "Remove this model from the catalog, unload it, and delete all its cached revisions, tensors and tokenizer files across the nodes. Offline nodes will be cleaned when they reconnect." : "Unload this node and permanently remove every model layer and tokenizer in its Soul cache. Other nodes keep their files. Downloads to this node will stay paused until you choose Resume downloads. Offline nodes will be cleaned when they reconnect.";
+  $("delete-submit").textContent = kind === "model" ? "Delete model" : "Clear all cached layers";
+  $("delete-dialog").showModal();
+}
+$("delete-dialog").addEventListener("close", () => pendingDeletion = null);
+$("delete-form").onsubmit = async event => {
+  event.preventDefault();
+  if (!pendingDeletion || destructiveBusy) return;
+  const {kind, id} = pendingDeletion;
+  destructiveBusy = true; $("delete-dialog").close();
+  notice("Waiting for active work to finish, then removing cached files…");
+  try {
+    const result = kind === "model" ? await api("/admin/models/delete", {method:"POST", body:JSON.stringify({model:id})}) : await api(`/admin/nodes/${encodeURIComponent(id)}/cache`, {method:"DELETE"});
+    const pending = kind === "model" ? result.pending_nodes.length > 0 : result.pending;
+    notice(kind === "model" ? `${id} removed from the catalog. ${pending ? 'Some node files still await cleanup; see the pending list.' : `${bytes(result.freed_bytes)} of cached files removed.`}` : pending ? "Node cache clearing is queued. Downloads are paused; see the pending list." : `${bytes(result.freed_bytes)} of cached files removed from this node. Downloads are paused until you choose Resume downloads.`, !pending);
+  } catch (error) { notice(error.message); }
+  finally { destructiveBusy = false; await refresh(); }
+};
+
 document.addEventListener("click", async (event) => {
+  const deleteModel = event.target.closest("[data-delete-model]");
+  if (deleteModel) confirmDeletion("model", deleteModel.dataset.deleteModel);
+  const clearCache = event.target.closest("[data-clear-cache]");
+  if (clearCache) confirmDeletion("node", clearCache.dataset.clearCache);
+  const resumeCache = event.target.closest("[data-resume-cache]");
+  if (resumeCache) {
+    resumeCache.disabled = true;
+    try { await api(`/admin/nodes/${encodeURIComponent(resumeCache.dataset.resumeCache)}/cache/resume`, {method:"POST"}); notice("Downloads resumed. Registered models will be distributed as capacity allows.", true); }
+    catch (error) { notice(error.message); } finally { resumeCache.disabled = false; await refresh(); }
+  }
+  const retryCleanup = event.target.closest("[data-retry-cleanup]");
+  if (retryCleanup) {
+    retryCleanup.disabled = true;
+    try { const result = await api("/admin/cache/retry", {method:"POST"}); const pending = result.pending_models.length || result.nodes.some(n => n.pending); notice(pending ? "Cleanup is still pending. Reconnect or update the listed nodes, then retry." : "Cache cleanup completed.", !pending); }
+    catch (error) { notice(error.message); } finally { retryCleanup.disabled = false; await refresh(); }
+  }
   const use = event.target.closest("[data-use-model]");
   if (use) openUsage(use.dataset.useModel);
   const copy = event.target.closest("[data-copy-use]");
@@ -152,8 +194,13 @@ document.addEventListener("click", async (event) => {
 });
 function renderTopology() {
   const model = snapshot.models.find((m) => m.model === selected);
-  if (!model) return;
-  const topology = $("topology"); topology.classList.remove("empty-topology");
+  const topology = $("topology");
+  if (!model) {
+    topology.classList.add("empty-topology");
+    renderHTML("topology", '<div class="controller-orb">✳</div><h3>No models registered</h3><p>Preload a model to distribute its layers across your nodes.</p>');
+    return;
+  }
+  topology.classList.remove("empty-topology");
   const stages = model.assignments.map((assignment, index) => {
     const node = snapshot.nodes.find((n) => n.node_id === assignment.node_id);
     const status = !node?.connected ? "offline" : ["available", "partial"].includes(model.status) ? "cached" : node.status;
@@ -163,6 +210,10 @@ function renderTopology() {
 }
 function render() {
   const {nodes, models, metrics} = snapshot, connected = nodes.filter((n) => n.connected), ready = models.filter((m) => m.executable);
+  const cleanup = (snapshot.cache_cleanup || []).map(item => `<li><strong>${escapeHTML(item.model)}</strong>: waiting for ${escapeHTML(item.pending_nodes.join(', '))}${Object.values(item.errors || {}).length ? `<small>${escapeHTML(Object.values(item.errors).join('; '))}</small>` : ''}</li>`);
+  cleanup.push(...nodes.filter(n => n.cache_clear_pending).map(n => `<li><strong>${escapeHTML(n.name)}</strong>: cache clearing pending${n.cache_error ? `<small>${escapeHTML(n.cache_error)}</small>` : ' · reconnect the node to finish'}</li>`));
+  $("cleanup-status").hidden = !cleanup.length;
+  renderHTML("cleanup-status", cleanup.length ? `<strong>Cache cleanup pending</strong><ul>${cleanup.join('')}</ul><button class="button secondary" data-retry-cleanup>Retry cleanup</button>` : '');
   const pendingModel = models.find(m => m.model === pendingNoticeModel);
   if (pendingModel) preparedNotice(pendingModel, pendingModel.model);
   $("stat-nodes").textContent = connected.length; $("stat-models").textContent = ready.length; $("stat-requests").textContent = number(metrics.counts.completed); $("stat-tokens").textContent = number(metrics.output_tokens);
@@ -175,8 +226,8 @@ function render() {
   renderTopology();
   $("node-preview").innerHTML = nodes.length ? nodes.slice(0,4).map((n) => `<div class="node-row"><div class="machine-icon">▣</div><div class="node-info"><strong>${escapeHTML(n.name)}</strong><small>${escapeHTML(n.capabilities.device_name)} · ${gib(n.capabilities.budget_bytes)}</small></div>${badge(n.status)}<button class="text-button" data-logs="${escapeHTML(n.node_id)}">Logs ↗</button></div>`).join("") : '<div class="empty-small">Your nodes will appear here when they connect.</div>';
   $("activity").innerHTML = metrics.recent.length ? metrics.recent.slice(0,4).map((r) => `<div class="activity-row"><span class="activity-mark">${r.status === "completed" ? "✓" : "↗"}</span><div><strong>${escapeHTML(r.model.split('/').pop())}</strong><small>${escapeHTML(r.status)} · ${r.output_tokens} tokens · ${r.duration.toFixed(1)}s</small></div><time class="activity-time">${new Date(r.created*1000).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}</time></div>`).join("") : '<div class="empty-small">No requests yet.<br><span>Ready when you are.</span></div>';
-  renderHTML("models-table", models.length ? `<table><thead><tr><th>MODEL</th><th>ARCHITECTURE</th><th>DISTRIBUTION</th><th>STATUS</th><th></th></tr></thead><tbody>${models.map((m)=>`<tr><td>${warningIcon(m)} ${escapeHTML(m.model)}<small>Revision ${escapeHTML(m.revision.slice(0,12))}</small></td><td>${escapeHTML(m.architecture)}<small>${escapeHTML(m.quantization === "none" ? "Unquantized" : m.quantization || "Unquantized")} · ${m.context} token context</small></td><td>${escapeHTML(distributionText(m))}${m.distribution ? `<small>${m.distribution.cached_tensors} / ${m.distribution.total_tensors} tensors · ${m.distribution.nodes} connected nodes</small><progress aria-label="Cached model tensor bytes" value="${m.distribution.cached_bytes}" max="${m.distribution.total_bytes || 1}"></progress>` : ''}</td><td>${badge(m.status)}</td><td><button data-use-model="${escapeHTML(m.model)}">Use model</button>${m.status === "ready" ? `<button data-unload="${escapeHTML(m.model)}">Unload GPU</button>` : `<button data-prepare-model="${escapeHTML(m.model)}" data-action="${m.executable ? 'load' : 'preload'}" ${m.status === 'downloading' ? 'disabled' : ''}>${m.executable ? 'Load GPU' : m.status === 'downloading' ? 'Distributing…' : 'Distribute missing'}</button>`}</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">No models yet. Preload a model to get started.</div>');
-  $("nodes-table").innerHTML = nodes.length ? `<table><thead><tr><th>NODE</th><th>HARDWARE</th><th>MEMORY BUDGET</th><th>CACHED LAYERS</th><th>STATE</th><th></th></tr></thead><tbody>${nodes.map((n)=>`<tr><td>${escapeHTML(n.name)}<small><code>${escapeHTML(n.node_id)}</code></small></td><td>${escapeHTML(n.capabilities.device_name)}<small>${escapeHTML(n.capabilities.dtype)} · ${escapeHTML(n.capabilities.weight_mode)} weights</small></td><td>${gib(n.capabilities.budget_bytes)}</td><td>${(n.cached_models || []).map((m)=>`${escapeHTML(modelLabel(m.model))}<small>${m.layers.length ? `Layers ${escapeHTML(layerRanges(m.layers))}` : "Partial cache"} · ${m.tensor_count} tensors</small>`).join('<br>') || '—'}</td><td>${badge(n.status)}${n.total_bytes ? `<small>${gib(n.downloaded_bytes)} / ${gib(n.total_bytes)}</small><progress value="${Number(n.downloaded_bytes)}" max="${Number(n.total_bytes)}"></progress>`:''}${n.tensor ? `<small>${escapeHTML(n.tensor)}</small>`:''}${n.error ? `<small>${escapeHTML(n.error)}</small>`:''}</td><td><button data-logs="${escapeHTML(n.node_id)}">View logs</button>${!n.connected ? `<button data-remove-node="${escapeHTML(n.node_id)}">Remove node</button>` : ''}</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">No nodes registered. Connect a node to contribute compute.</div>';
+  renderHTML("models-table", models.length ? `<table><thead><tr><th>MODEL</th><th>ARCHITECTURE</th><th>DISTRIBUTION</th><th>STATUS</th><th></th></tr></thead><tbody>${models.map((m)=>`<tr><td>${warningIcon(m)} ${escapeHTML(m.model)}<small>Revision ${escapeHTML(m.revision.slice(0,12))}</small></td><td>${escapeHTML(m.architecture)}<small>${escapeHTML(m.quantization === "none" ? "Unquantized" : m.quantization || "Unquantized")} · ${m.context} token context</small></td><td>${escapeHTML(distributionText(m))}${m.distribution ? `<small>${m.distribution.cached_tensors} / ${m.distribution.total_tensors} tensors · ${m.distribution.nodes} connected nodes</small><progress aria-label="Cached model tensor bytes" value="${m.distribution.cached_bytes}" max="${m.distribution.total_bytes || 1}"></progress>` : ''}</td><td>${badge(m.status)}</td><td><button data-use-model="${escapeHTML(m.model)}">Use model</button>${m.status === "ready" ? `<button data-unload="${escapeHTML(m.model)}">Unload GPU</button>` : `<button data-prepare-model="${escapeHTML(m.model)}" data-action="${m.executable ? 'load' : 'preload'}" ${m.status === 'downloading' ? 'disabled' : ''}>${m.executable ? 'Load GPU' : m.status === 'downloading' ? 'Distributing…' : 'Distribute missing'}</button>`}<button class="danger-button" data-delete-model="${escapeHTML(m.model)}">Delete model</button></td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">No models yet. Preload a model to get started.</div>');
+  $("nodes-table").innerHTML = nodes.length ? `<table><thead><tr><th>NODE</th><th>HARDWARE</th><th>MEMORY BUDGET</th><th>CACHED LAYERS</th><th>STATE</th><th></th></tr></thead><tbody>${nodes.map((n)=>`<tr><td>${escapeHTML(n.name)}<small><code>${escapeHTML(n.node_id)}</code></small></td><td>${escapeHTML(n.capabilities.device_name)}<small>${escapeHTML(n.capabilities.dtype)} · ${escapeHTML(n.capabilities.weight_mode)} weights</small></td><td>${gib(n.capabilities.budget_bytes)}</td><td>${(n.cached_models || []).map((m)=>`${escapeHTML(modelLabel(m.model))}<small>${m.layers.length ? `Layers ${escapeHTML(layerRanges(m.layers))}` : "Partial cache"} · ${m.tensor_count} tensors</small>`).join('<br>') || '—'}</td><td>${badge(n.status)}${n.cache_paused ? `<small>${n.cache_clear_pending ? 'Cache clear pending' : 'Downloads paused'}</small>` : ''}${n.total_bytes ? `<small>${gib(n.downloaded_bytes)} / ${gib(n.total_bytes)}</small><progress value="${Number(n.downloaded_bytes)}" max="${Number(n.total_bytes)}"></progress>`:''}${n.tensor ? `<small>${escapeHTML(n.tensor)}</small>`:''}${n.error ? `<small>${escapeHTML(n.error)}</small>`:''}</td><td><button data-logs="${escapeHTML(n.node_id)}">View logs</button><button class="danger-button" data-clear-cache="${escapeHTML(n.node_id)}" ${n.cache_clear_pending ? 'disabled' : ''}>Clear all cached layers</button>${n.cache_paused && !n.cache_clear_pending ? `<button data-resume-cache="${escapeHTML(n.node_id)}">Resume downloads</button>` : ''}${!n.connected ? `<button data-remove-node="${escapeHTML(n.node_id)}">Remove node</button>` : ''}</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">No nodes registered. Connect a node to contribute compute.</div>';
   $("requests-table").innerHTML = metrics.recent.length ? `<table><thead><tr><th>REQUEST</th><th>MODEL</th><th>STATUS</th><th>TOKENS IN / OUT</th><th>DURATION</th></tr></thead><tbody>${metrics.recent.map((r)=>`<tr><td><code>${escapeHTML(r.id.slice(0,20))}…</code><small>${new Date(r.created*1000).toLocaleString()}</small></td><td>${escapeHTML(r.model)}</td><td>${badge(r.status)}${r.error ? `<small>${escapeHTML(r.error)}</small>`:''}</td><td>${r.input_tokens} / ${r.output_tokens}</td><td>${r.duration.toFixed(2)}s</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">Requests appear here when you use an inference endpoint.</div>';
 }
 async function refresh(explicit=false) {

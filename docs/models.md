@@ -53,6 +53,18 @@ After freeing disk space or changing a node's memory budget, choose **Distribute
 
 **Preload and load GPU** still returns `503 model_not_ready` if the full pipeline cannot fit, but keeps the partial download and registered model for later completion. Use **Preload to disk** when planning ahead. Large downloads share the inference scheduling lock and can delay queued requests.
 
+## Delete models and reclaim node space
+
+In **Models**, choose **Delete model** and confirm the exact model in the dialog. Soul waits for active inference/preparation, removes the model from the catalog, unloads its GPU stages, and deletes all cached revisions of its tensors, tokenizer and manifests on connected nodes. Other models and request history remain. Inference can no longer select the deleted model.
+
+Offline or outdated nodes appear under **Cache cleanup pending**. Their files are removed when they reconnect with an updated agent. Deletion intentions survive controller restarts, so returning caches do not silently restore deleted models. Use **Retry cleanup** after fixing a filesystem/access error or updating a node. Re-adding the model is blocked until all known pending deletions finish, then **Preload a model** can download it again.
+
+In **Nodes**, the red **Clear all cached layers** button removes every model's files from that node's Soul `weights` directory, including incomplete downloads, and unloads its current stage. The confirmation identifies the node. Its identity, logs, source checkpoints, and other nodes' files are retained. Offline nodes can also be queued for clearing.
+
+Clearing a node **pauses downloads to that node**, including after reconnects and controller restarts, so automatic distribution cannot immediately refill the freed space. The model catalog remains intact; affected models may become partial and other nodes can continue repairing their placements. Choose **Resume downloads** after cleanup completes to use the node for model distribution again.
+
+Update and restart the controller **and nodes** to enable deletion. Agents advertise the `cache_management` capability; older agents keep cleanup pending with an upgrade message. Deletion only removes Soul-owned cache files, not a separate shared Hugging Face cache or an original local model directory. Reported bytes are removed regular-file sizes; filesystem allocation and free-space readings can differ.
+
 ## API example
 
 The controller base URL includes its path prefix, if any. Export your existing admin key locally; do not put it in model IDs or URLs.

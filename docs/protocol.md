@@ -18,6 +18,8 @@ Before opening the connection, nodes scan cache manifests and verify tensor chec
 
 ## RPC
 
+Nodes advertise `cache_management: true` in their capabilities to accept `delete_model` and `clear_cache`. This is an additive protocol-v2 capability. Controllers keep cleanup pending on older nodes with an upgrade message instead of claiming their files were removed. Upgrade and restart both controller and node agents to use cache deletion.
+
 Controller → node: `{"type":"rpc","id":"uuid","method":"...","args":{...}}`.
 
 Node → controller: `{"type":"result","id":"uuid","result":{...}}` or `{"type":"result","id":"uuid","error":"reason","status":503}`.
@@ -26,6 +28,8 @@ Node → controller: `{"type":"result","id":"uuid","result":{...}}` or `{"type":
 | --- | --- |
 | `offer` | ModelSpec → memory offer and refreshed full inventory |
 | `preload` | ModelSpec, inclusive `start`, exclusive `end` → download assigned tensors/tokenizer to disk; return `cached: true` and full inventory |
+| `delete_model` | `model` ID and optional known `keys` (24 lowercase hexadecimal cache IDs) → unload this model if resident and remove its known/discoverable cached revisions; return `freed_bytes` and full inventory |
+| `clear_cache` | No arguments → unload and remove the node's entire Soul `weights` directory; return `freed_bytes` and empty inventory |
 | `load` | ModelSpec, inclusive `start`, exclusive `end`, deployment `epoch` → ready; requires locally cached tensors/tokenizer, never downloads |
 | `unload` | No arguments → releases weights and all request caches |
 | `tokenize` | epoch and `messages` or `prompt` → `input_ids`, `eos_ids`; first stage only |

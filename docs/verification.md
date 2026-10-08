@@ -1,5 +1,11 @@
 # Verification record
 
+## Model deletion and node cache cleanup — 2026-10-08
+
+- **Automated suite:** **159 tests passed, 4 CUDA tests skipped** because CUDA was unavailable. New tests exercise admin authentication, loaded-model removal, retained models, offline cleanup and reconnects, restart persistence, older node capability handling, filesystem errors/retries, per-node download pause/resume, damaged manifests, invalid cache keys, symlink boundaries, repeated deletion, and serialization with inference. An initial run encountered an inference timeout; its isolated rerun and the full rerun passed.
+- **Browser:** a disposable controller under `/soul` verified both confirmation dialogs and cancellation. Local API operations removed real fixture caches; the UI showed a cleared node with **Resume downloads**, pending cleanup for offline nodes, and an empty model catalog/topology after deletion. No browser console errors appeared. Temporary nodes, controller, and browser tab were stopped afterward.
+- **Static checks:** Ruff lint/format, JavaScript syntax, and whitespace checks passed. Existing dependency deprecation warnings remain. Production caches were not touched or redeployed; controller and node agents must both be updated to enable the new cache-management RPCs.
+
 ## Partial model distribution — 2026-10-08
 
 - **Automated suite:** **147 tests passed, 4 CUDA tests skipped** because CUDA was unavailable. New real HTTP/WebSocket tests cover unquantized, AWQ and GPTQ models downloaded across an initially undersized cluster, expansion one node at a time, reuse without redownloading cached stages, inference only after full coverage, offline/reconnecting nodes, no-node persistence, and retained tensors after an interrupted download.

@@ -20,6 +20,8 @@ class Store:
             CREATE TABLE IF NOT EXISTS deployments (model TEXT PRIMARY KEY, data TEXT);
             CREATE TABLE IF NOT EXISTS nodes (id TEXT PRIMARY KEY, data TEXT);
             CREATE TABLE IF NOT EXISTS models (model TEXT PRIMARY KEY, data TEXT);
+            CREATE TABLE IF NOT EXISTS deleted_models (model TEXT PRIMARY KEY, data TEXT);
+            CREATE TABLE IF NOT EXISTS node_caches (id TEXT PRIMARY KEY, data TEXT);
         """)
         self.db.execute(
             "UPDATE requests SET status='failed', error='Controller restarted' WHERE status IN ('queued','running')"
@@ -44,17 +46,30 @@ class Store:
         self.db.commit()
 
     def save(self, table, key, data):
-        assert table in ("nodes", "deployments", "models")
+        assert table in ("nodes", "deployments", "models", "deleted_models", "node_caches")
         self.db.execute(f"INSERT OR REPLACE INTO {table} VALUES(?,?)", (key, json.dumps(data)))
         self.db.commit()
 
     def load(self, table):
-        assert table in ("nodes", "deployments", "models")
+        assert table in ("nodes", "deployments", "models", "deleted_models", "node_caches")
         return [json.loads(row[0]) for row in self.db.execute(f"SELECT data FROM {table}")]
 
     def delete_node(self, node_id):
         self.db.execute("DELETE FROM nodes WHERE id=?", (node_id,))
         self.db.commit()
+
+    def forget_model(self, model):
+        with self.db:
+            self.db.execute("DELETE FROM models WHERE model=?", (model,))
+            self.db.execute("DELETE FROM deployments WHERE model=?", (model,))
+
+    def restore_model(self, model):
+        with self.db:
+            self.db.execute("DELETE FROM deleted_models WHERE model=?", (model,))
+
+    def resume_node(self, node_id):
+        with self.db:
+            self.db.execute("DELETE FROM node_caches WHERE id=?", (node_id,))
 
     def stats(self):
         counts = {r[0]: r[1] for r in self.db.execute("SELECT status,count(*) FROM requests GROUP BY status")}

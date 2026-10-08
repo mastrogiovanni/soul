@@ -57,8 +57,11 @@ class Models:
         return not self.engine.allowed_models or model in self.engine.allowed_models
 
     def adopt_inventory(self, peer, *, wake=True):
+        self.engine.cache.observe(peer)
         for entry in peer.inventory.values():
             spec = self.contextual(ModelSpec(**entry["spec"]))
+            if spec.model_id in self.engine.cache.deleted or self.engine.cache.paused(peer.id):
+                continue
             if not self.allowed(spec.model_id) or spec.config.get("model_type") not in ARCHITECTURES:
                 continue
             if spec.model_id not in self.records:
@@ -82,6 +85,7 @@ class Models:
         return record
 
     async def register(self, model, revision=None):
+        self.engine.cache.check_registration(model)
         if not self.allowed(model):
             raise SoulError("Model is not in the controller allowlist", 403, "model_not_allowed")
         existing = self.engine.specs.get(model)
@@ -101,6 +105,9 @@ class Models:
                 raise
             except Exception as exc:
                 raise SoulError(f"Cannot inspect model: {str(exc)[:300]}", 400, "invalid_model") from exc
+            # A returning node may report an old cache while inspection awaits I/O.
+            self.engine.cache.check_registration(model)
+            self.engine.cache.restore(model)
             return self.remember(spec)
         return self.records[model]
 
@@ -110,6 +117,8 @@ class Models:
             raise SoulError("Model has not been preloaded", 404, "model_not_preloaded")
         offers = []
         for peer in self.engine.nodes.values():
+            if self.engine.cache.paused(peer.id):
+                continue
             entry = peer.inventory.get(spec.key)
             if not peer.connected or not entry or not supports(peer.capabilities, spec):
                 continue
@@ -201,6 +210,8 @@ class Models:
         """
         names, nodes, tokenizer = set(), 0, False
         for peer in self.engine.nodes.values():
+            if self.engine.cache.paused(peer.id):
+                continue
             entry = peer.inventory.get(spec.key)
             if not peer.connected or not entry or not supports(peer.capabilities, spec):
                 continue
@@ -276,7 +287,11 @@ class Models:
         return result
 
     async def refresh_offers(self, spec):
-        peers = [p for p in self.engine.nodes.values() if p.connected and supports(p.capabilities, spec)]
+        peers = [
+            p
+            for p in self.engine.nodes.values()
+            if p.connected and not self.engine.cache.paused(p.id) and supports(p.capabilities, spec)
+        ]
         await asyncio.gather(
             *(p.call("offer", {"spec": spec.to_dict()}, timeout=self.engine.rpc_timeout) for p in peers),
             return_exceptions=True,
@@ -342,6 +357,7 @@ class Models:
             self.changed.clear()
             # Use the same gate as inference: no shard replacement during a request.
             async with self.engine.gate:
+                await self.engine.cache.reconcile()
                 for model in list(self.records):
                     if not self.allowed(model):
                         continue

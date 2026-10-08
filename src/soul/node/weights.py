@@ -3,6 +3,8 @@
 import hashlib
 import json
 import os
+import shutil
+import stat
 import struct
 from pathlib import Path
 
@@ -35,6 +37,35 @@ class WeightStore:
     def require(self, names):
         if not set(names).issubset(self.available()):
             raise SoulError("Assigned tensors are missing or corrupt; preload the model first", 503)
+
+    @staticmethod
+    def remove_tree(path):
+        """Remove only the selected cache tree; never follow directory symlinks."""
+        if path.is_symlink():
+            path.unlink()
+            return 0
+        if not path.exists():
+            return 0
+        size = 0
+        for directory, _, files in os.walk(path, followlinks=False):
+            for filename in files:
+                info = (Path(directory) / filename).lstat()
+                if stat.S_ISREG(info.st_mode):
+                    size += info.st_size
+        shutil.rmtree(path)
+        return size
+
+    @classmethod
+    def delete(cls, root, model_id=None, keys=()):
+        weights = root / "weights"
+        if model_id is None:
+            return cls.remove_tree(weights)
+        # Keys are validated cache IDs, never filesystem paths supplied by an
+        # admin request. Include every discoverable cached revision of the ID.
+        keys = set(keys) | {spec.key for spec in cls.manifests(root) if spec.model_id == model_id}
+        if weights.is_symlink():
+            raise SoulError("Cannot selectively delete a model through a symlinked weights directory")
+        return sum(cls.remove_tree(weights / key) for key in keys)
 
     @classmethod
     def manifests(cls, root):

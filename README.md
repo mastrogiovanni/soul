@@ -225,6 +225,8 @@ In **Nodes**, **Remove node** appears only for disconnected nodes. Removal forge
 
 **Upgrade:** this cache-inventory protocol is version **2**. Restart the controller and all nodes with the updated code; version-1 nodes are rejected. Existing deployment records are migrated into the catalog and old tensor files are reused after inspection. Cache verification reads local files and can delay node registration for large caches. No prompt or generated text is saved in the controller's ledger.
 
+In **Models**, **Delete model** removes the catalog entry and deletes its cached tensors/tokenizer across nodes after confirmation. Offline nodes retain a pending cleanup until they reconnect. In **Nodes**, the red **Clear all cached layers** action clears only that node, and pauses downloads there so the disk stays free. Use **Resume downloads** to enable placement again. Both features require updated nodes with the `cache_management` capability. See [deletion and disk cleanup](docs/models.md#delete-models-and-reclaim-node-space).
+
 ## Development and verification
 
 ```sh

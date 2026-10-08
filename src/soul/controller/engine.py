@@ -6,6 +6,7 @@ from dataclasses import asdict
 
 import anyio
 
+from soul.controller.cache import CacheManager
 from soul.controller.models import Models
 from soul.protocol import SoulError
 
@@ -64,6 +65,7 @@ class Engine:
         self.rpc_timeout, self.load_timeout = rpc_timeout, load_timeout
         self.allow_local, self.max_layers_per_node = allow_local, max_layers_per_node
         self.allowed_models = set(allowed_models or [])
+        self.cache = CacheManager(self)
         self.models = Models(self)
 
     async def remove_node(self, node_id):
@@ -91,8 +93,9 @@ class Engine:
     def snapshot(self):
         nodes = {**self.old_nodes, **{id: n.snapshot() for id, n in self.nodes.items()}}
         return {
-            "nodes": list(nodes.values()),
+            "nodes": [{**node, **self.cache.node_view(id)} for id, node in nodes.items()],
             "models": self.models.views(),
+            "cache_cleanup": self.cache.snapshot(),
             "metrics": self.store.stats(),
             "queue_depth": self.waiting,
             "active_request": self.active,

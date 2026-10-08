@@ -22,7 +22,17 @@ For a shared ingress requiring HTTP Basic Auth, retain its `Authorization: Basic
 | `POST /admin/models/preload` | `{"model":"owner/repo","revision":"optional-commit"}`; inspect, persist catalog entry, place and download shards to disk |
 | `POST /admin/models/load` | Same body; preload then materialize the model on GPUs |
 | `POST /admin/models/unload` | `{"model":"owner/repo"}`; releases a ready deployment |
+| `POST /admin/models/delete` | `{"model":"owner/repo"}`; removes the catalog entry and all cached revisions from nodes; returns pending node cleanup and removed-file bytes |
+| `DELETE /admin/nodes/{id}/cache` | Unloads and deletes all Soul model caches on this node; pauses further downloads |
+| `POST /admin/nodes/{id}/cache/resume` | Resumes placement/downloads on a cleared node; `409` while clearing is pending |
+| `POST /admin/cache/retry` | Retries pending model/node deletions on connected nodes |
 | `WS /internal/nodes` | Authenticated MessagePack node channel |
+
+## Cache management
+
+All cache deletion endpoints require the admin key and serialize with active inference/preparation. Model deletion returns `deleted`, `pending_nodes`, per-node `errors`, and cumulative `freed_bytes`. HTTP `200` acknowledges the durable deletion request; pending nodes have not yet freed their files. The model disappears immediately from the catalog, and a persistent deletion record prevents cached inventories from recreating it. Explicit preload returns `409 deletion_pending` until all known pending nodes acknowledge cleanup. The deletion body must omit `revision`, because all cached revisions are removed.
+
+Node cache clearing returns `node_id`, `pending`, `error`, `freed_bytes`, and `cache_paused: true`. It preserves node identity/logs and the model catalog. A cleared node remains excluded from placement and downloads until the resume endpoint is called, including across restarts. `/admin/state` exposes `cache_cleanup` for pending model deletions, plus each node's `cache_paused`, `cache_clear_pending`, and `cache_error`. Offline cleanup resumes on reconnect; old agents require an update advertising `cache_management`. Removed-file byte counts exclude symlink targets and may differ from physical filesystem space recovered. See [deletion and disk cleanup](models.md#delete-models-and-reclaim-node-space).
 
 ## OpenAI subset
 

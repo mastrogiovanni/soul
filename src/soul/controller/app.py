@@ -263,6 +263,24 @@ def create_app(settings: Settings):
     async def unload(body: LoadRequest, request: Request):
         return await request.app.state.engine.unload_model(body.model)
 
+    @app.post("/admin/models/delete")
+    async def delete_model(body: LoadRequest, request: Request):
+        if body.revision is not None:
+            raise SoulError("Deletion removes every cached revision; omit revision", 400, "invalid_request")
+        return await request.app.state.engine.cache.delete_model(body.model)
+
+    @app.delete("/admin/nodes/{node_id}/cache")
+    async def clear_node_cache(node_id: str, request: Request):
+        return await request.app.state.engine.cache.clear_node(node_id)
+
+    @app.post("/admin/nodes/{node_id}/cache/resume")
+    async def resume_node_cache(node_id: str, request: Request):
+        return await request.app.state.engine.cache.resume_node(node_id)
+
+    @app.post("/admin/cache/retry")
+    async def retry_cache_cleanup(request: Request):
+        return await request.app.state.engine.cache.retry()
+
     @app.websocket("/internal/nodes")
     async def nodes(ws: WebSocket):
         # Reject browser cross-origin websocket attempts, even if a node token was exposed.

@@ -128,6 +128,20 @@ class Runtime:
         finally:
             self.refresh_cache(spec)
 
+    def delete_cache(self, model_id=None, cache_keys=()):
+        if not isinstance(cache_keys, (list, tuple)) or any(
+            not isinstance(key, str) or not re.fullmatch(r"[0-9a-f]{24}", key) for key in cache_keys
+        ):
+            raise ValueError("Invalid cache keys")
+        if self.spec and (model_id is None or self.spec.model_id == model_id):
+            self.unload()
+        keys = [key for key, entry in self.cached.items() if entry["spec"]["model_id"] == model_id]
+        try:
+            return WeightStore.delete(self.cache_dir, model_id, [*keys, *cache_keys])
+        finally:
+            # Even an interrupted removal must stop advertising the deleted files.
+            self.scan_cache()
+
     def capabilities(self):
         return {
             "device": self.device,
@@ -136,6 +150,7 @@ class Runtime:
             "dtype": str(self.dtype).removeprefix("torch."),
             "architectures": list(ARCHITECTURES),
             "quantizations": list(QUANTIZATIONS),
+            "cache_management": True,
             "weight_mode": self.weight_mode,
             "ram_bytes": psutil.virtual_memory().total,
         }

@@ -161,15 +161,18 @@ class NodeClient:
                         with contextlib.suppress(Exception):
                             await work
                         raise
-                    if method in ("preload", "load", "unload", "release"):
+                    if method in ("preload", "load", "unload", "release", "delete_model", "clear_cache"):
                         await send({"type": "status", **self.status})
                     await send({"type": "result", "id": request["id"], "result": result})
-                    if method in ("preload", "load", "unload", "release"):
+                    if method in ("preload", "load", "unload", "release", "delete_model", "clear_cache"):
                         await send({"type": "log", "level": "INFO", "message": f"{method} completed"})
                 except Exception as exc:
                     log.exception("RPC %s failed", method)
-                    if method in ("preload", "load"):
+                    if method in ("preload", "load", "delete_model", "clear_cache"):
                         await send({"type": "inventory", "inventory": self.runtime.inventory()})
+                    if method in ("delete_model", "clear_cache") and self.runtime.model is None:
+                        self.status = {"status": "idle"}
+                        await send({"type": "status", **self.status})
                     if method in ("load", "forward"):
                         await asyncio.to_thread(self.runtime.unload)
                         self.status = {"status": "error", "error": str(exc)[:500]}
@@ -188,6 +191,14 @@ class NodeClient:
                 await task
 
     def dispatch(self, method, args, progress):
+        if method in ("delete_model", "clear_cache"):
+            model = args["model"] if method == "delete_model" else None
+            if method == "delete_model" and (not isinstance(model, str) or not model):
+                raise ValueError("A model ID is required for deletion")
+            freed = self.runtime.delete_cache(model, args.get("keys", []))
+            if self.runtime.model is None:
+                self.status = {"status": "idle"}
+            return {"freed_bytes": freed, "inventory": self.runtime.inventory()}
         if method == "offer":
             offer = self.runtime.offer(ModelSpec(**args["spec"]))
             return {**offer, "inventory": self.runtime.inventory()}
