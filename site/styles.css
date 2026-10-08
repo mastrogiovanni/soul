@@ -796,6 +796,62 @@ section[id] {
   line-height: 1.65;
   color: #c6d3bb;
 }
+.github-card {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 24px 40px;
+  align-items: center;
+  border-top: 1px solid #47563e;
+  padding-top: 28px;
+}
+.github-card .eyebrow {
+  font-size: 8px;
+  margin-bottom: 11px;
+}
+.github-card h3 {
+  font-size: 22px;
+  letter-spacing: -0.025em;
+}
+.github-card p:not(.eyebrow) {
+  color: #bdcbb6;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-top: 9px;
+  max-width: 540px;
+}
+.github-actions {
+  display: grid;
+  gap: 13px;
+  min-width: 0;
+}
+.github-actions .button {
+  justify-self: start;
+}
+.clone-line {
+  display: flex;
+  min-width: 0;
+  border: 1px solid #4c6147;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #15291f;
+}
+.clone-line code {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 15px;
+  color: #e6efda;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.clone-line button {
+  background: #304932;
+  color: var(--lime);
+  padding: 11px 15px;
+  font-size: 10px;
+  flex: none;
+}
 kbd {
   background: #344b36;
   border: 1px solid #576a49;
@@ -1314,6 +1370,10 @@ dialog::backdrop {
     grid-template-columns: 1fr;
     gap: 20px;
   }
+  .github-card {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
   .requirements ul {
     grid-template-columns: 1fr 1fr 1.5fr;
   }
@@ -1575,6 +1635,18 @@ dialog::backdrop {
   }
   .join-intro > p:not(.eyebrow) {
     font-size: 15px;
+  }
+  .github-card {
+    padding-top: 25px;
+  }
+  .github-card p:not(.eyebrow) {
+    font-size: 13px;
+  }
+  .clone-line {
+    flex-direction: column;
+  }
+  .clone-line button {
+    padding: 9px 14px;
   }
   .terminal-body {
     padding: 20px;
