@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#142b2b"><title>Soul · Model browser</title>
-  <link rel="stylesheet" href="static/style.css?v=8"><link rel="stylesheet" href="static/model-browser.css?v=1">
+  <link rel="stylesheet" href="static/style.css?v=9"><link rel="stylesheet" href="static/model-browser.css?v=2">
   <script src="static/model-browser.js?v=2" defer></script>
 </head>
 <body>
@@ -11,7 +11,13 @@
     <a class="brand" href="./" aria-label="Soul home"><span class="brand-symbol">✳</span> soul<span class="version">0.1</span></a>
     <div class="workspace"><span class="workspace-icon">S</span><div>Distributed serving<small>Control plane</small></div><span class="workspace-dot"></span></div>
     <p class="nav-label">WORKSPACE</p>
-    <nav aria-label="Main navigation"><a class="nav-item" href="./"><span>◫</span> Control room</a><a class="nav-item active" href="model-browser" aria-current="page"><span>⌕</span> Model browser</a></nav>
+    <nav aria-label="Main navigation">
+      <a class="nav-item" href="./#overview"><span>◫</span> Overview</a>
+      <a class="nav-item" href="./#models"><span>▧</span> Models</a>
+      <a class="nav-item active" href="model-browser" aria-current="page"><span>⌕</span> Browse</a>
+      <a class="nav-item" href="./#nodes"><span>⌘</span> Nodes</a>
+      <a class="nav-item" href="./#requests"><span>↗</span> Requests</a>
+    </nav>
     <div class="sidebar-bottom"><div class="network-mark"><span></span> One model. Many machines.</div><p>Find a model.<br>Plan your next pipeline.</p><a href="docs" target="_blank" rel="noopener">API reference ↗</a><button id="disconnect" class="sidebar-button">Disconnect console</button></div>
   </aside>
   <main>
