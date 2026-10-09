@@ -1,7 +1,6 @@
 "use strict";
 const controllerURL = new URL(".", document.baseURI);
 const controllerPath = controllerURL.pathname.replace(/\/$/, "");
-const storageKey = `soul-admin-key${controllerPath}`;
 const $ = (id) => document.getElementById(id);
 const renderedMarkup = new Map();
 function renderHTML(id, markup) {
@@ -37,14 +36,14 @@ const layerRanges = (layers) => {
   if (start !== null) ranges.push(start === end ? `${start + 1}` : `${start + 1}–${end + 1}`);
   return ranges.join(", ") || "partial tensors";
 };
-let key = sessionStorage.getItem(storageKey) || "", snapshot = null, selected = "", busy = false, logsNode = null, pendingNoticeModel = null;
+let snapshot = null, selected = "", busy = false, logsNode = null, pendingNoticeModel = null;
 function notice(text, success = false) { pendingNoticeModel = null; $("notice").textContent = text; $("notice").classList.toggle("success", success); $("notice").hidden = !text; }
-async function api(path, options = {}) {
-  const response = await fetch(`${controllerPath}${path}`, {credentials:"same-origin", ...options, headers: {"X-Soul-Admin-Key": key, "Content-Type": "application/json", ...options.headers}});
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || data.detail || `Request failed (${response.status})`);
-  return data;
-}
+const auth = new ControllerAuth({
+  path: controllerPath, validatePath: "/admin/state",
+  onConnect: data => { snapshot = data; notice(""); renderConnected(); },
+  onLock: () => { snapshot = null; renderedMarkup.clear(); },
+});
+const api = (path, options) => auth.request(path, options);
 function setTab(tab) {
   if (!["overview", "models", "nodes", "requests"].includes(tab)) tab = "overview";
   document.body.dataset.view = tab;
@@ -68,9 +67,7 @@ document.querySelectorAll("[data-go]").forEach((el) => el.onclick = () => naviga
 window.addEventListener("hashchange", () => setTab(location.hash.slice(1)));
 setTab(location.hash.slice(1));
 document.querySelectorAll("[data-close]").forEach((el) => el.onclick = () => $(el.dataset.close).close());
-$("auth-form").onsubmit = async (event) => { event.preventDefault(); key = $("admin-key").value.trim(); await refresh(true); };
-$("disconnect").onclick = () => { key = ""; sessionStorage.removeItem(storageKey); location.reload(); };
-$("open-load").onclick = () => { if (!key) { $("admin-key").focus(); return; } $("load-dialog").showModal(); };
+$("open-load").onclick = () => { if (!auth.authenticated) return; $("load-dialog").showModal(); };
 $("load-form").onsubmit = async (event) => {
   event.preventDefault(); const model = $("model-id").value.trim(); if (!model) return;
   $("load-submit").disabled = true; $("load-dialog").close(); notice(`Inspecting and distributing ${model}. Download progress will appear on the nodes.`);
@@ -244,11 +241,18 @@ function render() {
   $("nodes-table").innerHTML = nodes.length ? `<table><thead><tr><th scope="col">NODE</th><th scope="col">HARDWARE</th><th scope="col">MEMORY BUDGET</th><th scope="col">CACHED LAYERS</th><th scope="col">STATE</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead><tbody>${nodes.map((n)=>`<tr><td data-label="Node">${escapeHTML(n.name)}<small><code>${escapeHTML(n.node_id)}</code></small></td><td data-label="Hardware">${escapeHTML(n.capabilities.device_name)}<small>${escapeHTML(n.capabilities.dtype)} · ${escapeHTML(n.capabilities.weight_mode)} weights</small></td><td data-label="Memory budget">${gib(n.capabilities.budget_bytes)}</td><td data-label="Cached layers">${(n.cached_models || []).map((m)=>`${escapeHTML(modelLabel(m.model))}<small>${m.layers.length ? `Layers ${escapeHTML(layerRanges(m.layers))}` : "Partial cache"} · ${m.tensor_count} tensors</small>`).join('<br>') || '—'}</td><td data-label="State">${badge(n.status)}${n.cache_paused ? `<small>${n.cache_clear_pending ? 'Cache clear pending' : 'Downloads paused'}</small>` : ''}${n.download ? `<small>Downloading ${escapeHTML(modelLabel(n.download.model))}</small>` : ''}${n.total_bytes ? `<small>${gib(n.downloaded_bytes)} / ${gib(n.total_bytes)}</small><progress value="${Number(n.downloaded_bytes)}" max="${Number(n.total_bytes)}"></progress>`:''}${n.tensor ? `<small>${escapeHTML(n.tensor)}</small>`:''}${n.error ? `<small>${escapeHTML(n.error)}</small>`:''}</td><td data-label="Actions"><button data-logs="${escapeHTML(n.node_id)}">View logs</button><button class="danger-button" data-clear-cache="${escapeHTML(n.node_id)}" ${n.cache_clear_pending ? 'disabled' : ''}>Clear all cached layers</button>${n.cache_paused && !n.cache_clear_pending ? `<button data-resume-cache="${escapeHTML(n.node_id)}">Resume downloads</button>` : ''}${!n.connected ? `<button data-remove-node="${escapeHTML(n.node_id)}">Remove node</button>` : ''}</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">No nodes registered. Connect a node to contribute compute.</div>';
   $("requests-table").innerHTML = metrics.recent.length ? `<table><thead><tr><th scope="col">REQUEST</th><th scope="col">MODEL</th><th scope="col">STATUS</th><th scope="col">TOKENS IN / OUT</th><th scope="col">DURATION</th></tr></thead><tbody>${metrics.recent.map((r)=>`<tr><td data-label="Request"><code>${escapeHTML(r.id.slice(0,20))}…</code><small>${new Date(r.created*1000).toLocaleString()}</small></td><td data-label="Model">${escapeHTML(r.model)}</td><td data-label="Status">${badge(r.status)}${r.error ? `<small>${escapeHTML(r.error)}</small>`:''}</td><td data-label="Tokens in / out">${r.input_tokens} / ${r.output_tokens}</td><td data-label="Duration">${r.duration.toFixed(2)}s</td></tr>`).join("")}</tbody></table>` : '<div class="empty-small">Requests appear here when you use an inference endpoint.</div>';
 }
-async function refresh(explicit=false) {
-  if (!key || busy) return; busy = true;
-  try {
-    snapshot = await api("/admin/state"); sessionStorage.setItem(storageKey, key); $("auth-panel").hidden = true; $("live-dot").classList.add("online"); $("live-label").textContent = "Controller connected"; $("updated").textContent = `Updated ${new Date().toLocaleTimeString()}`; render(); if (explicit) notice(""); await refreshLogs();
-  } catch (error) { $("live-dot").classList.remove("online"); $("live-label").textContent = "Connection interrupted"; if (explicit || error.message.includes("API key")) { $("auth-panel").hidden = false; notice(error.message); } }
-  finally { busy = false; }
+function renderConnected() {
+  $("live-dot").classList.add("online");
+  $("live-label").textContent = "Controller connected";
+  $("updated").textContent = `Updated ${new Date().toLocaleTimeString()}`;
+  render();
 }
-refresh(); setInterval(refresh, 3000);
+async function refresh() {
+  if (!auth.authenticated || busy) return; busy = true;
+  try {
+    snapshot = await api("/admin/state"); renderConnected(); await refreshLogs();
+  } catch (error) {
+    $("live-dot").classList.remove("online"); $("live-label").textContent = "Connection interrupted";
+  } finally { busy = false; }
+}
+auth.start(); setInterval(refresh, 3000);

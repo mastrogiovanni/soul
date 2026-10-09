@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 scripts/build-site-locales.py --check
-      - run: node --test tests/site/*.test.mjs
+      - run: node --test tests/site/*.test.mjs tests/ui/*.test.mjs
       - uses: astral-sh/setup-uv@v6
         with:
           version: '0.9.0'

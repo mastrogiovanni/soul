@@ -2,21 +2,19 @@
 const $ = id => document.getElementById(id);
 const base = new URL(".", document.baseURI);
 const controllerPath = base.pathname.replace(/\/$/, "");
-const storageKey = `soul-admin-key${controllerPath}`;
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"}[c]));
 const gib = bytes => `${(bytes / 1024 ** 3).toFixed(2)} GiB`;
 const labels = {candidate:"Supported format · check layout", supported:"Supported · layout verified", unsupported:"Unsupported", unknown:"Not checked"};
-let key = sessionStorage.getItem(storageKey) || "";
 let rows = [], pages = [""], page = 0, nextCursor = null, searchRequest = null, selected = null, detailRequest = 0, preparing = false;
 let filters = {q:"", family:"", sort:"downloads"};
 const checked = new Map();
 function notice(message, success = false) { $("notice").textContent = message; $("notice").hidden = !message; $("notice").classList.toggle("success", success); }
-async function api(path, options = {}) {
-  const response = await fetch(`${controllerPath}${path}`, {credentials:"same-origin", ...options, headers:{"X-Soul-Admin-Key":key, "Content-Type":"application/json"}});
-  const data = await response.json();
-  if (!response.ok) { const error = new Error(data.error?.message || "Request failed"); error.code = data.error?.code; if (response.status === 401) $("auth-panel").hidden = false; throw error; }
-  return data;
-}
+const auth = new ControllerAuth({
+  path: controllerPath, validatePath: "/admin/catalog/support",
+  onConnect: data => { connect(data); },
+  onLock: () => { searchRequest?.abort(); ++detailRequest; selected = null; checked.clear(); },
+});
+const api = (path, options) => auth.request(path, options);
 function render() {
   const filter = $("support-filter").value;
   const visible = rows.filter(row => filter === "all" || (filter === "compatible" ? ["candidate", "supported"].includes(row.status) : row.status === filter));
@@ -27,7 +25,7 @@ function render() {
   $("next").disabled = !nextCursor;
 }
 async function search(targetPage = 0, reset = false) {
-  if (!key) { $("admin-key").focus(); return; }
+  if (!auth.token) return;
   searchRequest?.abort();
   const request = new AbortController(); searchRequest = request;
   if (reset) { filters = {q:$("search-query").value.trim(), family:$("family").value.trim(), sort:$("sort").value}; pages = [""]; page = 0; nextCursor = null; rows = []; $("results").innerHTML = '<div class="catalog-empty">Searching model configurations…</div>'; }
@@ -46,15 +44,10 @@ async function search(targetPage = 0, reset = false) {
     if (error.name !== "AbortError") { notice(error.message); $("results-status").textContent = "Search unavailable. You can retry or use the control room to add a model by ID."; $("previous").disabled = page === 0; $("next").disabled = !nextCursor; }
   } finally { if (request === searchRequest) $("results").setAttribute("aria-busy", "false"); }
 }
-async function connect() {
-  if (!key) return;
-  try {
-    const data = await api("/admin/catalog/support");
-    sessionStorage.setItem(storageKey, key); $("auth-panel").hidden = true;
-    $("families").innerHTML = data.families.map(f => `<option value="${esc(f.id)}">${esc(f.name)} · ${f.supported ? "Supported" : "Adapter needed"}</option>`).join("");
-    $("family-shortcuts").innerHTML = [{id:"", name:"All families"}, ...data.families.slice(0, 5)].map(f => `<button type="button" data-family="${esc(f.id)}" aria-pressed="false">${esc(f.name)}</button>`).join("");
-    await search(0, true);
-  } catch (error) { notice(error.message); $("auth-panel").hidden = false; }
+function connect(data) {
+  $("families").innerHTML = data.families.map(f => `<option value="${esc(f.id)}">${esc(f.name)} · ${f.supported ? "Supported" : "Adapter needed"}</option>`).join("");
+  $("family-shortcuts").innerHTML = [{id:"", name:"All families"}, ...data.families.slice(0, 5)].map(f => `<button type="button" data-family="${esc(f.id)}" aria-pressed="false">${esc(f.name)}</button>`).join("");
+  search(0, true);
 }
 function showDetails(data) {
   $("detail-body").innerHTML = `<span class="badge supported">Supported · layout verified</span><dl><dt>Architecture / format</dt><dd>${esc(data.architecture)} / ${esc(data.quantization)}</dd><dt>Revision</dt><dd>${esc(data.revision.slice(0, 12))}</dd><dt>Layers / configured context</dt><dd>${data.layers} / ${data.context.toLocaleString()} tokens</dd><dt>Weight memory · FP16 nodes</dt><dd>${gib(data.weight_bytes_fp16)}</dd><dt>Weight memory · FP32 nodes</dt><dd>${gib(data.weight_bytes_fp32)}</dd><dt>Checkpoint tensor download</dt><dd>${gib(data.download_bytes)}</dd><dt>Compatible connected nodes</dt><dd>${data.compatible_nodes}</dd></dl><p>${esc(data.reason)}</p><p>Prepare now to download the shards that fit. If capacity is insufficient, Soul keeps the model with a warning and distributes missing pieces automatically when compatible nodes join.</p>`;
@@ -81,8 +74,6 @@ async function check(model) {
     if (row && error.code === "unsupported_model") { row.status = "unsupported"; row.reason = error.message; render(); }
   }
 }
-$("auth-form").onsubmit = event => { event.preventDefault(); key = $("admin-key").value.trim(); connect(); };
-$("disconnect").onclick = () => { sessionStorage.removeItem(storageKey); location.reload(); };
 $("search-form").onsubmit = event => { event.preventDefault(); search(0, true); };
 $("support-filter").onchange = render;
 $("previous").onclick = () => search(page - 1);
@@ -103,4 +94,4 @@ $("prepare-form").onsubmit = async event => {
   } catch (error) { $("detail-body").textContent = error.message; }
   finally { preparing = false; $("prepare-submit").disabled = false; }
 };
-connect();
+auth.start();

@@ -62,7 +62,7 @@ uv sync --locked --extra node
 uv run --locked --extra node soul demo
 ```
 
-Open **http://127.0.0.1:8000** and enter `soul-dev` as the admin key. The demo launches **three separate processes**: one controller and two CPU nodes. It builds a tiny four-layer Llama locally, distributes two layers to each node, and executes a request to populate the dashboard. No model download is required. The demo model has random weights, so its output is deliberately meaningless. Computation, communication, placement, and counters are real. `Ctrl+C` stops all three processes.
+Open **http://127.0.0.1:8000** and enter `soul-dev` in the **Admin token** sign-in dialog. The demo launches **three separate processes**: one controller and two CPU nodes. It builds a tiny four-layer Llama locally, distributes two layers to each node, and executes a request to populate the dashboard. No model download is required. The demo model has random weights, so its output is deliberately meaningless. Computation, communication, placement, and counters are real. `Ctrl+C` stops all three processes.
 
 uv manages Python 3.12 (pinned in `.python-version`), the local `.venv`, and dependencies from `uv.lock`; no manual environment activation is needed. The `node` extra installs CPU PyTorch on Linux and the Metal-capable wheel on macOS. The demo always uses CPU.
 
@@ -86,6 +86,8 @@ uv run --locked soul controller --host 0.0.0.0 --port 8000 --max-context 2048
 Use independent, strong values for these three credentials. The API key can run inference; the admin key can inspect logs and load/unload models; the node token admits trusted compute nodes. `--dev` instead uses the public `soul-dev` credential and is restricted to loopback.
 
 Native execution defaults to the dashboard at `/`, API documentation at `/docs`, and basic health at `/healthz`. Use `--context-root /soul` (or `CONTEXT_ROOT=/soul`) to serve the entire application beneath `/soul`; the container uses this prefix by default. Deployment state and counters live in `.soul/controller/controller.sqlite3`. Run **one controller process / one Uvicorn worker** against this state. Multi-controller consensus and shared scheduling are outside this release.
+
+The admin pages remain hidden until the sign-in dialog validates your admin token. The token is remembered for the current browser tab and revalidated when opening either admin page; **Sign out** clears it and hides the console.
 
 In the dashboard, open **Models → Use model** for a copyable curl request (streaming or JSON), the exact model ID and API base URL, and Open WebUI connection instructions. Enable **Site also requires HTTP Basic Auth** when using the shared ingress. Examples use your inference key (`SOUL_API_KEY`), never your admin key. The Ollama guide explains how to use Soul alongside Ollama in a compatible chat UI; Soul does not implement Ollama's native API.
 

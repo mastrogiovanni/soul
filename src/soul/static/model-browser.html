@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#142b2b"><title>Soul · Model browser</title>
-  <link rel="stylesheet" href="static/style.css?v=9"><link rel="stylesheet" href="static/model-browser.css?v=2">
-  <script src="static/model-browser.js?v=2" defer></script>
+  <link rel="stylesheet" href="static/style.css?v=10"><link rel="stylesheet" href="static/model-browser.css?v=3">
+  <script src="static/auth.js?v=1" defer></script><script src="static/model-browser.js?v=3" defer></script>
 </head>
-<body>
+<body class="auth-locked">
+  <div id="console" hidden inert>
   <aside class="sidebar">
     <a class="brand" href="./" aria-label="Soul home"><span class="brand-symbol">✳</span> soul<span class="version">0.1</span></a>
     <div class="workspace"><span class="workspace-icon">S</span><div>Distributed serving<small>Control plane</small></div><span class="workspace-dot"></span></div>
@@ -18,14 +19,13 @@
       <a class="nav-item" href="./#nodes"><span>⌘</span> Nodes</a>
       <a class="nav-item" href="./#requests"><span>↗</span> Requests</a>
     </nav>
-    <div class="sidebar-bottom"><div class="network-mark"><span></span> One model. Many machines.</div><p>Find a model.<br>Plan your next pipeline.</p><a href="docs" target="_blank" rel="noopener">API reference ↗</a><button id="disconnect" class="sidebar-button">Disconnect console</button></div>
+    <div class="sidebar-bottom"><div class="network-mark"><span></span> One model. Many machines.</div><p>Find a model.<br>Plan your next pipeline.</p><a href="docs" target="_blank" rel="noopener">API reference ↗</a><button id="disconnect" class="sidebar-button">Sign out</button></div>
   </aside>
   <main>
     <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span>Model browser</div><a href="./">Back to control room ↗</a></header>
     <div class="content catalog-content">
       <section class="page-heading"><div><div class="eyebrow">SOUL / MODEL LIBRARY</div><h1>Find your next model.</h1><p>Search Hugging Face, compare families, and check what your network can run.</p></div><a class="button secondary" href="#adding-models">How to add models ↓</a></section>
       <div id="notice" class="notice" role="status" hidden></div>
-      <section id="auth-panel" class="auth-panel"><div><h2>Connect to your controller</h2><p>Use your admin key to search and prepare models.</p></div><form id="auth-form"><label class="sr-only" for="admin-key">Admin key</label><input id="admin-key" type="password" placeholder="Admin key" autocomplete="current-password" required><button class="button primary">Connect →</button></form></section>
       <section class="catalog-support panel" aria-label="Current model support">
         <div><span class="eyebrow">SUPPORTED FAMILIES</span><h2>Llama · Mistral · Qwen2 · Qwen3 dense</h2><p>Standard safetensors, AWQ GEMM 4-bit, and GPTQ v1 4-bit.</p></div>
         <div><span class="eyebrow">ARCHITECTURE STILL MATTERS</span><p>Qwen3.5, MoE, vision and hybrid models need additional adapters. GGUF, FP8 and bitsandbytes checkpoints are not supported.</p></div>
@@ -58,5 +58,20 @@
     <form id="prepare-form" hidden><label for="prepare-action">Preparation</label><select id="prepare-action"><option value="preload">Preload to disk</option><option value="load">Preload and load GPU</option></select><button id="prepare-submit" class="button primary full">Prepare model →</button></form>
     <a class="text-button" href="./">Open control room for placement and download progress ↗</a>
   </dialog>
+  </div>
+  <dialog id="auth-dialog" aria-labelledby="auth-title" aria-describedby="auth-description">
+    <div class="auth-brand"><span aria-hidden="true">✳</span> soul <small>CONTROL ROOM</small></div>
+    <h2 id="auth-title">Sign in to your controller</h2>
+    <p id="auth-description">Enter your admin token to access the dashboard.</p>
+    <form id="auth-form">
+      <label for="admin-key">Admin token</label>
+      <input id="admin-key" type="password" placeholder="Paste your token" autocomplete="current-password" spellcheck="false" autocapitalize="none" aria-describedby="auth-help" required autofocus>
+      <p id="auth-help">Use the admin key configured for this controller.</p>
+      <p id="auth-message" role="status" aria-live="polite" hidden></p>
+      <button id="auth-submit" class="button primary full" type="submit">Sign in</button>
+    </form>
+    <p class="auth-session-note">Your token is kept for this browser tab. Sign out when you’re done.</p>
+  </dialog>
+  <noscript><p class="auth-noscript">Enable JavaScript to sign in to the Soul controller.</p></noscript>
 </body>
 </html>

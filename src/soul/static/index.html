@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#142b2b"><title>Soul · Control room</title>
-  <link rel="stylesheet" href="static/style.css?v=9"><script src="static/app.js?v=10" defer></script>
+  <link rel="stylesheet" href="static/style.css?v=10"><script src="static/auth.js?v=1" defer></script><script src="static/app.js?v=11" defer></script>
 </head>
-<body>
+<body class="auth-locked">
+  <div id="console" hidden inert>
   <aside class="sidebar">
     <a class="brand" href="./" aria-label="Soul home"><span class="brand-symbol">✳</span> soul<span class="version">0.1</span></a>
     <div class="workspace"><span class="workspace-icon">S</span><div>Distributed serving<small>Control plane</small></div><span class="workspace-dot"></span></div>
@@ -17,7 +18,7 @@
       <button class="nav-item" data-tab="nodes"><span>⌘</span> Nodes <b id="node-count">0</b></button>
       <button class="nav-item" data-tab="requests"><span>↗</span> Requests</button>
     </nav>
-    <div class="sidebar-bottom"><div class="network-mark"><span></span> One model. Many machines.</div><p>Computation at the edges.<br>Coordination at the center.</p><a href="docs" target="_blank" rel="noopener">API reference <span>↗</span></a><button id="disconnect" class="sidebar-button">Disconnect console</button></div>
+    <div class="sidebar-bottom"><div class="network-mark"><span></span> One model. Many machines.</div><p>Computation at the edges.<br>Coordination at the center.</p><a href="docs" target="_blank" rel="noopener">API reference <span>↗</span></a><button id="disconnect" class="sidebar-button">Sign out</button></div>
   </aside>
   <main>
     <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="slash">/</span><span id="crumb">Overview</span></div><div class="live-indicator"><span id="live-dot"></span><span id="live-label">Not connected</span></div></header>
@@ -25,7 +26,6 @@
       <section class="page-heading"><div><div class="eyebrow">SOUL / CONTROL ROOM</div><h1 id="page-title">Network overview</h1><p id="page-description">Check your nodes, models and recent requests.</p></div><button class="button primary" id="open-load"><span>＋</span> Preload a model</button></section>
       <div id="notice" class="notice" role="status" hidden></div>
       <div id="cleanup-status" class="notice" hidden></div>
-      <section id="auth-panel" class="auth-panel"><div><h2>Connect to your controller</h2><p>Enter the admin key to view this network. Local development uses <code>soul-dev</code>.</p></div><form id="auth-form"><label class="sr-only" for="admin-key">Admin key</label><input id="admin-key" type="password" placeholder="Admin key" autocomplete="current-password" required><button class="button primary">Connect →</button></form></section>
       <section class="stats" aria-label="Network metrics">
         <article class="stat"><span class="stat-label">Connected nodes <span>⌘</span></span><div class="stat-value" id="stat-nodes">—</div><span class="stat-detail" id="node-detail">Waiting for connection</span></article>
         <article class="stat"><span class="stat-label">Available models <span>▧</span></span><div class="stat-value" id="stat-models">—</div><span class="stat-detail">Cached across connected nodes</span></article>
@@ -69,5 +69,20 @@
     <p class="form-hint">Use a URL reachable from the machine running your client. In a Docker container, localhost refers to that container; use the public HTTPS address or a reachable host address and retain the path prefix. Soul supports text chat and streaming; tools, images, embeddings and the Responses API are not supported.</p>
     <a id="use-docs" href="docs" target="_blank" rel="noopener" class="text-button">API reference ↗</a>
   </dialog>
+  </div>
+  <dialog id="auth-dialog" aria-labelledby="auth-title" aria-describedby="auth-description">
+    <div class="auth-brand"><span aria-hidden="true">✳</span> soul <small>CONTROL ROOM</small></div>
+    <h2 id="auth-title">Sign in to your controller</h2>
+    <p id="auth-description">Enter your admin token to access the dashboard.</p>
+    <form id="auth-form">
+      <label for="admin-key">Admin token</label>
+      <input id="admin-key" type="password" placeholder="Paste your token" autocomplete="current-password" spellcheck="false" autocapitalize="none" aria-describedby="auth-help" required autofocus>
+      <p id="auth-help">Use the admin key configured for this controller.</p>
+      <p id="auth-message" role="status" aria-live="polite" hidden></p>
+      <button id="auth-submit" class="button primary full" type="submit">Sign in</button>
+    </form>
+    <p class="auth-session-note">Your token is kept for this browser tab. Sign out when you’re done.</p>
+  </dialog>
+  <noscript><p class="auth-noscript">Enable JavaScript to sign in to the Soul controller.</p></noscript>
 </body>
 </html>

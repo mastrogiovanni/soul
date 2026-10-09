@@ -111,7 +111,7 @@ def test_catalog_routes_auth_and_read_only_check(tmp_path, prefix, monkeypatch):
     with TestClient(app) as client:
         page = client.get(prefix + "/model-browser")
         assert page.status_code == 200
-        assert 'src="static/model-browser.js?v=2"' in page.text
+        assert 'src="static/model-browser.js?v=3"' in page.text
         assert 'href="model-browser"' in client.get(prefix + "/").text
         assert client.get(prefix + "/static/model-browser.js").status_code == 200
         for route in ("support", "search"):
