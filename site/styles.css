@@ -1962,3 +1962,13 @@ dialog::backdrop {
   .header-actions > .button { display: none; }
   .language-switch a { min-height: 38px; min-width: 38px; }
 }
+
+/* Keep the GitHub call to action visible alongside the language switch. */
+.github-star { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13px; font-weight: 650; white-space: nowrap; }
+.github-star span { font-size: 21px; }
+.github-star:hover { color: var(--forest); text-decoration: underline; }
+@media (max-width: 380px) {
+  .site-header { gap: 8px; }
+  .header-actions { gap: 8px; }
+  .github-star { gap: 3px; font-size: 12px; }
+}

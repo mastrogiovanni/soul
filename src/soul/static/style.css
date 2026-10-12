@@ -96,6 +96,9 @@ dialog { max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior:
   /* Preserve one set of inventory actions; stack each table row as a labeled card. */
   .view.panel { background: transparent; border: 0; overflow: visible; }
   .view.panel > .panel-heading { display: none; }
+  #nodes-view > .panel-heading { display: flex; padding: 0 0 16px; }
+  #nodes-view > .panel-heading > div { display: none; }
+  #nodes-view [data-connect-node] { width: 100%; }
   .table-wrap { overflow: visible; padding: 0; }
   .table-wrap table, #models-table table, #nodes-table table { display: block; min-width: 0; width: 100%; }
   .table-wrap thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
@@ -152,3 +155,15 @@ body.auth-locked { min-height: 100dvh; padding: 0; background: #edf2ee; }
   #auth-title { font-size: 21px; }
   .auth-brand { margin-bottom: 24px; }
 }
+
+/* Project links remain reachable on small screens and before sign-in. */
+.page-footer { flex-wrap: wrap; gap: 12px; }
+.project-links { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.project-links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--green); font-size: 12px; }
+.project-links a:hover, #join-dialog a:hover { text-decoration: underline; }
+#auth-dialog .project-links { margin-top: 18px; }
+#join-dialog { width: min(720px, calc(100vw - 24px)); }
+#join-dialog details { margin-top: 24px; }
+#join-dialog summary { cursor: pointer; font-weight: 600; padding: 12px 0; }
+#join-dialog a { color: var(--green); }
+#join-copy-status { color: var(--green); }

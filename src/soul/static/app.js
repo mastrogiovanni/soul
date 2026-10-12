@@ -79,10 +79,19 @@ $("pipeline-model").onchange = () => { selected = $("pipeline-model").value; ren
 function renderJoinCommand() {
   const profile = $("join-profile").value;
   const device = profile === "node" ? "" : " --device cuda:0";
-  $("join-command").textContent = `uv sync --locked --extra ${profile}\n\nexport SOUL_NODE_TOKEN='<node-token>'\nuv run --locked --extra ${profile} soul node --controller ${controllerURL.href.replace(/\/$/, "")}${device}`;
+  $("join-command").textContent = `uv sync --locked --extra ${profile}\n\nexport SOUL_NODE_TOKEN='<node-token>'\nuv run --locked --extra ${profile} soul node --controller ${shellQuote(controllerURL.href.replace(/\/$/, ""))}${device}`;
 }
 $("join-profile").onchange = renderJoinCommand;
-$("join-button").onclick = () => { renderJoinCommand(); $("join-dialog").showModal(); };
+document.querySelectorAll("[data-connect-node]").forEach(button => button.onclick = () => {
+  if (!auth.authenticated) return;
+  const community = controllerURL.href === "https://mastrogiovanni.ddns.net/soul/";
+  $("join-community").hidden = !community;
+  $("join-manual").open = !community;
+  $("join-copy-status").textContent = "";
+  renderJoinCommand();
+  $("join-dialog").showModal();
+});
+document.querySelectorAll("[data-copy-join]").forEach(button => button.onclick = () => copyText(button.dataset.copyJoin, "join-copy-status"));
 $("logs-dialog").addEventListener("close", () => logsNode = null);
 async function refreshLogs() {
   if (!logsNode) return;
@@ -127,15 +136,16 @@ function openUsage(id) {
 }
 for (const id of ["use-format", "use-stream", "use-basic"]) $(id).onchange = renderUsage;
 $("use-dialog").addEventListener("close", () => usageModel = null);
-async function copyUsage(id) {
+function copyUsage(id) { return copyText(id, "use-copy-status"); }
+async function copyText(id, statusId) {
   const element = $(id), value = element.textContent;
   try {
     await navigator.clipboard.writeText(value);
-    $("use-copy-status").textContent = "Copied.";
+    $(statusId).textContent = "Copied.";
   } catch {
     const range = document.createRange(); range.selectNodeContents(element);
     const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
-    $("use-copy-status").textContent = "Clipboard unavailable. Text selected; press Ctrl+C or ⌘C to copy.";
+    $(statusId).textContent = "Clipboard unavailable. Text selected; press Ctrl+C or ⌘C to copy.";
   }
 }
 

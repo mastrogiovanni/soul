@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#142b2b"><title>Soul · Control room</title>
-  <link rel="stylesheet" href="static/style.css?v=10"><script src="static/auth.js?v=1" defer></script><script src="static/app.js?v=11" defer></script>
+  <link rel="stylesheet" href="static/style.css?v=11"><script src="static/auth.js?v=1" defer></script><script src="static/app.js?v=12" defer></script>
 </head>
 <body class="auth-locked">
   <div id="console" hidden inert>
@@ -39,12 +39,12 @@
         </section>
         <div class="lower-grid"><section class="panel"><div class="panel-heading"><div><h2>Connected machines</h2><p>The compute behind your network.</p></div><button class="text-button" data-go="nodes">View all ↗</button></div><div id="node-preview" class="node-preview"><div class="empty-small">Your nodes will appear here when they connect.</div></div></section>
         <section class="panel activity-panel"><div class="panel-heading"><div><h2>Recent activity</h2><p>Inference requests across your network.</p></div><span class="subtle-tag">LIVE</span></div><div id="activity" class="activity"><div class="empty-small">No requests yet.<br><span>Ready when you are.</span></div></div></section></div>
-        <section class="join-banner"><div class="join-icon">＋</div><div><h3>Add a node</h3><p>Join this controller from a Mac, NVIDIA machine, or CPU node.</p></div><button class="button secondary" id="join-button">Connect a node ↗</button></section>
+        <section class="join-banner"><div class="join-icon">＋</div><div><h3>Add a node</h3><p>Join this controller from a Mac, NVIDIA machine, or CPU node.</p></div><button class="button secondary" id="join-button" data-connect-node>Connect a node ↗</button></section>
       </div>
       <section id="models-view" class="view panel" hidden><div class="panel-heading"><div><h2>Model inventory</h2><p>Placement and availability of every model seen by this controller.</p></div></div><div id="models-table" class="table-wrap"></div></section>
-      <section id="nodes-view" class="view panel" hidden><div class="panel-heading"><div><h2>Node inventory</h2><p>Hardware, memory budgets, download progress, and node logs.</p></div></div><div id="nodes-table" class="table-wrap"></div></section>
+      <section id="nodes-view" class="view panel" hidden><div class="panel-heading"><div><h2>Node inventory</h2><p>Hardware, memory budgets, download progress, and node logs.</p></div><button class="button secondary" data-connect-node>Connect a node ↗</button></div><div id="nodes-table" class="table-wrap"></div></section>
       <section id="requests-view" class="view panel" hidden><div class="panel-heading"><div><h2>Request history</h2><p>The latest 30 requests. Prompt and response content are never stored.</p></div></div><div id="requests-table" class="table-wrap"></div></section>
-      <footer class="page-footer"><span><b>✳</b> Soul distributed serving</span><span id="updated">Waiting for controller</span></footer>
+      <footer class="page-footer"><span><b>✳</b> Soul distributed serving</span><nav class="project-links" aria-label="Soul project"><a href="https://mastrogiovanni.github.io/soul-community/" target="_blank" rel="noopener">Community website ↗</a><a href="https://github.com/mastrogiovanni/soul" target="_blank" rel="noopener">GitHub ↗</a></nav><span id="updated">Waiting for controller</span></footer>
     </div>
   </main>
   <dialog id="load-dialog" aria-labelledby="load-title"><form id="load-form"><div class="dialog-heading"><h2 id="load-title">Prepare a model</h2><button type="button" class="close" data-close="load-dialog" aria-label="Close">×</button></div><p>Download the model shards that fit on your nodes now. If more capacity is needed, the model shows a warning and distribution resumes automatically when nodes join.</p><label for="model-id">Hugging Face model ID</label><input id="model-id" placeholder="Qwen/Qwen2.5-0.5B-Instruct" required><label for="model-action">Preparation</label><select id="model-action"><option value="preload">Preload to disk</option><option value="load">Preload and load GPU</option></select><div class="form-hint">Supports Llama, Mistral, Qwen2 and Qwen3 dense safetensors: unquantized, AWQ GEMM 4-bit or GPTQ v1 4-bit. Quantized models require updated nodes. Gated models require HF_TOKEN on the controller and nodes. <a href="model-browser#adding-models">Browse models and read the setup guide ↗</a></div><button class="button primary full" id="load-submit">Prepare model →</button></form></dialog>
@@ -55,7 +55,30 @@
     <div class="delete-actions"><button type="button" class="button secondary" data-close="delete-dialog">Cancel</button><button type="submit" id="delete-submit" class="button danger">Delete model</button></div>
   </form></dialog>
   <dialog id="logs-dialog" aria-labelledby="logs-title"><div class="dialog-heading"><h2 id="logs-title">Node logs</h2><button class="close" data-close="logs-dialog" aria-label="Close">×</button></div><p>Latest 300 events received in this controller session. Full rolling logs remain on the node.</p><pre id="logs-output">Loading…</pre></dialog>
-  <dialog id="join-dialog" aria-labelledby="join-title"><div class="dialog-heading"><h2 id="join-title">Connect a node</h2><button class="close" data-close="join-dialog" aria-label="Close">×</button></div><p>Install <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener">uv 0.9 or newer</a>, then run these commands in a copy of this project.</p><label for="join-profile">Node hardware</label><select id="join-profile"><option value="node">Mac (Metal) or CPU</option><option value="node-cu126">NVIDIA · CUDA 12.6</option><option value="node-cu128">NVIDIA · CUDA 12.8</option><option value="node-cu129">NVIDIA · CUDA 12.9</option></select><pre id="join-command"></pre><div class="form-hint">For NVIDIA, choose a CUDA version supported by your GPU and driver; check nvidia-smi on the node. Use your node token, not the admin key. Each node needs its own cache directory.</div><a href="docs" target="_blank" rel="noopener" class="text-button">Explore the API ↗</a></dialog>
+  <dialog id="join-dialog" aria-labelledby="join-title">
+    <div class="dialog-heading"><h2 id="join-title">Connect another machine</h2><button class="close" data-close="join-dialog" aria-label="Close">×</button></div>
+    <p>Run the Bash commands on the machine you want to contribute. It will connect to this controller and serve assigned model layers.</p>
+    <section id="join-community" hidden>
+      <h3>Install and connect in one command</h3>
+      <p>For Apple Silicon macOS or Linux x86_64/ARM64. The installer selects CPU, Metal, or a compatible NVIDIA profile; no Git checkout or existing Python installation is needed.</p>
+      <pre id="join-install-command" tabindex="0">curl -fsSL https://mastrogiovanni.ddns.net/soul/install.sh | bash</pre>
+      <button type="button" class="button secondary" data-copy-join="join-install-command">Copy install command</button>
+      <p>Keep the terminal open to contribute. Press <kbd>Ctrl+C</kbd> to stop. To connect again:</p>
+      <pre id="join-restart-command" tabindex="0">~/.local/share/soul/bin/soul-node</pre>
+      <button type="button" class="button secondary" data-copy-join="join-restart-command">Copy restart command</button>
+    </section>
+    <details id="join-manual" open>
+      <summary>Connect from a source checkout</summary>
+      <p>Install <a href="https://docs.astral.sh/uv/getting-started/installation/" target="_blank" rel="noopener">uv 0.9 or newer</a>, then run these commands in a copy of the <a href="https://github.com/mastrogiovanni/soul" target="_blank" rel="noopener">Soul repository</a>. Replace the node token with this controller’s enrollment token.</p>
+      <label for="join-profile">Node hardware</label><select id="join-profile"><option value="node">Mac (Metal) or CPU</option><option value="node-cu126">NVIDIA · CUDA 12.6</option><option value="node-cu128">NVIDIA · CUDA 12.8</option><option value="node-cu129">NVIDIA · CUDA 12.9</option></select>
+      <pre id="join-command" tabindex="0"></pre>
+      <button type="button" class="button secondary" data-copy-join="join-command">Copy Bash commands</button>
+      <p class="form-hint">For NVIDIA, choose a CUDA version supported by your GPU and driver; check nvidia-smi on the node. Use the node token, not the admin key. Each node needs its own cache directory. For remote machines, use a controller address they can reach.</p>
+    </details>
+    <p id="join-copy-status" role="status" aria-live="polite"></p>
+    <p class="form-hint">Connecting uses this machine’s memory, disk and network. To send inference requests from an application, open Models → Use model for a curl example and API connection settings.</p>
+    <a href="https://mastrogiovanni.github.io/soul-community/#join" target="_blank" rel="noopener" class="text-button">Community installation guide ↗</a>
+  </dialog>
   <dialog id="use-dialog" aria-labelledby="use-title"><div class="dialog-heading"><h2 id="use-title">Use model</h2><button type="button" class="close" data-close="use-dialog" aria-label="Close">×</button></div>
     <p id="use-status" role="status"></p>
     <div class="usage-value"><div><strong>Model ID</strong><code id="use-model-id"></code></div><button type="button" class="button secondary" data-copy-use="use-model-id">Copy model ID</button></div>
@@ -81,6 +104,7 @@
       <p id="auth-message" role="status" aria-live="polite" hidden></p>
       <button id="auth-submit" class="button primary full" type="submit">Sign in</button>
     </form>
+    <nav class="project-links" aria-label="Soul project"><a href="https://mastrogiovanni.github.io/soul-community/" target="_blank" rel="noopener">Community website ↗</a><a href="https://github.com/mastrogiovanni/soul" target="_blank" rel="noopener">GitHub ↗</a></nav>
     <p class="auth-session-note">Your token is kept for this browser tab. Sign out when you’re done.</p>
   </dialog>
   <noscript><p class="auth-noscript">Enable JavaScript to sign in to the Soul controller.</p></noscript>

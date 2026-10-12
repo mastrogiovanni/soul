@@ -44,6 +44,12 @@ bash scripts/publish-site.sh
 
 Keep credentials, application sources, and private files out of `site/`: that entire directory is public. The publisher preserves deployment history and uses ordinary pushes, never force pushes.
 
+## Cross-links
+
+The header, hero, contribution card, and footer invite visitors to star the application repository, `mastrogiovanni/soul`. `site/README.md` is published with the website so that repository links back to the website and the admin panel. Star and clone links intentionally target the private application repository; the contribution card explains that repository access is required. Admin pages link to the application repository and community website, including on mobile and before sign-in.
+
+The admin’s **Connect a node** guide offers the community Bash installer only at `https://mastrogiovanni.ddns.net/soul/`: the installer is fixed to that network. Other deployments show source-checkout commands with their actual controller URL and a node-token placeholder.
+
 ## Content and assets
 
 The mission is to make large language models easier to access for communities and nonprofit organizations, accepting higher, variable latency in exchange for shared infrastructure and less setup effort. The use-case section describes nine potential background workflows, including email processing, invoice analysis, and process improvement. These are integration ideas rather than bundled applications: job scheduling, text extraction, retries, and result storage belong to the calling application. Keep this distinction when updating the copy; Soul does not currently implement a durable job service or Batch API.

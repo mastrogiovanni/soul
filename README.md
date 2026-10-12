@@ -1,5 +1,9 @@
 # Soul — distributed model serving
 
+**[Community website](https://mastrogiovanni.github.io/soul-community/)** · **[Admin panel](https://mastrogiovanni.ddns.net/soul/)** · **[Connect a machine](#join-the-community)**
+
+The admin panel requires the controller’s admin token. Help others discover Soul by **[starring Soul on GitHub](https://github.com/mastrogiovanni/soul)**.
+
 One model, many machines. Soul splits an LLM into contiguous decoder stages on a star network: nodes connect outward to a small controller, which accepts API requests and routes activations through the stages.
 
 Soul’s aim is to give **communities and nonprofit organizations access to large language models with little setup effort**, using shared compute and accepting **higher, variable latency**. It is intended for batch systems and processes that can finish later: email processing, analysis of extracted invoice text, process improvement, grant opportunity summaries, meeting follow-ups, translation drafts, document tagging, feedback digests, and impact report drafts.
@@ -88,6 +92,8 @@ Use independent, strong values for these three credentials. The API key can run 
 Native execution defaults to the dashboard at `/`, API documentation at `/docs`, and basic health at `/healthz`. Use `--context-root /soul` (or `CONTEXT_ROOT=/soul`) to serve the entire application beneath `/soul`; the container uses this prefix by default. Deployment state and counters live in `.soul/controller/controller.sqlite3`. Run **one controller process / one Uvicorn worker** against this state. Multi-controller consensus and shared scheduling are outside this release.
 
 The admin pages remain hidden until the sign-in dialog validates your admin token. The token is remembered for the current browser tab and revalidated when opening either admin page; **Sign out** clears it and hides the console.
+
+To connect another machine, choose **Connect a node** in **Overview** or **Nodes**. The community controller offers a copyable Bash installer and restart command; other controllers show commands using their own URL and a node-token placeholder. The footer and sign-in page link to GitHub and the community website.
 
 In the dashboard, open **Models → Use model** for a copyable curl request (streaming or JSON), the exact model ID and API base URL, and Open WebUI connection instructions. Enable **Site also requires HTTP Basic Auth** when using the shared ingress. Examples use your inference key (`SOUL_API_KEY`), never your admin key. The Ollama guide explains how to use Soul alongside Ollama in a compatible chat UI; Soul does not implement Ollama's native API.
 

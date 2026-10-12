@@ -313,5 +313,11 @@
   "English": "English",
   "IT": "IT",
   "EN": "EN",
-  "Soul supports standard safetensors checkpoints for llama, mistral, qwen2, and dense qwen3: unquantized, AWQ GEMM 4-bit, or GPTQ v1 4-bit. Availability depends on administrator preparation, model permissions, and network capacity. It does not provide proprietary OpenAI or Anthropic models; its APIs use compatible request formats.": "Soul supporta checkpoint safetensors standard per llama, mistral, qwen2 e qwen3 densi: non quantizzati, AWQ GEMM a 4 bit o GPTQ v1 a 4 bit. La disponibilità dipende dalla preparazione da parte dell’amministratore, dai permessi del modello e dalla capacità della rete. Non fornisce i modelli proprietari di OpenAI o Anthropic: le sue API usano formati di richiesta compatibili."
+  "Soul supports standard safetensors checkpoints for llama, mistral, qwen2, and dense qwen3: unquantized, AWQ GEMM 4-bit, or GPTQ v1 4-bit. Availability depends on administrator preparation, model permissions, and network capacity. It does not provide proprietary OpenAI or Anthropic models; its APIs use compatible request formats.": "Soul supporta checkpoint safetensors standard per llama, mistral, qwen2 e qwen3 densi: non quantizzati, AWQ GEMM a 4 bit o GPTQ v1 a 4 bit. La disponibilità dipende dalla preparazione da parte dell’amministratore, dai permessi del modello e dalla capacità della rete. Non fornisce i modelli proprietari di OpenAI o Anthropic: le sue API usano formati di richiesta compatibili.",
+  "GitHub": "GitHub",
+  "THE COMMUNITY / GITHUB": "LA COMUNITÀ / GITHUB",
+  "Help more people discover Soul.": "Aiuta più persone a scoprire Soul.",
+  "Star on GitHub ↗": "Metti una stella su GitHub ↗",
+  "Admin panel ↗": "Pannello di amministrazione ↗",
+  "Star the Soul application repository on GitHub and explore the code. The repository is currently private; access is required to view, star, or clone it.": "Metti una stella al repository dell’applicazione Soul su GitHub ed esplora il codice. Il repository è attualmente privato: per visualizzarlo, mettere una stella o clonarlo è necessario avere accesso."
 }

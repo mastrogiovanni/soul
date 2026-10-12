@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#142b2b"><title>Soul · Model browser</title>
-  <link rel="stylesheet" href="static/style.css?v=10"><link rel="stylesheet" href="static/model-browser.css?v=3">
+  <link rel="stylesheet" href="static/style.css?v=11"><link rel="stylesheet" href="static/model-browser.css?v=3">
   <script src="static/auth.js?v=1" defer></script><script src="static/model-browser.js?v=3" defer></script>
 </head>
 <body class="auth-locked">
@@ -49,7 +49,7 @@
         <ol><li><strong>Choose a supported checkpoint.</strong> Start with <button class="inline-link" data-example="Qwen/Qwen2.5-7B-Instruct-AWQ">Qwen/Qwen2.5-7B-Instruct-AWQ</button> or <button class="inline-link" data-example="Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4">Qwen/Qwen2.5-7B-Instruct-GPTQ-Int4</button>. The repository must contain standard safetensors and declare the supported format in its configuration.</li><li><strong>Update and connect your nodes.</strong> Both the controller and nodes need this Soul version. Older nodes cannot serve quantized checkpoints. For gated models, accept the publisher’s license and set <code>HF_TOKEN</code> on the controller and each node.</li><li><strong>Select “Check compatibility”.</strong> Soul reads configuration and tensor headers without downloading the model weights. Review the format, weight memory estimates, context limit and compatible node count.</li><li><strong>Select “Prepare model”.</strong> Choose “Preload to disk” or “Preload and load GPU”. Soul pins the checked revision and downloads only each node’s assigned tensors. Soul downloads the shards that fit now. An ! warning marks incomplete models in the control room; missing pieces are distributed automatically when compatible nodes join. Choose “Distribute missing” after freeing capacity. “Available” means ready for inference from cache.</li><li><strong>Use the exact repository ID in API requests.</strong> Open “Use model” in the control room for connection instructions. No separate adapter upload or quantization flag is needed.</li></ol>
         <details><summary>Formats, memory and performance</summary><p>AWQ requires 4-bit AutoAWQ GEMM packing with zero points. GPTQ requires the 4-bit v1 layout, including group indices; activation ordering is supported. GEMV, Marlin, GPTQ v2, mixed-bit settings and quantized output heads are not supported.</p><p>Packed weights stay compressed in memory. Small blocks are expanded during computation using PyTorch. This saves weight memory and works with resident or streamed layers, but may be slower than unquantized models or specialized GPU engines. Embeddings, the output head, activations and KV cache remain floating point. Memory estimates are lower bounds; preparation checks actual node budgets.</p><p>The portable adapter uses the existing CPU, CUDA and Metal runtime. Numerical tests cover CPU, with Metal and CUDA checks when those devices are available. Device-specific performance and capacity depend on your hardware.</p></details>
       </section>
-      <footer class="page-footer"><span><b>✳</b> Soul distributed serving</span><span>Compatibility is checked against this controller’s adapters.</span></footer>
+      <footer class="page-footer"><span><b>✳</b> Soul distributed serving</span><nav class="project-links" aria-label="Soul project"><a href="https://mastrogiovanni.github.io/soul-community/" target="_blank" rel="noopener">Community website ↗</a><a href="https://github.com/mastrogiovanni/soul" target="_blank" rel="noopener">GitHub ↗</a></nav><span>Compatibility is checked against this controller’s adapters.</span></footer>
     </div>
   </main>
   <dialog id="model-dialog" aria-labelledby="detail-title">
@@ -70,6 +70,7 @@
       <p id="auth-message" role="status" aria-live="polite" hidden></p>
       <button id="auth-submit" class="button primary full" type="submit">Sign in</button>
     </form>
+    <nav class="project-links" aria-label="Soul project"><a href="https://mastrogiovanni.github.io/soul-community/" target="_blank" rel="noopener">Community website ↗</a><a href="https://github.com/mastrogiovanni/soul" target="_blank" rel="noopener">GitHub ↗</a></nav>
     <p class="auth-session-note">Your token is kept for this browser tab. Sign out when you’re done.</p>
   </dialog>
   <noscript><p class="auth-noscript">Enable JavaScript to sign in to the Soul controller.</p></noscript>
